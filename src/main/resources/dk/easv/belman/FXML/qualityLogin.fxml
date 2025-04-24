@@ -8,6 +8,6 @@
    <children>
       <TextField fx:id="username" maxWidth="300.0" onAction="#login" promptText="Username" />
       <TextField fx:id="password" maxWidth="300.0" onAction="#login" promptText="Password" />
-      <Button fx:id="login" mnemonicParsing="false" text="Login" />
+      <Button fx:id="login" mnemonicParsing="false" onAction="#login" text="Login" />
    </children>
 </VBox>

@@ -86,6 +86,30 @@ public class HomeController
     @FXML
     private void login()
     {
+        try
+        {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/qualityOrders.fxml"));
+            fxmlLoader.setController(this);
+            Parent vbox = fxmlLoader.load();
+
+            borderPane.setCenter(vbox);
+        }
+        catch(IOException e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @FXML
+    private void search()
+    {
+
+    }
+
+    @FXML
+    private void selectOrder()
+    {
+
     }
 
     @FXML
