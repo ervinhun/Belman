@@ -14,7 +14,7 @@ public class ConnectionManager
     {
         ds = new SQLServerDataSource();
         ds.setServerName("EASV-DB4");
-        ds.setDatabaseName("EASV_Ticket_moet");
+        ds.setDatabaseName("MOET_Exam_2025");
         ds.setPortNumber(1433);
         ds.setUser("CSe2024b_e_8");
         ds.setPassword("CSe2024bE8!24");
