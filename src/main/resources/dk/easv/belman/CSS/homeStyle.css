@@ -113,6 +113,7 @@
     -fx-border-color: black;
     -fx-border-radius: 15;
     -fx-background-radius: 15;
+    -fx-cursor: hand;
 }
 #usersCard
 {

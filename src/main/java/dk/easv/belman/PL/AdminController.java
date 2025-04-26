@@ -32,9 +32,9 @@ public class AdminController {
     @FXML
     private void initialize()
     {
-        ordersPane.getChildren().add(addCardToFlowPane("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
-        ordersPane.getChildren().add(addCardToFlowPane("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
-        ordersPane.getChildren().add(addCardToFlowPane("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
+        ordersPane.getChildren().add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
+        ordersPane.getChildren().add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
+        ordersPane.getChildren().add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
         sideBtnNotSelected.setOnMouseEntered(e -> usersImage.setImage(userSel));
         sideBtnNotSelected.setOnMouseExited(e -> usersImage.setImage(userDefault));
     }
@@ -91,7 +91,7 @@ public class AdminController {
 
     }
 
-    private VBox addCardToFlowPane(String orderNumber, Image image) {
+    private VBox createCard(String orderNumber, Image image) {
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(100);
         imageView.setFitHeight(100);

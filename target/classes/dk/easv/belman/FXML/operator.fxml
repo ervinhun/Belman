@@ -8,49 +8,56 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox fx:id="coord" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="790.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.PL.OperatorController">
-   <children>
-      <VBox fx:id="leftBox" prefHeight="200.0" prefWidth="100.0">
+<BorderPane fx:id="borderPane" prefHeight="200.0" prefWidth="200.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.PL.OperatorController">
+   <left>
+      <HBox prefHeight="400.0" prefWidth="131.0" BorderPane.alignment="CENTER">
          <children>
-            <ImageView fitHeight="79.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@../Images/belman.png" />
-               </image>
-               <VBox.margin>
-                  <Insets left="23.0" top="15.0" />
-               </VBox.margin>
-            </ImageView>
-            <Button fx:id="sideBtnSelected" mnemonicParsing="false" prefHeight="25.0" prefWidth="109.0" text="My Orders">
-               <graphic>
-                  <ImageView fitHeight="20.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+            <VBox fx:id="leftBox" prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <ImageView fitHeight="79.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../Images/orders.png" />
+                        <Image url="@../Images/belman.png" />
                      </image>
+                     <VBox.margin>
+                        <Insets left="23.0" top="15.0" />
+                     </VBox.margin>
                   </ImageView>
-               </graphic>
-               <VBox.margin>
-                  <Insets left="7.0" top="12.0" />
-               </VBox.margin>
-               <font>
-                  <Font size="13.0" />
-               </font>
-            </Button>
+                  <Button fx:id="sideBtnSelected" mnemonicParsing="false" prefHeight="25.0" prefWidth="109.0" text="My Orders">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../Images/orders.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <VBox.margin>
+                        <Insets left="7.0" top="12.0" />
+                     </VBox.margin>
+                     <font>
+                        <Font size="13.0" />
+                     </font>
+                  </Button>
+               </children>
+            </VBox>
+            <Separator orientation="VERTICAL" prefHeight="200.0" />
          </children>
-      </VBox>
-      <Separator orientation="VERTICAL" prefHeight="200.0" />
-      <VBox fx:id="rightBox" alignment="TOP_RIGHT" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="475.0" prefHeight="400.0" prefWidth="660.0" HBox.hgrow="ALWAYS">
+      </HBox>
+   </left>
+   <center>
+      <VBox fx:id="rightBox" alignment="TOP_RIGHT" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="475.0" prefHeight="400.0" BorderPane.alignment="CENTER">
          <children>
             <ChoiceBox fx:id="user" maxHeight="30.0" minHeight="30.0" prefHeight="30.0" prefWidth="150.0">
                <VBox.margin>
                   <Insets right="10.0" top="10.0" />
                </VBox.margin>
             </ChoiceBox>
-            <HBox prefHeight="41.0" prefWidth="659.0">
+            <HBox prefHeight="49.0" prefWidth="659.0">
                <children>
                   <VBox prefHeight="44.0" prefWidth="370.0" spacing="10.0">
                      <children>
@@ -82,5 +89,5 @@
             </ScrollPane>
          </children>
       </VBox>
-   </children>
-</HBox>
+   </center>
+</BorderPane>
