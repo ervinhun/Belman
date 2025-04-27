@@ -39,6 +39,20 @@ jobs:
             </servers>
           </settings>" > $GITHUB_WORKSPACE/settings.xml
 
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2.1.1
+        with:
+          organization: your-sonarcloud-org-name
+          projectKey: your-github-username_repo-name
+          token: ${{ secrets.SONAR_TOKEN }}
+
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
