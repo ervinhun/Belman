@@ -3,10 +3,7 @@ name: Maven Package
 on:
   push:
     branches:
-      - main  # Only analyze when pushing to main
-  pull_request:
-    branches:
-      - main  # Also analyze PRs targeting main
+      - '**'  # All branches trigger the workflow
 
 jobs:
   build:
@@ -15,7 +12,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-      pull-requests: write  # Needed for SonarCloud PR decoration
 
     steps:
       - uses: actions/checkout@v4
@@ -47,7 +43,7 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Build, test, and analyze with Maven
+      - name: Build, test and analyze with Maven
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
