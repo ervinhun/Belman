@@ -1,9 +1,11 @@
-name: Maven Package
+name: Maven Package and SonarCloud Analysis
 
 on:
   push:
     branches:
-      - '**'  # All branches trigger the workflow
+      - '**'  # Trigger on all branches
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
@@ -43,13 +45,23 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Build, test and analyze with Maven
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build and test with Maven
+        run: mvn clean verify
+
+      - name: Build, test, and analyze with Maven and SonarCloud
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn clean verify sonar:sonar \
             -Dsonar.projectKey=ervinhun_Belman \
-            -Dsonar.organization=your-organization-name \
+            -Dsonar.organization=ervinhun \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
@@ -58,3 +70,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: success()
+
