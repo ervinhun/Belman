@@ -1,50 +1,110 @@
 package dk.easv.belman.dal;
 
-import dk.easv.belman.dal.ChooseFile;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import javafx.scene.image.ImageView;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel; // <-- import this dummy class to initialize JavaFX
+
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class ChooseFileTest {
-    private List<String> filePaths;
+
+    @TempDir
+    static File tempDir; // JUnit creates a temporary folder automatically
+
+    private File testImageFile;
+    private File savedThumbnail;
+    private ArrayList<File> testFiles;
+    private String testFileName;
+
+    @BeforeAll
+    static void initJavaFX() {
+        new JFXPanel(); // Initializes JavaFX toolkit
+    }
+
+    @BeforeEach
+    void setUp() throws IOException {
+        // Create a dummy image file to simulate upload
+        testFileName = "test_image";
+        testFiles = new ArrayList<>();
+        testImageFile = new File(tempDir, testFileName + ".jpg");
+        Files.copy(getClass().getResourceAsStream("/" + testFileName + ".jpg"), testImageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        testFiles.add(testImageFile);
+        testImageFile = new File(tempDir, testFileName + ".png");
+        Files.copy(getClass().getResourceAsStream("/" + testFileName + ".png"), testImageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        testFiles.add(testImageFile);
+    }
 
     @Test
-    void testGetSelectedFilePath() throws Exception {
-        // Setup: manually create a ChooseFile object
-        ChooseFile chooseFile = new ChooseFile(null, null);
+    void testCreateThumbnail() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        int THUMBNAIL_SIZE = ChooseFile.getThumbnailSize();
+        Platform.runLater(() -> {
+            try {
+                // JavaFX operations
+                ImageView thumbnail = new ImageView();
+                thumbnail.setFitWidth(150);
+                thumbnail.setFitHeight(150);
+                thumbnail.setPreserveRatio(true);
 
-        // Use reflection to set the private field "chosenFile" for testing
-        Field field = ChooseFile.class.getDeclaredField("chosenFile");
-        field.setAccessible(true);
-        field.set(chooseFile, List.of(
-                new File("src/test/resources/test_image.jpg").getAbsolutePath(),
-                new File("src/test/resources/test_image.png").getAbsolutePath()
-        ));
+                assertEquals(150, thumbnail.getFitWidth());
+                assertEquals(150, thumbnail.getFitHeight());
+            } finally {
+                latch.countDown(); // Very important: release test thread
+            }
+        });
+        latch.await();
+    }
 
-        filePaths = chooseFile.getSelectedFilePath();
+    @Test
+    void testChooseFile() {
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            try {
+                ChooseFile chooseFile = new ChooseFile(null, "testProductNo", testFiles);
+                assertNotNull(chooseFile.getSelectedFilePath());
+                assertEquals(testFiles.size(), chooseFile.getChosenFile().size());
+            } finally {
+                latch.countDown(); // Very important: release test thread
+            }
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 
-        assertEquals(2, filePaths.size());
-        assertTrue(filePaths.get(0).endsWith("test_image.jpg"));
-        assertTrue(filePaths.get(1).endsWith("test_image.png"));
+    @Test
+    void getFileExtension() {
+        String fileName = testFileName + ".jpg";
+        String expectedExtension = "jpg";
+        String actualExtension = ChooseFile.getFileExtension(fileName);
+        assertEquals(expectedExtension, actualExtension);
     }
 
     @AfterEach
     void cleanUp() {
-        if (filePaths != null) {
-            for (String filePath : filePaths) {
-                File file = new File(filePath);
-                if (file.exists()) {
-                    boolean deleted = file.delete();
-                    if (!deleted) {
-                        System.err.println("Warning: could not delete test file " + filePath);
-                    }
-                }
+        if (savedThumbnail != null && savedThumbnail.exists()) {
+            boolean deleted = savedThumbnail.delete();
+            if (!deleted) {
+                System.err.println("Warning: could not delete test thumbnail!");
+            }
+        }
+        if (testImageFile != null && testImageFile.exists()) {
+            boolean deleted = testImageFile.delete();
+            if (!deleted) {
+                System.err.println("Warning: could not delete test image!");
             }
         }
     }

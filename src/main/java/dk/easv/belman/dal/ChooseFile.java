@@ -5,6 +5,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -15,10 +17,18 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-public class ChooseFile {
-    private List<File> chosenFile;
 
-    public ChooseFile(Window window, String productNoString) {
+public class ChooseFile {
+    public List<File> getChosenFile() {
+        return chosenFile;
+    }
+
+    private List<File> chosenFile;
+    private static final int THUMBNAIL_SIZE = 150;
+    private final Logger logger = LoggerFactory.getLogger(ChooseFile.class);
+
+
+    public ChooseFile(Window window, String productNoString, List<File> chosenFileForTest) {
         FileChooser fileChooser = new FileChooser();
         //Sets the window title
         fileChooser.setTitle("Upload Image Files");
@@ -28,8 +38,12 @@ public class ChooseFile {
                 ("Image Files", "*.jpg", "*.jpeg", "*.png", "*.gif");
         //Sets the filter for the browser
         fileChooser.getExtensionFilters().addAll(extFilter);
-        //Open dialog for multiple files, when finishes the File will be stored in chosenFile
-        chosenFile = fileChooser.showOpenMultipleDialog(window);
+        //Open dialog for multiple files, when finishes the File will be stored in chosenFile only if it is not for test
+        if (chosenFileForTest == null) {
+            this.chosenFile = fileChooser.showOpenMultipleDialog(window);
+        } else {
+            this.chosenFile = chosenFileForTest;
+        }
 
         if (chosenFile != null && productNoString != null) {
             File targetDir = new File("./src/main/resources/dk/easv/belman/SavedImages/" + productNoString);
@@ -47,46 +61,17 @@ public class ChooseFile {
                 try {
                     // Save original
                     Files.copy(file.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
                     // Create thumbnail
-                    ImageView thumbnailView = CreateThumbnail.createThumbnail(file.toURI().toString());
-                    WritableImage writableImage = thumbnailView.snapshot(null, null);
-                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
-                    String extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
-
-                    if (extension.equals("jpg") || extension.equals("jpeg")) {
-                        // JPG needs to remove transparency
-                        BufferedImage rgbImage = new BufferedImage(
-                                bufferedImage.getWidth(),
-                                bufferedImage.getHeight(),
-                                BufferedImage.TYPE_INT_RGB
-                        );
-                        Graphics2D g = rgbImage.createGraphics();
-                        g.setColor(java.awt.Color.WHITE); // Set background to white
-                        g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
-                        g.drawImage(bufferedImage, 0, 0, null);
-                        g.dispose();
-
-                        ImageIO.write(rgbImage, "jpg", thumbnailFile);
-
-                    } else if (extension.equals("png") || extension.equals("gif")) {
-                        // PNG and GIF can keep transparency
-                        ImageIO.write(bufferedImage, extension, thumbnailFile);
-                    } else {
-                        // Unknown extension — safe fallback: PNG
-                        ImageIO.write(bufferedImage, "png", thumbnailFile);
-                    }
-
+                    createThumbnail(file, thumbnailFile);
                     System.out.println("Original saved: " + targetFile.getAbsolutePath());
                     System.out.println("Thumbnail saved: " + thumbnailFile.getAbsolutePath());
 
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    logger.error("Failed to create thumbnail for " + file.getName(), e);
                 }
             }
 
         }
-
     }
 
     public List<String> getSelectedFilePath() {
@@ -99,6 +84,69 @@ public class ChooseFile {
             }
             return filepaths;
         } else
-            throw new RuntimeException("File is null, can not return filePath");
+            logger.error("File is null, can not return filePath");
+        return List.of();
     }
+
+    private void createThumbnail(File sourceFile, File destinationFile) {
+        try {
+            // Load the image
+            javafx.scene.image.Image productImage = new javafx.scene.image.Image(sourceFile.toURI().toString());
+
+            // Create an ImageView to scale the image
+            ImageView thumbnailView = new ImageView(productImage);
+
+            thumbnailView.setFitWidth(THUMBNAIL_SIZE);
+            thumbnailView.setFitHeight(THUMBNAIL_SIZE);
+
+            thumbnailView.setPreserveRatio(true);
+            thumbnailView.setSmooth(true);
+
+            // Snapshot the ImageView to create a resized image
+            WritableImage writableImage = thumbnailView.snapshot(null, null);
+            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
+
+            String extension = getFileExtension(sourceFile.getName());
+
+            if (extension.equals("jpg") || extension.equals("jpeg")) {
+                // JPG: needs background (white)
+                BufferedImage rgbImage = new BufferedImage(
+                        bufferedImage.getWidth(),
+                        bufferedImage.getHeight(),
+                        BufferedImage.TYPE_INT_RGB
+                );
+                Graphics2D g = rgbImage.createGraphics();
+                g.setColor(java.awt.Color.WHITE);
+                g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
+                g.drawImage(bufferedImage, 0, 0, null);
+                g.dispose();
+
+                ImageIO.write(rgbImage, "jpg", destinationFile);
+
+            } else if (extension.equals("png") || extension.equals("gif")) {
+                // PNG and GIF can be saved directly
+                ImageIO.write(bufferedImage, extension, destinationFile);
+            } else {
+                // Fallback
+                ImageIO.write(bufferedImage, "png", destinationFile);
+            }
+        } catch (IOException e) {
+            logger.error("Failed to create thumbnail for " + sourceFile.getName(), e);
+        }
+    }
+
+
+    static String getFileExtension(String fileName) {
+        int lastDot = fileName.lastIndexOf('.');
+        if (lastDot > 0 && lastDot < fileName.length() - 1) {
+            return fileName.substring(lastDot + 1).toLowerCase();
+        } else {
+            return "";
+        }
+    }
+
+    public static int getThumbnailSize() {
+        return THUMBNAIL_SIZE;
+    }
+
 }

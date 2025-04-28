@@ -12,7 +12,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="belman" options="--add-exports java.base/jdk.internal.jrtfs=dk.easv.belman" />
+      <module name="belman" options="" />
     </option>
   </component>
 </project>
