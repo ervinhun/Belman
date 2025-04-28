@@ -8,7 +8,6 @@ module dk.easv.belman {
     requires org.slf4j;
 
 
-
     opens dk.easv.belman to javafx.fxml;
     exports dk.easv.belman;
     exports dk.easv.belman.PL;
