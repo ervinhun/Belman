@@ -63,6 +63,12 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-swing -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-swing</artifactId>
+      <version>24.0.1</version>
+    </dependency>
   </dependencies>
 
   <build>
