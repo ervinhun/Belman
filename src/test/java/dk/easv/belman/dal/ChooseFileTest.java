@@ -11,7 +11,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel; // <-- import this dummy class to initialize JavaFX
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,11 +23,7 @@ class ChooseFileTest {
     private File savedThumbnail;
     private ArrayList<File> testFiles;
     private String testFileName;
-    @Disabled
-    @BeforeAll
-    static void initJavaFX() {
-        new JFXPanel(); // Initializes JavaFX toolkit
-    }
+
 
     @BeforeEach
     void setUp() throws IOException {
@@ -62,7 +57,7 @@ class ChooseFileTest {
         });
         latch.await();
     }
-
+    @Disabled
     @Test
     void testChooseFile() {
         CountDownLatch latch = new CountDownLatch(1);
