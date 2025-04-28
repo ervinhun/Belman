@@ -4,6 +4,7 @@ module dk.easv.belman {
     requires com.microsoft.sqlserver.jdbc;
     requires java.sql;
     requires java.naming;
+    requires javafx.swing;
 
 
     opens dk.easv.belman to javafx.fxml;
