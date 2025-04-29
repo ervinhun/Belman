@@ -53,16 +53,19 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Install Xvfb
-        run: sudo apt-get install xvfb
+        run: sudo apt-get install xvfb libgtk-3-dev libcanberra-gtk-module
+
       - name: Start Xvfb
         run: Xvfb :99 &
 
+      - name: Check DISPLAY variable
+        run: echo $DISPLAY
+
       - name: Verify Xvfb is running
-        run: |
-          ps -ef | grep Xvfb
+        run: ps -ef | grep Xvfb
 
       - name: Build and test with Maven
-        run: mvn clean install -Djava.awt.headless=true
+        run: xvfb-run mvn clean install -Djava.awt.headless=true
         env:
           DISPLAY: ":99"
 
@@ -70,7 +73,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn clean verify sonar:sonar \
+          xvfb-run mvn clean verify sonar:sonar \
             -Dsonar.projectKey=ervinhun_Belman \
             -Dsonar.organization=ervinhun \
             -Dsonar.host.url=https://sonarcloud.io \
