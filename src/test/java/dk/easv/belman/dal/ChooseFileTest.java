@@ -80,9 +80,13 @@ class ChooseFileTest {
     @Test
     void getFileExtension() {
         String fileName = testFileName + ".jpg";
+        String fileName2 = testFileName + ".png";
         String expectedExtension = "jpg";
+        String expectedExtension2 = "png";
         String actualExtension = ChooseFile.getFileExtension(fileName);
+        String actualExtension2 = ChooseFile.getFileExtension(fileName2);
         assertEquals(expectedExtension, actualExtension);
+        assertEquals(expectedExtension2, actualExtension2);
     }
 
     @AfterEach
