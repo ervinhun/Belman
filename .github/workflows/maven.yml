@@ -62,7 +62,7 @@ jobs:
       - name: Build and test with Maven
         run: mvn clean install -Djava.awt.headless=true
         env:
-        DISPLAY: ":99"
+          DISPLAY: ":99"
 
       - name: Build, test, and analyze with Maven and SonarCloud
         env:
