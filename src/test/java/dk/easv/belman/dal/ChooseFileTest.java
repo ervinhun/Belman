@@ -1,5 +1,6 @@
 package dk.easv.belman.dal;
 
+import javafx.embed.swing.JFXPanel;
 import javafx.scene.image.ImageView;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
@@ -24,6 +25,10 @@ class ChooseFileTest {
     private ArrayList<File> testFiles;
     private String testFileName;
 
+    @BeforeAll
+    static void initJavaFX() {
+        new JFXPanel();
+    }
 
     @BeforeEach
     void setUp() throws IOException {
@@ -37,7 +42,7 @@ class ChooseFileTest {
         Files.copy(getClass().getResourceAsStream("/" + testFileName + ".png"), testImageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         testFiles.add(testImageFile);
     }
-    @Disabled
+
     @Test
     void testCreateThumbnail() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
@@ -57,7 +62,7 @@ class ChooseFileTest {
         });
         latch.await();
     }
-    @Disabled
+
     @Test
     void testChooseFile() {
         CountDownLatch latch = new CountDownLatch(1);

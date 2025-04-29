@@ -53,7 +53,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Build and test with Maven
-        run: mvn clean verify
+        run: mvn clean install -Djava.awt.headless=true
 
       - name: Build, test, and analyze with Maven and SonarCloud
         env:
