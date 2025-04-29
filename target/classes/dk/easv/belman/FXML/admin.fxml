@@ -9,61 +9,70 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<HBox maxHeight="400.0" maxWidth="790.0" minHeight="400.0" minWidth="790.0" prefHeight="400.0" prefWidth="790.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.PL.AdminController">
-   <children>
-      <VBox fx:id="leftBox" prefHeight="200.0" prefWidth="100.0" spacing="7.0">
+<BorderPane fx:id="borderPane" prefHeight="200.0" prefWidth="200.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.PL.AdminController">
+   <left>
+      <HBox prefHeight="400.0" prefWidth="126.0" BorderPane.alignment="CENTER">
          <children>
-            <ImageView fitHeight="79.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@../Images/belman.png" />
-               </image>
-               <VBox.margin>
-                  <Insets left="23.0" top="15.0" />
-               </VBox.margin>
-            </ImageView>
-            <Button fx:id="sideBtnSelected" mnemonicParsing="false" onAction="#ordersTab" prefHeight="25.0" prefWidth="109.0" text="Orders">
-               <graphic>
-                  <ImageView fx:id="ordersImage" fitHeight="20.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+            <VBox fx:id="leftBox" prefHeight="200.0" prefWidth="100.0" spacing="7.0">
+               <children>
+                  <ImageView fitHeight="79.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../Images/orders.png" />
+                        <Image url="@../Images/belman.png" />
                      </image>
+                     <VBox.margin>
+                        <Insets left="23.0" top="15.0" />
+                     </VBox.margin>
                   </ImageView>
-               </graphic>
-               <VBox.margin>
-                  <Insets left="7.0" top="5.0" />
-               </VBox.margin>
-               <font>
-                  <Font size="13.0" />
-               </font></Button>
-            <Button fx:id="sideBtnNotSelected" layoutX="17.0" layoutY="63.0" mnemonicParsing="false" onAction="#usersTab" prefHeight="25.0" prefWidth="109.0" text="Users">
-               <graphic>
-                  <ImageView fx:id="usersImage" fitHeight="20.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../Images/userDef.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <VBox.margin>
-                  <Insets left="7.0" />
-               </VBox.margin>
-               <font>
-                  <Font size="13.0" />
-               </font>
-            </Button>
+                  <Button fx:id="sideBtnSelected" mnemonicParsing="false" onAction="#ordersTab" prefHeight="25.0" prefWidth="109.0" text="Orders">
+                     <graphic>
+                        <ImageView fx:id="ordersImage" fitHeight="20.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../Images/orders.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <VBox.margin>
+                        <Insets left="7.0" top="5.0" />
+                     </VBox.margin>
+                     <font>
+                        <Font size="13.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="sideBtnNotSelected" layoutX="17.0" layoutY="63.0" mnemonicParsing="false" onAction="#usersTab" prefHeight="25.0" prefWidth="109.0" text="Users">
+                     <graphic>
+                        <ImageView fx:id="usersImage" fitHeight="20.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../Images/userDef.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <VBox.margin>
+                        <Insets left="7.0" />
+                     </VBox.margin>
+                     <font>
+                        <Font size="13.0" />
+                     </font>
+                  </Button>
+               </children>
+            </VBox>
+            <Separator orientation="VERTICAL" prefHeight="200.0" />
          </children>
-      </VBox>
-      <Separator orientation="VERTICAL" prefHeight="200.0" />
-      <VBox fx:id="rightBox" alignment="TOP_RIGHT" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="475.0" prefHeight="400.0" prefWidth="660.0" HBox.hgrow="ALWAYS">
+      </HBox>
+   </left>
+   <center>
+      <VBox fx:id="rightBox" alignment="TOP_RIGHT" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="475.0" prefHeight="400.0" prefWidth="660.0" BorderPane.alignment="CENTER">
          <children>
             <ChoiceBox fx:id="user" maxHeight="30.0" minHeight="30.0" prefHeight="30.0" prefWidth="150.0">
                <VBox.margin>
                   <Insets right="10.0" top="10.0" />
-               </VBox.margin></ChoiceBox>
+               </VBox.margin>
+            </ChoiceBox>
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
                   <VBox prefHeight="100.0" prefWidth="370.0" spacing="10.0">
@@ -115,6 +124,7 @@
                   <Insets bottom="5.0" left="3.0" right="5.0" />
                </VBox.margin>
             </ScrollPane>
-         </children></VBox>
-   </children>
-</HBox>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>

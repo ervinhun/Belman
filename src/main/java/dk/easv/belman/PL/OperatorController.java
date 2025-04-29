@@ -1,6 +1,9 @@
 package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableArray;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -22,11 +25,14 @@ public class OperatorController {
     private FlowPane ordersPane;
     @FXML
     private Label orderLabel;
+    private ObservableList<VBox> orders = FXCollections.observableArrayList();
 
     @FXML
     private void initialize()
     {
-        ordersPane.getChildren().add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
+        ordersPane.getChildren().clear();
+        orders.add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
+        ordersPane.getChildren().addAll(orders);
     }
 
     @FXML
@@ -51,7 +57,7 @@ public class OperatorController {
     {
         try
         {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/order.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/orderOperator.fxml"));
             fxmlLoader.setController(this);
             Parent root = fxmlLoader.load();
             borderPane.setCenter(root);
