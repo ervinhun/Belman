@@ -87,16 +87,12 @@ class ChooseFileTest {
 
     @AfterEach
     void cleanUp() {
-        if (savedThumbnail != null && savedThumbnail.exists()) {
-            boolean deleted = savedThumbnail.delete();
-            if (!deleted) {
-                System.err.println("Warning: could not delete test thumbnail!");
-            }
-        }
-        if (testImageFile != null && testImageFile.exists()) {
-            boolean deleted = testImageFile.delete();
-            if (!deleted) {
-                System.err.println("Warning: could not delete test image!");
+        for (File file : testFiles) {
+            if (file != null && file.exists()) {
+                boolean deleted = file.delete();
+                if (!deleted) {
+                    System.err.println("Warning: could not delete test file: " + file.getAbsolutePath());
+                }
             }
         }
     }
