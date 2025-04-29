@@ -51,13 +51,15 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      #For JavaFX
 
       - name: Install Xvfb
         run: sudo apt-get install xvfb
-
       - name: Start Xvfb
         run: Xvfb :99 &
+
+      - name: Verify Xvfb is running
+        run: |
+          ps -ef | grep Xvfb
 
       - name: Build and test with Maven
         run: mvn clean install -Djava.awt.headless=true
@@ -79,4 +81,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: success()
-
