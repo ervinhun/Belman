@@ -30,6 +30,7 @@ public class OperatorController {
     @FXML
     private void initialize()
     {
+        ordersPane.getChildren().clear();
         orders.add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
         ordersPane.getChildren().addAll(orders);
     }

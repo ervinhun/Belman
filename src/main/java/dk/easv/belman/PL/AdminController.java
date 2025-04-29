@@ -1,6 +1,7 @@
 package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -10,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -26,6 +28,7 @@ public class AdminController {
     @FXML private Button sideBtnNotSelected;
     @FXML private ImageView usersImage;
     @FXML private ImageView ordersImage;
+    @FXML private BorderPane borderPane;
     private Boolean isOrdersWin = true;
     private Image userSel = new Image(getClass().getResourceAsStream("/dk/easv/belman/Images/user.png"));
     private Image ordersSel = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/orders.png"));
