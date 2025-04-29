@@ -83,7 +83,8 @@ jobs:
             -Dsonar.organization=ervinhun \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-        if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.pull_request == null)
+        if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.pull_request == null) &&
+          success()
 
       - name: Publish to GitHub Packages Apache Maven
         run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
