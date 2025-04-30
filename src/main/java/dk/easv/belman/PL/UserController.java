@@ -103,7 +103,7 @@ public class UserController {
 
     private void disableForm() {
         btnSave.setDisable(true);
-        btnGenerateQR.setDisable(true);
+        btnGenerateQR.setDisable(true);//
     }
 
     private void showError(String msg) {
