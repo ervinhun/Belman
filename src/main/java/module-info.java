@@ -6,6 +6,7 @@ module dk.easv.belman {
     requires java.naming;
     requires javafx.swing;
     requires org.slf4j;
+    requires org.apache.pdfbox;
 
 
     opens dk.easv.belman to javafx.fxml;
