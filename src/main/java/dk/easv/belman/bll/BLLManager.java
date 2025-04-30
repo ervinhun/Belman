@@ -3,16 +3,20 @@ package dk.easv.belman.bll;
 import dk.easv.belman.be.User;
 import dk.easv.belman.dal.DALManager;
 
+import dk.easv.belman.exceptions.BelmanException;
+
+import java.util.List;
+import java.util.UUID;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 public class BLLManager {
     private final DALManager dalManager;
-
-    public BLLManager() {
-        this.dalManager = new DALManager();
+ 
+    public BLLManager() throws BelmanException {
+        dalManager = new DALManager();
     }
-
+    
     public String hashPass(String username, String pass) {
         PasswordHasher hasher = new PasswordHasher();
         String hashedPass = null;
@@ -27,5 +31,20 @@ public class BLLManager {
     public User login(String username, String password) {
         User user = dalManager.login(username, hashPass(username, password));
         return user;
+
+    public List<User> getAllUsers() {
+        return dalManager.getAllUsers();
+    }
+
+    public UUID addUser(User user) {
+        return dalManager.insertUser(user);
+    }
+
+    public boolean updateUser(User user) {
+        return dalManager.updateUser(user);
+    }
+
+    public void deleteUser(UUID id) {
+        dalManager.deleteUser(id);
     }
 }
