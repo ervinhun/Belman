@@ -64,7 +64,6 @@ jobs:
             -Dsonar.organization=ervinhun \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.qualitygate.wait=false
 
         if: success()
       - name: Publish to GitHub Packages Apache Maven
