@@ -1,1 +1,9 @@
+dk\easv\belman\PL\LoginController.class
+dk\easv\belman\exceptions\BelmanException.class
+dk\easv\belman\PL\QualityController.class
 module-info.class
+dk\easv\belman\dal\ConnectionManager.class
+dk\easv\belman\PL\OperatorController.class
+dk\easv\belman\Main.class
+dk\easv\belman\PL\AdminController.class
+dk\easv\belman\dal\ChooseFile.class

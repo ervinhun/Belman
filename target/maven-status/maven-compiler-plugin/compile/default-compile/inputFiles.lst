@@ -1,5 +1,6 @@
-C:\Users\ervin\Documents\School\SCO2\Project\belman\src\main\java\dk\easv\belman\DAL\ConnectionManager.java
-C:\Users\ervin\Documents\School\SCO2\Project\belman\src\main\java\dk\easv\belman\exceptions\BelmanExceptions.java
+C:\Users\ervin\Documents\School\SCO2\Project\belman\src\main\java\dk\easv\belman\dal\ChooseFile.java
+C:\Users\ervin\Documents\School\SCO2\Project\belman\src\main\java\dk\easv\belman\dal\ConnectionManager.java
+C:\Users\ervin\Documents\School\SCO2\Project\belman\src\main\java\dk\easv\belman\exceptions\BelmanException.java
 C:\Users\ervin\Documents\School\SCO2\Project\belman\src\main\java\dk\easv\belman\Main.java
 C:\Users\ervin\Documents\School\SCO2\Project\belman\src\main\java\dk\easv\belman\PL\AdminController.java
 C:\Users\ervin\Documents\School\SCO2\Project\belman\src\main\java\dk\easv\belman\PL\LoginController.java
