@@ -4,6 +4,10 @@ module dk.easv.belman {
     requires com.microsoft.sqlserver.jdbc;
     requires java.sql;
     requires java.naming;
+    requires com.google.zxing;
+    requires webcam.capture;
+    requires com.google.zxing.javase;
+    requires javafx.swing;
 
 
     opens dk.easv.belman to javafx.fxml;
