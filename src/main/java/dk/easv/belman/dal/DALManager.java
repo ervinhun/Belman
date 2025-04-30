@@ -47,8 +47,7 @@ public class DALManager {
                 int roleId = rs.getInt("role_id");
                 String roleName = rs.getString("role");
                 LocalDateTime created = rs.getTimestamp("created_at").toLocalDateTime();
-                Timestamp ts = rs.getTimestamp("last_login_time");
-                LocalDateTime lastLogin = ts != null ? ts.toLocalDateTime() : null;
+                LocalDateTime lastLogin = rs.getTimestamp("last_login_time").toLocalDateTime();
                 boolean active = rs.getBoolean("is_active");
 
                 User u = new User(id, fullName, username, password, tagId, roleId, created, lastLogin, active);
