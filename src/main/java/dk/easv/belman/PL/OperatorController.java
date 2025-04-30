@@ -1,6 +1,7 @@
 package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
+import dk.easv.belman.be.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
@@ -26,10 +27,12 @@ public class OperatorController {
     @FXML
     private Label orderLabel;
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
+    private User loggedinUser;
 
     @FXML
     private void initialize()
     {
+        loggedinUser = null;
         ordersPane.getChildren().clear();
         orders.add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
         ordersPane.getChildren().addAll(orders);
@@ -89,5 +92,13 @@ public class OperatorController {
         card.setOnMouseClicked(_ -> {openOrder(orderNumber);});
 
         return card;
+    }
+
+    public void setLoggedinUser(User loggedinUser) {
+        if (loggedinUser != null) {
+            this.loggedinUser = loggedinUser;
+            System.out.println("LoggedinUser: " + loggedinUser);
+        } else
+            System.out.println("No user is set who logged in");
     }
 }

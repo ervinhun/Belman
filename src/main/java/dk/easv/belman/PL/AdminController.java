@@ -1,6 +1,7 @@
 package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
+import dk.easv.belman.be.User;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -36,10 +37,12 @@ public class AdminController {
     private Image ordersDefault = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/ordersDef.png"));
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
     private ObservableList<VBox> users = FXCollections.observableArrayList();
+    private User loggedinUser;
 
     @FXML
     private void initialize()
     {
+        loggedinUser = null;
         orders.add(createOrderCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
         users.add(createUserCard("Username", "Operator", "2025-01-01"));
         ordersPane.getChildren().addAll(orders);
@@ -141,5 +144,13 @@ public class AdminController {
         card.getChildren().addAll(user, roleText, loginText);
 
         return card;
+    }
+
+    public void setLoggedinUser(User loggedinUser) {
+        if (loggedinUser != null) {
+            this.loggedinUser = loggedinUser;
+            System.out.println("LoggedinUser: " + loggedinUser);
+        } else
+            System.out.println("No user is set who logged in");
     }
 }
