@@ -36,11 +36,12 @@ public class AdminController {
     private Image ordersDefault = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/ordersDef.png"));
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
     private ObservableList<VBox> users = FXCollections.observableArrayList();
+    private String[] states = {"Images Needed", "Pending", "Signed ✅"};
 
     @FXML
     private void initialize()
     {
-        orders.add(createOrderCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
+        orders.add(createOrderCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[1]));
         users.add(createUserCard("Username", "Operator", "2025-01-01"));
         ordersPane.getChildren().addAll(orders);
         sideBtnNotSelected.setOnMouseEntered(e -> usersImage.setImage(userSel));
@@ -103,7 +104,7 @@ public class AdminController {
 
     }
 
-    private VBox createOrderCard(String orderNumber, Image image) {
+    private VBox createOrderCard(String orderNumber, Image image, String state) {
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(100);
         imageView.setFitHeight(100);
@@ -114,7 +115,9 @@ public class AdminController {
 
         Label orderLabel = new Label("Order: " + orderNumber);
 
-        VBox card = new VBox(10, imageView, orderLabel);
+        Label statusLabel = new Label("Status: " + state);
+
+        VBox card = new VBox(10, imageView, orderLabel, statusLabel);
         card.setAlignment(Pos.CENTER);
         card.setPrefWidth(Region.USE_COMPUTED_SIZE);
         card.setId("orderCard");
