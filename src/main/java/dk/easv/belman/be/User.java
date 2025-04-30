@@ -8,7 +8,7 @@ public class User {
     private String fullName;
     private String username;
     private String password;
-    private Integer tagId;
+    private String tagId;
     private int roleId;
     private String role;
     private LocalDateTime createdAt;
@@ -18,7 +18,7 @@ public class User {
     public User() {}
 
     public User(UUID id, String fullName, String username, String password,
-                Integer tagId, int roleId, LocalDateTime createdAt,
+                String tagId, int roleId, LocalDateTime createdAt,
                 LocalDateTime lastLoginTime, boolean active) {
         this.id = id;
         this.fullName = fullName;
@@ -43,8 +43,8 @@ public class User {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public Integer getTagId() { return tagId; }
-    public void setTagId(Integer tagId) { this.tagId = tagId; }
+    public String getTagId() { return tagId; }
+    public void setTagId(String tagId) { this.tagId = tagId; }
 
     public int getRoleId() { return roleId; }
     public void setRoleId(int roleId) { this.roleId = roleId; }
@@ -62,5 +62,7 @@ public class User {
     public void setActive(boolean active) { this.active = active; }
 
     @Override
-    public String toString() { return fullName + " (" + username + ")"; }
+    public String toString() {
+        return fullName + " (" + username + ")";
+    }
 }

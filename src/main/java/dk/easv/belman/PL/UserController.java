@@ -89,7 +89,7 @@ public class UserController {
     }
 
     @FXML
-    private void btnGenerateQRClick() {
+    private void GenerateQR() {
     }
 
     private void clearForm() {

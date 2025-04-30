@@ -8,7 +8,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -132,22 +131,9 @@ public class AdminController {
         return card;
     }
 
-    private void editUser(User u) {
+    private void editUser(User user) {
         newUserTab();
     }
-    private void initUsers() {
-        users.clear();
-        contentPane.getChildren().clear();
-        for (User u : bllManager.getAllUsers()) {
-            users.add(createUserCard(u));
-        }
-    }
-
-    private void loadUsers() {
-        contentPane.getChildren().setAll(users);
-    }
-
-
 
     private HBox createUserCard(User u) {
         Label name = new Label(u.getFullName());

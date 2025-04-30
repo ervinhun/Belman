@@ -50,15 +50,9 @@
                         <Insets left="130.0" />
                     </GridPane.margin>
                 </RadioButton>
-                <RadioButton fx:id="chkOperator"
-                             mnemonicParsing="false"
-                             onAction="#chkOperator"
-                             text="Operator"
-                             toggleGroup="$tgRole"
-                             GridPane.columnIndex="1"
-                             GridPane.rowIndex="4">
+                <RadioButton fx:id="chkOperator" mnemonicParsing="false" onAction="#chkOperator" text="Operator" toggleGroup="$tgRole" GridPane.columnIndex="1" GridPane.rowIndex="4">
                     <GridPane.margin>
-                        <Insets left="250.0"/>
+                        <Insets left="250.0" />
                     </GridPane.margin>
                 </RadioButton>
 
@@ -72,7 +66,7 @@
                 <Insets bottom="1.0" left="1.0" top="1.0" />
             </VBox.margin>
             <children>
-                <Button fx:id="btnGenerateQR" mnemonicParsing="false" onAction="#btnGenerateQRClick" prefWidth="97.0" text="Generate QR" />
+                <Button fx:id="btnGenerateQR" mnemonicParsing="false" onAction="#GenerateQR" prefWidth="97.0" text="Generate QR" />
                 <ImageView fx:id="qrImage" fitHeight="105.0" fitWidth="116.0" pickOnBounds="true" preserveRatio="true">
                     <HBox.margin>
                         <Insets left="30.0" />
