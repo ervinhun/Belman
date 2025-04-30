@@ -19,7 +19,7 @@ public class LoginController {
     {
         try
         {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/quality.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/admin.fxml"));
             Stage stage = (Stage) confirm.getScene().getWindow();
             Scene scene = new Scene(fxmlLoader.load());
             stage.setScene(scene);
