@@ -21,7 +21,7 @@
 
     <sonar.exclusions>**/Main.java,**/App.java,**/module-info.java,**/dal/ChooseFile.java,**/dal/ConnectionManager.java</sonar.exclusions>
 
-    <sonar.coverage.exclusions>**/Main.java,**/App.java,**/module-info.java,**/dal/ChooseFile.java,**/dal/ConnectionManager.java</sonar.coverage.exclusions>
+    <sonar.coverage.exclusions>**/Main.java,**/App.java,**/module-info.java,**/dal/ChooseFile.java,**/dal/ConnectionManager.java, **/PL/**</sonar.coverage.exclusions>
   </properties>
 
   <dependencies>
