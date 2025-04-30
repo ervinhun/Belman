@@ -31,6 +31,7 @@ public class BLLManager {
     public User login(String username, String password) {
         User user = dalManager.login(username, hashPass(username, password));
         return user;
+    }
 
     public List<User> getAllUsers() {
         return dalManager.getAllUsers();
