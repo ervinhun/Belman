@@ -18,12 +18,10 @@
     <!-- SonarCloud configuration -->
     <sonar.organization>ervinhun</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-    <sonar.exclusions>
-      **/Main.java,**/App.java,**/module-info.java, **/dal/ChooseFile.java,**/dal/ConnectionManager.java
-    </sonar.exclusions>
-    <sonar.coverage.exclusions>
-      **/Main.java,**/App.java,**/module-info.java, **/dal/ChooseFile.java,**/dal/ConnectionManager.java
-    </sonar.coverage.exclusions>
+
+    <sonar.exclusions>**/Main.java,**/App.java,**/module-info.java,**/dal/ChooseFile.java,**/dal/ConnectionManager.java</sonar.exclusions>
+
+    <sonar.coverage.exclusions>**/Main.java,**/App.java,**/module-info.java,**/dal/ChooseFile.java,**/dal/ConnectionManager.java</sonar.coverage.exclusions>
   </properties>
 
   <dependencies>
