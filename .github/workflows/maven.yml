@@ -55,7 +55,7 @@ jobs:
       - name: Build and test with Maven
         run: mvn clean verify
 
-      - name: Build, test, and analyze with Maven and SonarCloud
+      - name: SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -63,10 +63,9 @@ jobs:
             -Dsonar.projectKey=ervinhun_Belman \
             -Dsonar.organization=ervinhun \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.qualitygate.wait=false
+
         if: success()
       - name: Publish to GitHub Packages Apache Maven
         run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
