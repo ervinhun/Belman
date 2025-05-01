@@ -136,10 +136,12 @@ public class LoginController {
         }
     }
 
-    // CAMERA DOESNT SHUT DOWN IF CLOSED BY TOP RIGHT X
     @FXML
     private void cameraLogin()
     {
+        Stage stage = (Stage) confirm.getScene().getWindow();
+        stage.setOnCloseRequest(_ -> {webcam.close(); executor.shutdownNow();});
+
         cameraView.setVisible(true);
         webcam = Webcam.getDefault();
         webcam.setViewSize(new Dimension(640, 480));
