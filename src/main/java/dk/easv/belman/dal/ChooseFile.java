@@ -19,6 +19,7 @@ import java.util.List;
 
 
 public class ChooseFile {
+
     public List<File> getChosenFile() {
         return chosenFile;
     }
@@ -29,6 +30,7 @@ public class ChooseFile {
 
 
     public ChooseFile(Window window, String productNoString, List<File> chosenFileForTest) {
+        String imagePath = FilePaths.IMAGE_PATH;
         FileChooser fileChooser = new FileChooser();
         //Sets the window title
         fileChooser.setTitle("Upload Image Files");
@@ -46,7 +48,7 @@ public class ChooseFile {
         }
 
         if (chosenFile != null && productNoString != null) {
-            File targetDir = new File("./src/main/resources/dk/easv/belman/SavedImages/" + productNoString);
+            File targetDir = new File(imagePath + productNoString);
             if (!targetDir.exists()) {
                 targetDir.mkdirs();
             }
@@ -63,8 +65,6 @@ public class ChooseFile {
                     Files.copy(file.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     // Create thumbnail
                     createThumbnail(file, thumbnailFile);
-                    System.out.println("Original saved: " + targetFile.getAbsolutePath());
-                    System.out.println("Thumbnail saved: " + thumbnailFile.getAbsolutePath());
 
                 } catch (IOException e) {
                     logger.error("Failed to create thumbnail for " + file.getName(), e);
@@ -80,7 +80,7 @@ public class ChooseFile {
                     .map(File::getAbsolutePath)
                     .toList();
             for (File file : chosenFile) {
-                System.out.println(file.getName());
+                logger.info("File path: {}", file.getAbsolutePath());
             }
             return filepaths;
         } else
