@@ -56,7 +56,7 @@ public class QualityController {
     @FXML
     private void openImage()
     {
-
+        
     }
 
     @FXML

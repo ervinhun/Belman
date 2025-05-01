@@ -43,7 +43,7 @@ public class AdminController {
     private Image userDefault = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/userDef.png"));
     private Image ordersDefault = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/ordersDef.png"));
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
-    private ObservableList<VBox> users = FXCollections.observableArrayList();
+    private ObservableList<HBox> users = FXCollections.observableArrayList();
     private String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private final BLLManager bllManager = new BLLManager();
     private User loggedinUser;
@@ -52,8 +52,7 @@ public class AdminController {
     private void initialize()
     {
         orders.add(createOrderCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[1]));
-        users.add(createUserCard("Username", "Operator", "2025-01-01"));
-        ordersPane.getChildren().addAll(orders);
+        contentPane.getChildren().addAll(orders);
         loggedinUser = null;
         ordersRoot = scrollP.getContent();
         try {
