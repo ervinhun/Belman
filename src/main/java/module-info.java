@@ -8,6 +8,9 @@ module dk.easv.belman {
     requires webcam.capture;
     requires com.google.zxing.javase;
     requires javafx.swing;
+    requires javafx.swing;
+    requires org.slf4j;
+    requires MaterialFX;
 
 
     opens dk.easv.belman to javafx.fxml;
