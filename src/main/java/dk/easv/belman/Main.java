@@ -1,10 +1,14 @@
 package dk.easv.belman;
 
+import com.github.sarxos.webcam.Webcam;
+import com.github.sarxos.webcam.WebcamException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class Main extends Application {
