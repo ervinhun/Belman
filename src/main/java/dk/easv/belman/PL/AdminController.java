@@ -45,10 +45,12 @@ public class AdminController {
     private ObservableList<HBox> orders = FXCollections.observableArrayList();
     private ObservableList<HBox> users = FXCollections.observableArrayList();
     private final BLLManager bllManager = new BLLManager();
+    private User loggedinUser;
 
     @FXML
     private void initialize()
-    {   ordersRoot = scrollP.getContent();
+    {   loggedinUser = null;
+        ordersRoot = scrollP.getContent();
         try {
             newUserView = FXMLLoader.load(Main.class.getResource("FXML/newUser.fxml"));
         } catch (IOException ex) { ex.printStackTrace(); }
@@ -171,6 +173,14 @@ public class AdminController {
 
 
         return card;
+    }
+
+    public void setLoggedinUser(User loggedinUser) {
+        if (loggedinUser != null) {
+            this.loggedinUser = loggedinUser;
+            System.out.println("LoggedinUser: " + loggedinUser);
+        } else
+            System.out.println("No user is set who logged in");
     }
 
 }

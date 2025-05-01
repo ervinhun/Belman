@@ -1,7 +1,7 @@
 package dk.easv.belman.dal;
 
-import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
+import dk.easv.belman.be.User;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class DALManager {
+
     private final ConnectionManager connectionManager;
 
     public DALManager() throws BelmanException {
@@ -19,20 +20,19 @@ public class DALManager {
     public List<User> getAllUsers() {
         List<User> list = new ArrayList<>();
         String sql = """
-                SELECT 
-                    u.id,
-                    u.full_name,
-                    u.username,
-                    u.password,
-                    u.tag_id,
-                    u.role_id,
-                    u.created_at,
-                    u.last_login_time,
-                    u.is_active,
-                    r.role
-                FROM dbo.Users u
-                JOIN dbo.Roles r ON u.role_id = r.id
-                WHERE u.is_active = 1
+                SELECT  u.id,
+                        u.full_name,
+                        u.username,
+                        u.password,
+                        u.tag_id,
+                        u.role_id,
+                        u.created_at,
+                        u.last_login_time,
+                        u.is_active,
+                        r.role
+                FROM    dbo.Users u
+                JOIN    dbo.Roles r ON u.role_id = r.id
+                WHERE   u.is_active = 1
                 """;
         try (Connection c = connectionManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
@@ -46,8 +46,11 @@ public class DALManager {
                 String tagId = rs.getString("tag_id");
                 int roleId = rs.getInt("role_id");
                 String roleName = rs.getString("role");
+
                 LocalDateTime created = rs.getTimestamp("created_at").toLocalDateTime();
-                LocalDateTime lastLogin = rs.getTimestamp("last_login_time").toLocalDateTime();
+                Timestamp lastTS = rs.getTimestamp("last_login_time");
+                LocalDateTime lastLogin = lastTS != null ? lastTS.toLocalDateTime() : null;
+
                 boolean active = rs.getBoolean("is_active");
 
                 User u = new User(id, fullName, username, password, tagId, roleId, created, lastLogin, active);
@@ -63,17 +66,27 @@ public class DALManager {
     public UUID insertUser(User u) {
         String sql = """
                 INSERT INTO dbo.Users
-                (id, full_name, username, password, tag_id, role_id, created_at, is_active)
+                    (id, full_name, username, password, tag_id,
+                     role_id, created_at, last_login_time, is_active)
                 OUTPUT INSERTED.ID
-                VALUES (NEWID(),?,?,?,?,?,SYSDATETIME(),1)
+                VALUES
+                    (NEWID(),?,?,?,?,?,?,?,1)
                 """;
         try (Connection c = connectionManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setString(1, u.getFullName());
             ps.setString(2, u.getUsername());
             ps.setString(3, u.getPassword());
-            if (u.getTagId() == null) ps.setNull(4, Types.VARCHAR); else ps.setString(4, u.getTagId());
+            if (u.getTagId() == null)
+                ps.setNull(4, Types.VARCHAR);
+            else
+                ps.setString(4, u.getTagId());
             ps.setInt(5, u.getRoleId());
+
+            Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+            ps.setTimestamp(6, now);
+            ps.setTimestamp(7, now);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -91,17 +104,29 @@ public class DALManager {
     public boolean updateUser(User u) {
         String sql = """
                 UPDATE dbo.Users
-                SET full_name=?, username=?, password=?, tag_id=?, role_id=?, last_login_time=?
-                WHERE id=? AND is_active=1
+                SET full_name      = ?,
+                    username       = ?,
+                    password       = ?,
+                    tag_id         = ?,
+                    role_id        = ?,
+                    last_login_time= ?
+                WHERE id = ? AND is_active = 1
                 """;
         try (Connection c = connectionManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setString(1, u.getFullName());
             ps.setString(2, u.getUsername());
             ps.setString(3, u.getPassword());
-            if (u.getTagId() == null) ps.setNull(4, Types.VARCHAR); else ps.setString(4, u.getTagId());
+            if (u.getTagId() == null)
+                ps.setNull(4, Types.VARCHAR);
+            else
+                ps.setString(4, u.getTagId());
             ps.setInt(5, u.getRoleId());
-            if (u.getLastLoginTime() == null) ps.setNull(6, Types.TIMESTAMP); else ps.setTimestamp(6, Timestamp.valueOf(u.getLastLoginTime()));
+            if (u.getLastLoginTime() == null)
+                ps.setNull(6, Types.TIMESTAMP);
+            else
+                ps.setTimestamp(6, Timestamp.valueOf(u.getLastLoginTime()));
             ps.setObject(7, u.getId());
 
             return ps.executeUpdate() > 0;
@@ -114,10 +139,63 @@ public class DALManager {
         String sql = "UPDATE dbo.Users SET is_active = 0 WHERE id = ?";
         try (Connection c = connectionManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setObject(1, id);
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new RuntimeException("Error deleting user", ex);
+        }
+    }
+  
+  public User login(String username, String hashedPassword) {
+        final String selectSql =
+                "SELECT id, full_name, username, password, tag_id, role_id, created_at, last_login_time, is_active " +
+                        "FROM Users WHERE username = ? AND password = ?";
+        final String updateSql =
+                "UPDATE Users SET last_login_time = CURRENT_TIMESTAMP WHERE id = ?";
+
+        try (Connection con = connectionManager.getConnection();
+             PreparedStatement psSelect = con.prepareStatement(selectSql)) {
+
+            psSelect.setString(1, username);
+            psSelect.setString(2, hashedPassword);
+
+            try (ResultSet rs = psSelect.executeQuery()) {
+                if (!rs.next()) return null;
+
+                String idStr = rs.getString("id");
+                UUID id = UUID.fromString(idStr);
+
+                String fullName        = rs.getString("full_name");
+                String user            = rs.getString("username");
+                String storedHash      = rs.getString("password");
+                String tagId           = rs.getString("tag_id");
+                int    roleId          = rs.getInt("role_id");
+                LocalDateTime createdAt       = rs.getTimestamp("created_at").toLocalDateTime();
+                boolean active       = rs.getBoolean("is_active");
+
+                // update last_login_time
+                try (PreparedStatement psUpdate = con.prepareStatement(updateSql)) {
+                    psUpdate.setString(1, id.toString());
+                    psUpdate.executeUpdate();
+                }
+                LocalDateTime newLastLogin = LocalDateTime.now();
+
+                return new User(
+                        id,
+                        fullName,
+                        user,
+                        storedHash,
+                        tagId,
+                        roleId,
+                        createdAt,
+                        newLastLogin,
+                        active
+                );
+            }
+
+        } catch (SQLException ex) {
+            throw new RuntimeException("Error logging in user", ex);
         }
     }
 }
