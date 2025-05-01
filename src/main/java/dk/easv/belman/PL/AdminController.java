@@ -42,14 +42,19 @@ public class AdminController {
     private Image ordersSel = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/orders.png"));
     private Image userDefault = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/userDef.png"));
     private Image ordersDefault = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/ordersDef.png"));
-    private ObservableList<HBox> orders = FXCollections.observableArrayList();
-    private ObservableList<HBox> users = FXCollections.observableArrayList();
+    private ObservableList<VBox> orders = FXCollections.observableArrayList();
+    private ObservableList<VBox> users = FXCollections.observableArrayList();
+    private String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private final BLLManager bllManager = new BLLManager();
     private User loggedinUser;
-
+  
     @FXML
     private void initialize()
-    {   loggedinUser = null;
+    {
+        orders.add(createOrderCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[1]));
+        users.add(createUserCard("Username", "Operator", "2025-01-01"));
+        ordersPane.getChildren().addAll(orders);
+        loggedinUser = null;
         ordersRoot = scrollP.getContent();
         try {
             newUserView = FXMLLoader.load(Main.class.getResource("FXML/newUser.fxml"));
@@ -113,7 +118,7 @@ public class AdminController {
 
     }
 
-    private VBox createOrderCard(String orderNumber, Image image) {
+    private VBox createOrderCard(String orderNumber, Image image, String state) {
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(100);
         imageView.setFitHeight(100);
@@ -124,7 +129,9 @@ public class AdminController {
 
         Label orderLabel = new Label("Order: " + orderNumber);
 
-        VBox card = new VBox(10, imageView, orderLabel);
+        Label statusLabel = new Label("Status: " + state);
+
+        VBox card = new VBox(10, imageView, orderLabel, statusLabel);
         card.setAlignment(Pos.CENTER);
         card.setPrefWidth(Region.USE_COMPUTED_SIZE);
         card.setId("orderCard");

@@ -29,6 +29,7 @@ public class QualityController {
     @FXML
     private Label orderLabel;
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
+    private String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private User loggedinUser;
 
     @FXML
@@ -36,7 +37,7 @@ public class QualityController {
     {
         loggedinUser = null;
         ordersPane.getChildren().clear();
-        orders.add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png"))));
+        orders.add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
         ordersPane.getChildren().addAll(orders);
     }
 
@@ -86,7 +87,7 @@ public class QualityController {
         }
     }
 
-    private VBox createCard(String orderNumber, Image image) {
+    private VBox createCard(String orderNumber, Image image, String state) {
         ImageView imageView = new ImageView(image);
         imageView.setFitWidth(100);
         imageView.setFitHeight(100);
@@ -97,7 +98,9 @@ public class QualityController {
 
         Label orderLabel = new Label("Order: " + orderNumber);
 
-        VBox card = new VBox(10, imageView, orderLabel);
+        Label statusLabel = new Label("Status: " + state);
+
+        VBox card = new VBox(10, imageView, orderLabel, statusLabel);
         card.setAlignment(Pos.CENTER);
         card.setPrefWidth(Region.USE_COMPUTED_SIZE);
         card.setId("orderCard");
