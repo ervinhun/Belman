@@ -48,6 +48,7 @@ public class ChooseFile {
         }
 
         if (chosenFile != null && productNoString != null) {
+            //Creates the directories for the images
             File targetDir = new File(imagePath + productNoString);
             if (!targetDir.exists()) {
                 targetDir.mkdirs();
