@@ -1,0 +1,16 @@
+{
+  "title": "Quality Check Report",
+  "dynamicText": "Order No: ",
+  "headText": [
+    "Customer Name: Valued Customer",
+    "Order Date: 2024-12-04",
+    "Delivery Date: 2025-01-04"
+  ],
+  "bodyText": [
+    "Status: Delivered",
+    "This is a sample report for a joint quality control document.",
+    "The report contains information about the quality check of the order.",
+    "Please find the details below:"
+  ],
+  "signedBy": "Signed by:"
+}
