@@ -12,11 +12,11 @@ import java.security.spec.InvalidKeySpecException;
 
 public class BLLManager {
     private final DALManager dalManager;
- 
+
     public BLLManager() throws BelmanException {
         dalManager = new DALManager();
     }
-    
+
     public String hashPass(String username, String pass) {
         PasswordHasher hasher = new PasswordHasher();
         String hashedPass = null;
@@ -37,8 +37,11 @@ public class BLLManager {
         return dalManager.getAllUsers();
     }
 
-    public UUID addUser(User user) {
-        return dalManager.insertUser(user);
+    public User addUser(User user) {
+        UUID id = dalManager.insertUser(user);
+        if (id == null) return null;
+        user.setId(id);
+        return user;
     }
 
     public boolean updateUser(User user) {

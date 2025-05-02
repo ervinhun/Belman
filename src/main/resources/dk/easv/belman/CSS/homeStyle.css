@@ -139,25 +139,25 @@
      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0.5, 0, 0);
  }
 
- .alert-success {
-     -fx-background-color: #D4EDDA;
-     -fx-background-radius: 5;
- }
- .alert-warning {
-     -fx-background-color: #FFF3CD;
-     -fx-background-radius: 5;
- }
- .alert-danger {
-     -fx-background-color: #F8D7DA;
-     -fx-background-radius: 5;
- }
- .alert-title {
-     -fx-font-weight: bold;
-     -fx-font-size: 14px;
- }
- .alert-body {
-     -fx-font-size: 10px;
- }
+.alert-success {
+    -fx-background-color: #D4EDDA;
+    -fx-background-radius: 5;
+}
+.alert-warning {
+    -fx-background-color: #FFF3CD;
+    -fx-background-radius: 5;
+}
+.alert-danger {
+    -fx-background-color: #F8D7DA;
+    -fx-background-radius: 5;
+}
+.alert-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+.alert-body {
+    -fx-font-size: 10px;
+}
 .error {
     -fx-border-width: 2px;
     -fx-border-color: red;
@@ -202,3 +202,12 @@
     -fx-min-height: 30px;
     -fx-min-width: 30px;
 }
+.newUserBtn {
+    -fx-background-color: #019ee3;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 16px;
+    -fx-cursor: hand;
+}
+
