@@ -1,10 +1,14 @@
 package dk.easv.belman.PL;
 
+import dk.easv.belman.Main;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 
 public class UserController {
 
@@ -20,6 +24,8 @@ public class UserController {
     @FXML private Button btnCancel;
     @FXML private Button btnGenerateQR;
     @FXML private ImageView qrImage;
+    @FXML private VBox rootVBox;
+    private VBox rightBox;
 
     private BLLManager bllManager;
 
@@ -36,6 +42,11 @@ public class UserController {
         tgRole.selectedToggleProperty().addListener((obs, oldVal, newVal) ->
                 btnGenerateQR.setDisable(newVal == null || !((RadioButton) newVal).getText().equals("Operator"))
         );
+    }
+
+    public void getRightBox(VBox rightBox)
+    {
+        this.rightBox = rightBox;
     }
 
     @FXML
@@ -80,8 +91,10 @@ public class UserController {
     }
 
     @FXML
-    private void btnCancelClick() {
+    private void cancel() {
         clearForm();
+        BorderPane borderPane = (BorderPane) rootVBox.getParent();
+        borderPane.setCenter(rightBox);
     }
 
     @FXML
