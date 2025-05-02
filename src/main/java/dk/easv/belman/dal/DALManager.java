@@ -146,6 +146,26 @@ public class DALManager {
             throw new RuntimeException("Error deleting user", ex);
         }
     }
+
+    public void getAllOrders()
+    {
+
+    }
+
+    public void getOperatorsOrders(String username)
+    {
+        final String selectSql = "SELECT * FROM Products;";
+
+        try (Connection con = connectionManager.getConnection();
+            PreparedStatement psSelect = con.prepareStatement(selectSql))
+        {
+
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
   
   public User login(String username, String hashedPassword) {
         final String selectSql =
