@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="265.0" prefWidth="660.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.PL.UserController">
+<VBox fx:id="rootVBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="265.0" prefWidth="660.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.PL.UserController">
     <children>
         <GridPane prefHeight="151.0" prefWidth="656.0">
             <columnConstraints>
@@ -72,7 +72,7 @@
                         <Insets left="30.0" />
                     </HBox.margin>
                 </ImageView>
-                <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#btnCancelClick" prefWidth="97.0" text="Cancel">
+                <Button fx:id="btnCancel" mnemonicParsing="false" onAction="#cancel" prefWidth="97.0" text="Cancel">
                     <HBox.margin>
                         <Insets left="175.0" top="70.0" />
                     </HBox.margin>

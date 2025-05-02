@@ -34,10 +34,9 @@ public class AdminController {
     @FXML private ImageView ordersImage;
     @FXML private BorderPane borderPane;
     @FXML private ScrollPane scrollP;
-    private Node ordersRoot;
-    private Parent newUserView;
-    private FlowPane usersPane;
+    private VBox newUserWindow;
     private boolean isOrdersWin = true;
+    private VBox rightBox;
     private Image userSel = new Image(getClass().getResourceAsStream("/dk/easv/belman/Images/user.png"));
     private Image ordersSel = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/orders.png"));
     private Image userDefault = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/userDef.png"));
@@ -47,6 +46,7 @@ public class AdminController {
     private String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private final BLLManager bllManager = new BLLManager();
     private User loggedinUser;
+    private UserController userController;
   
     @FXML
     private void initialize()
@@ -54,13 +54,13 @@ public class AdminController {
         orders.add(createOrderCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[1]));
         contentPane.getChildren().addAll(orders);
         loggedinUser = null;
-        ordersRoot = scrollP.getContent();
         try {
-            newUserView = FXMLLoader.load(Main.class.getResource("FXML/newUser.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/newUser.fxml"));
+            newUserWindow = fxmlLoader.load();
+            userController = fxmlLoader.getController();
         } catch (IOException ex) { ex.printStackTrace(); }
         sideBtnNotSelected.setOnMouseEntered(e -> usersImage.setImage(userSel));
         sideBtnNotSelected.setOnMouseExited(e -> usersImage.setImage(userDefault));
-        scrollP.setContent(ordersRoot);
     }
 
     @FXML
@@ -73,21 +73,17 @@ public class AdminController {
             isOrdersWin = false;
             currentP.setText("Users");
 
-            usersPane = new FlowPane(10,10);
-            usersPane.setPadding(contentPane.getPadding());
-
             users.clear();
             for (User u : bllManager.getAllUsers()) users.add(createUserCard(u));
-            usersPane.getChildren().setAll(users);
-            scrollP.setContent(usersPane);
-            newUser.setVisible(true); newUser.setDisable(false);
+            contentPane.getChildren().setAll(users);
+            newUser.setVisible(true);
+            newUser.setDisable(false);
         }
     }
 
     @FXML
     private void ordersTab() {
         if (!isOrdersWin) {
-            scrollP.setContent(ordersRoot);
             sideBtnNotSelected.setId("sideBtnNotSelected");
             sideBtnSelected.setId("sideBtnSelected");
             usersImage.setImage(userDefault);
@@ -96,6 +92,8 @@ public class AdminController {
             currentP.setText("Orders");
             newUser.setVisible(false);
             newUser.setDisable(true);
+            contentPane.getChildren().clear();
+            contentPane.getChildren().addAll(orders);
             sideBtnNotSelected.setOnMouseEntered(e -> usersImage.setImage(userSel));
             sideBtnNotSelected.setOnMouseExited(e -> usersImage.setImage(userDefault));
             sideBtnSelected.setOnMouseEntered(e -> {});
@@ -105,7 +103,9 @@ public class AdminController {
 
     @FXML
     private void newUserTab() {
-        scrollP.setContent(newUserView);
+        rightBox = (VBox) borderPane.getCenter();
+        userController.getRightBox(rightBox);
+        borderPane.setCenter(newUserWindow);
         currentP.setText("Create user");
         newUser.setVisible(false);
         newUser.setDisable(true);
@@ -167,7 +167,7 @@ public class AdminController {
         del.setOnAction(e -> {
             bllManager.deleteUser(u.getId());
             users.removeIf(b -> b.getUserData() == u);
-            usersPane.getChildren().removeIf(b -> b.getUserData() == u);
+            contentPane.getChildren().removeIf(b -> b.getUserData() == u);
         });
 
         HBox controls = new HBox(5, edit, del);
