@@ -1,11 +1,13 @@
 package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
+import dk.easv.belman.be.Order;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -14,6 +16,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -34,6 +37,7 @@ public class AdminController {
     @FXML private ImageView ordersImage;
     @FXML private BorderPane borderPane;
     @FXML private ScrollPane scrollP;
+    @FXML private TextField search;
     private VBox newUserWindow;
     private boolean isOrdersWin = true;
     private VBox rightBox;
@@ -43,6 +47,8 @@ public class AdminController {
     private Image ordersDefault = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/ordersDef.png"));
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
     private ObservableList<HBox> users = FXCollections.observableArrayList();
+    private FilteredList<VBox> filteredOrders = new FilteredList<>(orders);
+    private FilteredList<HBox> filteredUsers = new FilteredList<>(users);
     private String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private final BLLManager bllManager = new BLLManager();
     private User loggedinUser;
@@ -51,8 +57,8 @@ public class AdminController {
     @FXML
     private void initialize()
     {
-        orders.add(createOrderCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[1]));
-        contentPane.getChildren().addAll(orders);
+        addOrderCards();
+        for (User u : bllManager.getAllUsers()) users.add(createUserCard(u));
         loggedinUser = null;
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/newUser.fxml"));
@@ -61,6 +67,16 @@ public class AdminController {
         } catch (IOException ex) { ex.printStackTrace(); }
         sideBtnNotSelected.setOnMouseEntered(e -> usersImage.setImage(userSel));
         sideBtnNotSelected.setOnMouseExited(e -> usersImage.setImage(userDefault));
+    }
+
+    private void addOrderCards()
+    {
+        for(Order o : bllManager.getOrders(null))
+        {
+            orders.add(createOrderCard(o));
+        }
+
+        contentPane.getChildren().addAll(filteredOrders);
     }
 
     @FXML
@@ -72,12 +88,16 @@ public class AdminController {
             ordersImage.setImage(ordersDefault);
             isOrdersWin = false;
             currentP.setText("Users");
-
-            users.clear();
-            for (User u : bllManager.getAllUsers()) users.add(createUserCard(u));
-            contentPane.getChildren().setAll(users);
+            search.setText("");
+            applySearch();
+            contentPane.getChildren().clear();
+            contentPane.getChildren().setAll(filteredUsers);
             newUser.setVisible(true);
             newUser.setDisable(false);
+            sideBtnNotSelected.setOnMouseEntered(_ -> {});
+            sideBtnNotSelected.setOnMouseExited(_ -> {});
+            sideBtnSelected.setOnMouseEntered(_ -> ordersImage.setImage(ordersSel));
+            sideBtnSelected.setOnMouseExited(_ -> ordersImage.setImage(ordersDefault));
         }
     }
 
@@ -92,12 +112,14 @@ public class AdminController {
             currentP.setText("Orders");
             newUser.setVisible(false);
             newUser.setDisable(true);
+            search.setText("");
+            applySearch();
             contentPane.getChildren().clear();
-            contentPane.getChildren().addAll(orders);
-            sideBtnNotSelected.setOnMouseEntered(e -> usersImage.setImage(userSel));
-            sideBtnNotSelected.setOnMouseExited(e -> usersImage.setImage(userDefault));
-            sideBtnSelected.setOnMouseEntered(e -> {});
-            sideBtnSelected.setOnMouseExited(e -> {});
+            contentPane.getChildren().addAll(filteredOrders);
+            sideBtnNotSelected.setOnMouseEntered(_ -> usersImage.setImage(userSel));
+            sideBtnNotSelected.setOnMouseExited(_ -> usersImage.setImage(userDefault));
+            sideBtnSelected.setOnMouseEntered(_ -> {});
+            sideBtnSelected.setOnMouseExited(_ -> {});
         }
     }
 
@@ -114,11 +136,53 @@ public class AdminController {
     @FXML
     private void applySearch()
     {
+        contentPane.getChildren().clear();
+        if(search.getText().isEmpty())
+        {
+            filteredOrders.setPredicate(_ -> true);
+            filteredUsers.setPredicate(_ -> true);
+        }
+        else {
+            filteredOrders.setPredicate(order -> {
+                String orderNum = (String) order.getProperties().get("orderNum");
+                return orderNum.toLowerCase().contains(search.getText().toLowerCase());
+            });
+            filteredUsers.setPredicate(user -> {
+                String username = (String) user.getProperties().get("username");
+                return username.toLowerCase().contains(search.getText().toLowerCase());
+            });
+        }
 
+        if(isOrdersWin)
+        {
+            contentPane.getChildren().addAll(filteredOrders);
+        }
+        else
+        {
+            contentPane.getChildren().addAll(filteredUsers);
+        }
     }
 
-    private VBox createOrderCard(String orderNumber, Image image, String state) {
-        ImageView imageView = new ImageView(image);
+    private VBox createOrderCard(Order order) {
+        ImageView imageView = new ImageView();
+        Label statusLabel = new Label();
+        if(order.getPhotos().isEmpty())
+        {
+            imageView.setImage(new Image(Main.class.getResourceAsStream("Images/belman.png")));
+            statusLabel.setText("Status: "+states[0]);
+        }
+        else
+        {
+            imageView.setImage(new Image(order.getPhotos().getFirst().getImagePath()));
+            if(order.getIsSigned())
+            {
+                statusLabel.setText("Status: "+states[2]);
+            }
+            else
+            {
+                statusLabel.setText("Status: "+states[1]);
+            }
+        }
         imageView.setFitWidth(100);
         imageView.setFitHeight(100);
         Rectangle clip = new Rectangle(100, 100);
@@ -126,15 +190,14 @@ public class AdminController {
         clip.setArcHeight(20);
         imageView.setClip(clip);
 
-        Label orderLabel = new Label("Order: " + orderNumber);
-
-        Label statusLabel = new Label("Status: " + state);
+        Label orderLabel = new Label("Order: " + order.getOrderNumber());
 
         VBox card = new VBox(10, imageView, orderLabel, statusLabel);
         card.setAlignment(Pos.CENTER);
         card.setPrefWidth(Region.USE_COMPUTED_SIZE);
         card.setId("orderCard");
         card.setPrefHeight(160);
+        card.getProperties().put("orderNum", order.getOrderNumber());
 
         return card;
     }
@@ -176,7 +239,7 @@ public class AdminController {
         HBox card = new HBox(20, details, controls);
         card.setId("userCard");
         card.setUserData(u);
-
+        card.getProperties().put("username", u.getFullName());
 
         return card;
     }

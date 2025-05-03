@@ -1,17 +1,20 @@
 package dk.easv.belman.be;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class Photo {
-    private UUID id;
-    private User uploadedBy;
+    private Long id;
+    // SWITCH TO USER
+    private UUID uploadedBy;
     private String imagePath;
-    private String uploadedAt;
+    private LocalDateTime uploadedAt;
     private Boolean isDeleted;
-    private User deletedBy;
-    private String deletedAt;
+    // SWITCH TO USER
+    private UUID deletedBy;
+    private LocalDateTime deletedAt;
 
-    public Photo(UUID id, User uploadedBy, String imagePath, String uploadedAt, Boolean isDeleted, User deletedBy, String deletedAt)
+    public Photo(Long id, UUID uploadedBy, String imagePath, LocalDateTime uploadedAt, Boolean isDeleted, UUID deletedBy, LocalDateTime deletedAt)
     {
         this.id = id;
         this.uploadedBy = uploadedBy;
@@ -22,12 +25,12 @@ public class Photo {
         this.deletedAt = deletedAt;
     }
 
-    public UUID getId()
+    public Long getId()
     {
         return id;
     }
 
-    public User getUploadedBy()
+    public UUID getUploadedBy()
     {
         return uploadedBy;
     }
@@ -37,7 +40,7 @@ public class Photo {
         return imagePath;
     }
 
-    public String getUploadedAt()
+    public LocalDateTime getUploadedAt()
     {
         return uploadedAt;
     }
@@ -47,12 +50,12 @@ public class Photo {
         return isDeleted;
     }
 
-    public User getDeletedBy()
+    public UUID getDeletedBy()
     {
         return deletedBy;
     }
 
-    public String getDeletedAt()
+    public LocalDateTime getDeletedAt()
     {
         return deletedAt;
     }

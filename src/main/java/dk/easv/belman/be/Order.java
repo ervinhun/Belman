@@ -1,37 +1,38 @@
 package dk.easv.belman.be;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public class Order {
-    private UUID id;
-    private String productNumber;
-    private String createdAt;
+    private Long id;
+    private String orderNumber;
+    private LocalDateTime createdAt;
     private Boolean isDeleted;
     private List<Photo> photos;
     private Boolean isSigned;
 
-    public Order(UUID id, String productNumber, String createdAt, Boolean isDeleted, List<Photo> photos, Boolean isSigned)
+    public Order(Long id, String productNumber, LocalDateTime createdAt, Boolean isDeleted, List<Photo> photos, Boolean isSigned)
     {
         this.id = id;
-        this.productNumber = productNumber;
+        this.orderNumber = productNumber;
         this.createdAt = createdAt;
         this.isDeleted = isDeleted;
         this.photos = photos;
         this.isSigned = isSigned;
     }
 
-    public UUID getId()
+    public Long getId()
     {
         return id;
     }
 
-    public String getProductNumber()
+    public String getOrderNumber()
     {
-        return productNumber;
+        return orderNumber;
     }
 
-    public String getCreatedAt()
+    public LocalDateTime getCreatedAt()
     {
         return createdAt;
     }

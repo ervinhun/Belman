@@ -1,5 +1,6 @@
 package dk.easv.belman.bll;
 
+import dk.easv.belman.be.Order;
 import dk.easv.belman.be.User;
 import dk.easv.belman.dal.DALManager;
 
@@ -48,4 +49,6 @@ public class BLLManager {
     public void deleteUser(UUID id) {
         dalManager.deleteUser(id);
     }
+
+    public List<Order> getOrders(String username) { return dalManager.getOrders(username); }
 }
