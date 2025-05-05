@@ -4,7 +4,6 @@ import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
@@ -19,10 +18,8 @@ public class UserController {
     @FXML private Button btnSave;
     @FXML private Button btnCancel;
     @FXML private VBox rootVBox;
-    private VBox rightBox;
+    @FXML private VBox rightBox;
     @FXML private TextField txtTagId;
-
-
     private BLLManager bllManager;
 
     @FXML
