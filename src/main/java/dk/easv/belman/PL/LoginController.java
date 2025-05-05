@@ -164,7 +164,10 @@ public class LoginController {
 
                     executor.shutdown();
                     webcam.close();
-                    Platform.runLater(this::login);
+                    cameraView.setVisible(false);
+                    cameraView.setDisable(true);
+                    //QR CODE LOOKUP IN DB
+                    //Platform.runLater(this::login);
                 }
             } catch (NotFoundException e) {
             } catch (Exception e) {
