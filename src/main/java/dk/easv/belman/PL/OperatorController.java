@@ -1,7 +1,9 @@
 package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
+import dk.easv.belman.be.Order;
 import dk.easv.belman.be.User;
+import dk.easv.belman.bll.BLLManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
@@ -29,13 +31,24 @@ public class OperatorController {
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
     private String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private User loggedinUser;
+    private BLLManager bllManager = new BLLManager();
 
     @FXML
     private void initialize()
     {
         loggedinUser = null;
+        orders.clear();
         ordersPane.getChildren().clear();
-        orders.add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[0]));
+        addOrderCards();
+    }
+
+    private void addOrderCards()
+    {
+        for(Order o : bllManager.getOrders(null))
+        {
+            orders.add(createCard(o));
+        }
+
         ordersPane.getChildren().addAll(orders);
     }
 
@@ -73,8 +86,26 @@ public class OperatorController {
         }
     }
 
-    private VBox createCard(String orderNumber, Image image, String state) {
-        ImageView imageView = new ImageView(image);
+    private VBox createCard(Order order) {
+        ImageView imageView = new ImageView();
+        Label statusLabel = new Label();
+        if(order.getPhotos().isEmpty())
+        {
+            imageView.setImage(new Image(Main.class.getResourceAsStream("Images/belman.png")));
+            statusLabel.setText("Status: "+states[0]);
+        }
+        else
+        {
+            imageView.setImage(new Image(order.getPhotos().getFirst().getImagePath()));
+            if(order.getIsSigned())
+            {
+                statusLabel.setText("Status: "+states[2]);
+            }
+            else
+            {
+                statusLabel.setText("Status: "+states[1]);
+            }
+        }
         imageView.setFitWidth(100);
         imageView.setFitHeight(100);
         Rectangle clip = new Rectangle(100, 100);
@@ -82,17 +113,14 @@ public class OperatorController {
         clip.setArcHeight(20);
         imageView.setClip(clip);
 
-        Label orderLabel = new Label("Order: " + orderNumber);
-
-        Label statusLabel = new Label("Status: " + state);
+        Label orderLabel = new Label("Order: " + order.getOrderNumber());
 
         VBox card = new VBox(10, imageView, orderLabel, statusLabel);
         card.setAlignment(Pos.CENTER);
         card.setPrefWidth(Region.USE_COMPUTED_SIZE);
         card.setId("orderCard");
         card.setPrefHeight(160);
-
-        card.setOnMouseClicked(_ -> {openOrder(orderNumber);});
+        card.setOnMouseClicked(_ -> openOrder(order.getOrderNumber()));
 
         return card;
     }
