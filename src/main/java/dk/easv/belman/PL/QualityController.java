@@ -59,8 +59,8 @@ public class QualityController {
     {
         loggedinUser = null;
         ordersPane.getChildren().clear();
- Preview-page-for-qc-document
-        orders.add(createCard("testProductNo", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
+
+     //   orders.add(createCard("testProductNo", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
         ordersPane.getChildren().addAll(orders);
 
         orders.clear();
@@ -75,7 +75,7 @@ public class QualityController {
         }
 
         ordersPane.getChildren().addAll(filteredOrders);
- master
+
     }
 
     @FXML
