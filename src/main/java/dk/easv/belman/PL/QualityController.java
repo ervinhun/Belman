@@ -1,11 +1,14 @@
 package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
+import dk.easv.belman.be.Order;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import dk.easv.belman.dal.GenerateReport;
+import dk.easv.belman.bll.BLLManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -13,6 +16,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -20,6 +24,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -34,12 +39,16 @@ public class QualityController {
     @FXML
     private Label orderLabel;
     @FXML
+    private TextField search;
+    @FXML
     private Button btnSign;
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
+    private FilteredList<VBox> filteredOrders = new FilteredList<>(orders);
     private String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private User loggedinUser;
     private String productNumberToSign;
     private BLLManager bllManager;
+    private BLLManager bllManager = new BLLManager();
 
     @FXML
     private void initialize()
@@ -57,12 +66,29 @@ public class QualityController {
         {
             e.printStackTrace();
         }
+        orders.clear();
+        addOrderCards();
+    }
+
+    private void addOrderCards()
+    {
+        for(Order o : bllManager.getOrders(null))
+        {
+            orders.add(createCard(o));
+        }
+
+        ordersPane.getChildren().addAll(filteredOrders);
     }
 
     @FXML
     private void applySearch()
     {
-
+        ordersPane.getChildren().clear();
+        filteredOrders.setPredicate(order -> {
+            String orderNum = (String) order.getProperties().get("orderNum");
+            return orderNum.toLowerCase().contains(search.getText().toLowerCase());
+        });
+        ordersPane.getChildren().addAll(filteredOrders);
     }
 
     @FXML
@@ -84,7 +110,7 @@ public class QualityController {
     }
 
     @FXML
-    public void signOrder()
+    private void signOrder()
     {
         if (productNumberToSign == null || productNumberToSign.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -146,6 +172,26 @@ public class QualityController {
 
     private VBox createCard(String orderNumber, Image image, String state) {
         ImageView imageView = new ImageView(image);
+    private VBox createCard(Order order) {
+        ImageView imageView = new ImageView();
+        Label statusLabel = new Label();
+        if(order.getPhotos().isEmpty())
+        {
+            imageView.setImage(new Image(Main.class.getResourceAsStream("Images/belman.png")));
+            statusLabel.setText("Status: "+states[0]);
+        }
+        else
+        {
+            imageView.setImage(new Image(order.getPhotos().getFirst().getImagePath()));
+            if(order.getIsSigned())
+            {
+                statusLabel.setText("Status: "+states[2]);
+            }
+            else
+            {
+                statusLabel.setText("Status: "+states[1]);
+            }
+        }
         imageView.setFitWidth(100);
         imageView.setFitHeight(100);
         Rectangle clip = new Rectangle(100, 100);
@@ -166,6 +212,8 @@ public class QualityController {
             openOrder(orderNumber);
             setProductNumberToSign(orderNumber);
         });
+        card.setOnMouseClicked(_ -> openOrder(order.getOrderNumber()));
+        card.getProperties().put("orderNum", order.getOrderNumber());
 
         return card;
     }

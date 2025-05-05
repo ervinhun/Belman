@@ -1,6 +1,7 @@
 package dk.easv.belman.bll;
 
 import dk.easv.belman.be.QualityDocument;
+import dk.easv.belman.be.Order;
 import dk.easv.belman.be.User;
 import dk.easv.belman.dal.DALManager;
 
@@ -14,11 +15,11 @@ import java.security.spec.InvalidKeySpecException;
 
 public class BLLManager {
     private final DALManager dalManager;
-
+ 
     public BLLManager() throws BelmanException {
         dalManager = new DALManager();
     }
-
+    
     public String hashPass(String username, String pass) {
         PasswordHasher hasher = new PasswordHasher();
         String hashedPass = null;
@@ -53,6 +54,8 @@ public class BLLManager {
     public void deleteUser(UUID id) {
         dalManager.deleteUser(id);
     }
+
+    public List<Order> getOrders(String username) { return dalManager.getOrders(username); }
 
     public Boolean signOrder(String productNumber, UUID userId) {
         long productId = dalManager.getProductIdFromProductNumber(productNumber);

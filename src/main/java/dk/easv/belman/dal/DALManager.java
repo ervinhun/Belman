@@ -1,6 +1,8 @@
 package dk.easv.belman.dal;
 
 import dk.easv.belman.be.QualityDocument;
+import dk.easv.belman.be.Order;
+import dk.easv.belman.be.Photo;
 import dk.easv.belman.exceptions.BelmanException;
 import dk.easv.belman.be.User;
 
@@ -147,8 +149,83 @@ public class DALManager {
             throw new RuntimeException("Error deleting user", ex);
         }
     }
-  
-  public User login(String username, String hashedPassword) {
+
+    public List<Order> getOrders(String username)
+    {
+        List<Order> orders = new ArrayList<>();
+        String selectSql;
+
+        if(username == null)
+        {
+            selectSql = "SELECT * FROM Products;";
+        }
+        else
+        {
+            // ADD LOGIC
+            selectSql = "SELECT * FROM Products WHERE hm;";
+        }
+
+        try (Connection con = connectionManager.getConnection();
+             PreparedStatement psSelect = con.prepareStatement(selectSql);
+             ResultSet rs = psSelect.executeQuery())
+        {
+
+            while(rs.next())
+            {
+                Long id = rs.getLong("id");
+                String orderNumber = rs.getString("product_number");
+                LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();;
+                Boolean isDeleted = rs.getBoolean("is_deleted");
+                //ADD IS SIGNED TO ORDERS IN DB
+                //Boolean isSigned = rs.getBoolean("is_signed");
+                List<Photo> photos = getPhotos(id);
+
+                Order o = new Order(id, orderNumber, createdAt, isDeleted, photos, false);
+                orders.add(o);
+            }
+
+            return orders;
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Error fetching the orders: "+e.getMessage());
+        }
+    }
+
+    private List<Photo> getPhotos(Long orderId)
+    {
+        List<Photo> photos = new ArrayList<>();
+        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ?";
+
+        try(Connection con = connectionManager.getConnection();
+            PreparedStatement psSelect = con.prepareStatement(selectSql))
+        {
+            psSelect.setObject(1, orderId);
+            ResultSet rs = psSelect.executeQuery();
+
+            while(rs.next())
+            {
+                Long id = rs.getLong("id");
+                UUID uploadedBy = rs.getObject("uploaded_by", UUID.class);
+                String imagePath = rs.getString("image_path");
+                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();;
+                Boolean isDeleted = rs.getBoolean("is_deleted");
+                UUID deletedBy = rs.getObject("deleted_by", UUID.class);
+                LocalDateTime deletedAt = rs.getTimestamp("deleted_at").toLocalDateTime();;
+
+                Photo p = new Photo(id, uploadedBy, imagePath, uploadedAt, isDeleted, deletedBy, deletedAt);
+                photos.add(p);
+            }
+
+            return photos;
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeException("Error fetching photos: "+e.getMessage());
+        }
+    }
+
+    public User login(String username, String hashedPassword) {
         final String selectSql =
                 "SELECT id, full_name, username, password, tag_id, role_id, created_at, last_login_time, is_active " +
                         "FROM Users WHERE username = ? AND password = ?";
