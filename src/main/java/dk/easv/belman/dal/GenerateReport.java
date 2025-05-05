@@ -118,7 +118,7 @@ public class GenerateReport {
                 targetDir.mkdirs();
             }
             document.save(filePath + "report.pdf");
-            openDocument(productNo);
+            new OpenFile(productNo);
 
         } catch (IOException e) {
             logger.severe("Error generating PDF: " + e.getMessage());
@@ -129,17 +129,6 @@ public class GenerateReport {
         return FilePaths.BASE_PATH + "report/" + productNo + "/report.pdf";
     }
 
-    public void openDocument(String productNumber) {
-        File pdfFile = new File(FilePaths.BASE_PATH + "report/" + productNumber + "/report.pdf");
-        if (Desktop.isDesktopSupported() && pdfFile.exists()) {
-            try {
-                Desktop.getDesktop().open(pdfFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("Desktop is not supported on this system.");
-        }
-    }
+
 
 }

@@ -162,7 +162,7 @@ public class DALManager {
         else
         {
             // ADD LOGIC
-            selectSql = "SELECT * FROM Products WHERE hm;";
+            selectSql = "SELECT * FROM Products WHERE is_deleted = 0;";
         }
 
         try (Connection con = connectionManager.getConnection();
@@ -208,10 +208,11 @@ public class DALManager {
                 Long id = rs.getLong("id");
                 UUID uploadedBy = rs.getObject("uploaded_by", UUID.class);
                 String imagePath = rs.getString("image_path");
-                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();;
+                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();
                 Boolean isDeleted = rs.getBoolean("is_deleted");
                 UUID deletedBy = rs.getObject("deleted_by", UUID.class);
-                LocalDateTime deletedAt = rs.getTimestamp("deleted_at").toLocalDateTime();;
+                Timestamp deletedAtTS = rs.getTimestamp("deleted_at");
+                LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
 
                 Photo p = new Photo(id, uploadedBy, imagePath, uploadedAt, isDeleted, deletedBy, deletedAt);
                 photos.add(p);
@@ -368,5 +369,47 @@ public class DALManager {
             throw new BelmanException("Error checking if document exists");
         }
         return false;
+    }
+
+    public String getDocumentPath(String orderNumber) {
+        long productId = getProductIdFromProductNumber(orderNumber);
+        String sql = "SELECT qc_doc_path FROM dbo.QualityCheckDoc WHERE product_id = ?";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("qc_doc_path");
+            }
+        } catch (SQLException _) {
+            throw new BelmanException("Error fetching document path");
+        }
+        return null;
+    }
+
+    public void uploadPhotos(String orderNumber, ArrayList<String> fileNames, UUID userId) {
+        String sql = "INSERT INTO dbo.Photos (product_id, image_path, uploaded_by, uploaded_at) " +
+                "VALUES (?, ?, ?,  CURRENT_TIMESTAMP)";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            long productId = getProductIdFromProductNumber(orderNumber);
+            if (productId == -1) {
+                throw new BelmanException("Product not found");
+            }
+            c.setAutoCommit(false);
+            for (String fileName : fileNames) {
+                String filePath = "SavedImages/" + orderNumber + "/" + fileName;
+                ps.setLong(1, productId);
+                ps.setString(2, filePath);
+                ps.setObject(3, userId);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            c.commit();
+            c.setAutoCommit(true);
+        } catch (SQLException _) {
+            throw new BelmanException("Error uploading photos");
+        }
     }
 }

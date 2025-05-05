@@ -7,10 +7,12 @@ import dk.easv.belman.bll.BLLManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -18,6 +20,7 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class OperatorController {
     @FXML
@@ -28,15 +31,21 @@ public class OperatorController {
     private FlowPane ordersPane;
     @FXML
     private Label orderLabel;
+    @FXML Label lblFileName;
+    @FXML
+    Button btnChooseFile;
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
     private String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private User loggedinUser;
     private BLLManager bllManager = new BLLManager();
+    private String orderNumber;
+    private ArrayList<String> fileNames = new ArrayList<>();
 
     @FXML
     private void initialize()
     {
-        loggedinUser = null;
+        //loggedinUser = null;
+
         orders.clear();
         ordersPane.getChildren().clear();
         addOrderCards();
@@ -59,15 +68,29 @@ public class OperatorController {
     }
 
     @FXML
-    private void addImage()
-    {
-
+    private void cancelUpload() {
+        fileNames.clear();
+        orderNumber = null;
+        cancel();
     }
+
+
 
     @FXML
     private void confirmImages()
     {
 
+    }
+
+    @FXML
+    private void confirmImagesUpload() {
+        if (orderNumber != null && fileNames != null && !fileNames.isEmpty()) {
+            bllManager.uploadImages(orderNumber, fileNames, loggedinUser.getId());
+            orderLabel.setText("Images uploaded successfully");
+            cancel();
+        } else {
+            orderLabel.setText(orderLabel.getText() + " - No order selected");
+        }
     }
 
     private void openOrder(String orderNumber)
@@ -79,11 +102,41 @@ public class OperatorController {
             Parent root = fxmlLoader.load();
             borderPane.setCenter(root);
             orderLabel.setText(orderNumber);
+            this.orderNumber = orderNumber;
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void addImage()
+    {
+        System.out.println("addImage");
+        try
+        {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/orderOperatorPhotoUpload.fxml"));
+            fxmlLoader.setController(this);
+            Parent root = fxmlLoader.load();
+            borderPane.setCenter(root);
+            orderLabel.setText(orderNumber);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML private void btnChooseFileClicked(Event event) {
+        fileNames = bllManager.getUploadingFileNames(btnChooseFile, orderLabel.getText());
+        String labelFileNames = "";
+        if (fileNames != null && !fileNames.isEmpty()) {
+            for (String fileName : fileNames) {
+                labelFileNames += fileName + "\n";
+            }
+        }
+        lblFileName.setText(labelFileNames);
     }
 
     private VBox createCard(Order order) {
@@ -96,7 +149,7 @@ public class OperatorController {
         }
         else
         {
-            imageView.setImage(new Image(order.getPhotos().getFirst().getImagePath()));
+            imageView.setImage(new Image(Main.class.getResourceAsStream(order.getPhotos().getFirst().getImagePath())));
             if(order.getIsSigned())
             {
                 statusLabel.setText("Status: "+states[2]);

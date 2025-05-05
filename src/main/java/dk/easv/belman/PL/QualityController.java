@@ -6,6 +6,7 @@ import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import dk.easv.belman.dal.GenerateReport;
 import dk.easv.belman.bll.BLLManager;
+import dk.easv.belman.dal.OpenFile;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -48,14 +49,13 @@ public class QualityController {
     private User loggedinUser;
     private String productNumberToSign;
     private BLLManager bllManager;
-    private BLLManager bllManager = new BLLManager();
 
     @FXML
     private void initialize()
     {
         //loggedinUser = null;
         ordersPane.getChildren().clear();
-        orders.add(createCard("I524-08641", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
+        //orders.add(createCard("I524-08641", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
         ordersPane.getChildren().addAll(orders);
         this.productNumberToSign = null;
         try
@@ -166,15 +166,18 @@ public class QualityController {
     }
 
     private void openDocument(String orderNumber) {
-        GenerateReport report = new GenerateReport(orderNumber);
-        report.openDocument(orderNumber);
+        String filePath = bllManager.getDocumentPath(orderNumber);
+        if (filePath != null) {
+            bllManager.openFile(filePath);
+
+        }
     }
 
-    private VBox createCard(String orderNumber, Image image, String state) {
-        ImageView imageView = new ImageView(image);
     private VBox createCard(Order order) {
         ImageView imageView = new ImageView();
         Label statusLabel = new Label();
+        String orderNumber = order.getOrderNumber();
+        String state = "Signed";
         if(order.getPhotos().isEmpty())
         {
             imageView.setImage(new Image(Main.class.getResourceAsStream("Images/belman.png")));
@@ -182,7 +185,7 @@ public class QualityController {
         }
         else
         {
-            imageView.setImage(new Image(order.getPhotos().getFirst().getImagePath()));
+            imageView.setImage(new Image(Main.class.getResourceAsStream(order.getPhotos().getFirst().getImagePath())));
             if(order.getIsSigned())
             {
                 statusLabel.setText("Status: "+states[2]);
@@ -199,8 +202,6 @@ public class QualityController {
         clip.setArcHeight(20);
         imageView.setClip(clip);
         Label orderLabel = new Label("Order: " + orderNumber);
-
-        Label statusLabel = new Label("Status: " + state);
 
         VBox card = new VBox(10, imageView, orderLabel, statusLabel);
         card.setAlignment(Pos.CENTER);

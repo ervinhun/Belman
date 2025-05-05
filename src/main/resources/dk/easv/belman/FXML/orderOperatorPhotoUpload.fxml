@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <VBox prefHeight="103.0" prefWidth="600.0">
+         <children>
+            <HBox alignment="TOP_RIGHT" prefHeight="55.0" prefWidth="600.0">
+               <children>
+                  <ChoiceBox prefWidth="150.0" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <padding>
+                  <Insets right="10.0" top="10.0" />
+               </padding>
+            </HBox>
+            <Label fx:id="orderLabel" text="OrderNumber">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </Label>
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="20.0" />
+         </padding>
+      </VBox>
+      <Button fx:id="btnChooseFile" mnemonicParsing="false" onAction="#btnChooseFileClicked" text="Choose files to upload" />
+      <Label fx:id="lblFileName" />
+      <HBox prefHeight="100.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
+         <children>
+            <HBox alignment="BOTTOM_LEFT" prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Button id="btn" minHeight="60.0" mnemonicParsing="false" onAction="#cancelUpload" prefHeight="60.0" prefWidth="62.0" text="Cancel" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="BOTTOM_RIGHT" prefHeight="92.0" prefWidth="398.0" spacing="40.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Button id="btn" fx:id="btnConfirmUpload" minHeight="60.0" mnemonicParsing="false" onAction="#confirmImagesUpload" prefHeight="60.0" prefWidth="68.0" text="Confirm" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" right="20.0" />
+               </padding>
+            </HBox>
+         </children>
+      </HBox>
+   </children>
+</VBox>
