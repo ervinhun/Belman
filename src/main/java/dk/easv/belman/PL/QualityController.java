@@ -4,9 +4,6 @@ import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
-import dk.easv.belman.dal.GenerateReport;
-import dk.easv.belman.bll.BLLManager;
-import dk.easv.belman.dal.OpenFile;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -16,7 +13,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -31,12 +27,8 @@ import javafx.scene.shape.Rectangle;
 
 import javafx.stage.Stage;
 
-import org.w3c.dom.Text;
-
-
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 public class QualityController {
     @FXML
@@ -59,7 +51,6 @@ public class QualityController {
     @FXML
     private FlowPane imagesPane;
 
-    private BLLManager bllManager = new BLLManager();
     private String productNumberToSign;
     private BLLManager bllManager;
 
@@ -69,12 +60,9 @@ public class QualityController {
         //loggedinUser = null;
         ordersPane.getChildren().clear();
 
-     //   orders.add(createCard("testProductNo", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
-        ordersPane.getChildren().addAll(orders);
-
         //orders.add(createCard("I524-08641", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
         ordersPane.getChildren().addAll(orders);
-        this.productNumberToSign = null;
+        //this.productNumberToSign = null;
         try
         {
             bllManager = new BLLManager();
@@ -112,6 +100,7 @@ public class QualityController {
     private void cancel()
     {
         borderPane.setCenter(rightBox);
+        this.productNumberToSign = null;
     }
 
     @FXML
@@ -225,6 +214,7 @@ public class QualityController {
             Parent root = fxmlLoader.load();
             borderPane.setCenter(root);
             orderLabel.setText(orderNumber);
+            this.productNumberToSign = orderNumber;
             boolean documentExists = bllManager.checkIfDocumentExists(orderNumber);
             if (documentExists) {
                 btnSign.setText("Open\nDocument");
@@ -242,9 +232,35 @@ public class QualityController {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();}
+    }
+
+    // Loads and displays thumbnail images for the specified order number
+    private void loadImages(String orderNumber) {
+        // Clear any previously displayed images
+        imagesPane.getChildren().clear();
+
+        // Define the directory where thumbnail images are stored for this order
+        File imageDir = new File("src/main/resources/dk/easv/belman/SavedImages/" + orderNumber + "/thumbnail");
+
+
+        // If the directory does not exist, show a placeholder image
+        if (!imageDir.exists() || !imageDir.isDirectory()) {
+            showPlaceholderImage();
         }
     }
+
+        // Displays a default "no image" placeholder when no thumbnails are found
+        private void showPlaceholderImage() {
+            // Load placeholder image from resources
+            Image placeholder = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/nolmg.jpg"), 150, 0, true, true);
+            ImageView imgView = new ImageView(placeholder);
+            imgView.setFitWidth(150);
+            imgView.setPreserveRatio(true);
+
+            // Add placeholder to the image container
+            imagesPane.getChildren().add(imgView);
+        }
 
     private void openDocument(String orderNumber) {
         String filePath = bllManager.getDocumentPath(orderNumber);
@@ -264,7 +280,7 @@ public class QualityController {
         }
         else
         {
-            imageView.setImage(new Image(Main.class.getResourceAsStream(order.getPhotos().getFirst().getImagePath())));
+            imageView.setImage(new Image(Main.class.getResourceAsStream(order.getPhotos().get(0).getImagePath())));
             if(order.getIsSigned())
             {
                 statusLabel.setText("Status: "+states[2]);
@@ -290,8 +306,8 @@ public class QualityController {
         card.setPrefHeight(160);
 
         card.setOnMouseClicked(_ -> {
-            openOrder(orderNumber);
-            setProductNumberToSign(orderNumber);
+            openOrder(order.getOrderNumber());
+            setProductNumberToSign(order.getOrderNumber());
         });
         card.setOnMouseClicked(_ -> openOrder(order.getOrderNumber()));
         card.getProperties().put("orderNum", order.getOrderNumber());

@@ -149,7 +149,7 @@ public class OperatorController {
         }
         else
         {
-            imageView.setImage(new Image(Main.class.getResourceAsStream(order.getPhotos().getFirst().getImagePath())));
+            imageView.setImage(new Image(Main.class.getResourceAsStream(order.getPhotos().get(0).getImagePath())));
             if(order.getIsSigned())
             {
                 statusLabel.setText("Status: "+states[2]);

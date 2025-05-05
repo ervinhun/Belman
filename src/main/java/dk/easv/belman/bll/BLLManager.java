@@ -69,9 +69,7 @@ public class BLLManager {
         String filePath = report.getFilePath();
         qcDoc.setQcDocPath(filePath);
         qcDoc.setGeneratedBy(userId);
-        dalManager.signQualityDocument(qcDoc);
-        //return dalManager.signOrder(productNumber, userId);
-        return true;
+        return dalManager.signQualityDocument(qcDoc);
     }
 
     public boolean checkIfDocumentExists(String orderNumber) {
