@@ -2,12 +2,16 @@ package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
 import dk.easv.belman.be.User;
+import dk.easv.belman.bll.BLLManager;
+import dk.easv.belman.dal.GenerateReport;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -18,6 +22,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class QualityController {
     @FXML
@@ -28,17 +33,30 @@ public class QualityController {
     private VBox rightBox;
     @FXML
     private Label orderLabel;
+    @FXML
+    private Button btnSign;
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
     private String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private User loggedinUser;
+    private String productNumberToSign;
+    private BLLManager bllManager;
 
     @FXML
     private void initialize()
     {
-        loggedinUser = null;
+        //loggedinUser = null;
         ordersPane.getChildren().clear();
-        orders.add(createCard("0123456789", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
+        orders.add(createCard("I524-08641", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
         ordersPane.getChildren().addAll(orders);
+        this.productNumberToSign = null;
+        try
+        {
+            bllManager = new BLLManager();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -66,9 +84,30 @@ public class QualityController {
     }
 
     @FXML
-    private void signOrder()
+    public void signOrder()
     {
-
+        if (productNumberToSign == null || productNumberToSign.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Warning");
+            alert.setHeaderText("No Order Selected");
+            alert.setContentText("Please select an order to sign.");
+            alert.showAndWait();
+            return;
+        }
+        boolean isSuccess = bllManager.signOrder(productNumberToSign, loggedinUser.getId());
+        Alert alert;
+        if (isSuccess) {
+            alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText("Order Signed");
+            alert.setContentText("The order has been successfully signed.");
+        } else {
+            alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Signing Failed");
+            alert.setContentText("Failed to sign the order. Please try again.");
+        }
+        alert.showAndWait();
     }
 
     private void openOrder(String orderNumber)
@@ -80,11 +119,29 @@ public class QualityController {
             Parent root = fxmlLoader.load();
             borderPane.setCenter(root);
             orderLabel.setText(orderNumber);
+            boolean documentExists = bllManager.checkIfDocumentExists(orderNumber);
+            if (documentExists) {
+                btnSign.setText("Open\nDocument");
+                btnSign.setOnAction(_ -> openDocument(orderNumber));
+                btnSign.setPrefWidth(88);
+            }
+            else {
+                btnSign.setText("Sign");
+                btnSign.setAlignment(Pos.CENTER);
+                btnSign.setOnAction(_ -> signOrder());
+                btnSign.setPrefWidth(88);
+            }
+
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
+    }
+
+    private void openDocument(String orderNumber) {
+        GenerateReport report = new GenerateReport(orderNumber);
+        report.openDocument(orderNumber);
     }
 
     private VBox createCard(String orderNumber, Image image, String state) {
@@ -95,7 +152,6 @@ public class QualityController {
         clip.setArcWidth(20);
         clip.setArcHeight(20);
         imageView.setClip(clip);
-
         Label orderLabel = new Label("Order: " + orderNumber);
 
         Label statusLabel = new Label("Status: " + state);
@@ -106,9 +162,16 @@ public class QualityController {
         card.setId("orderCard");
         card.setPrefHeight(160);
 
-        card.setOnMouseClicked(_ -> {openOrder(orderNumber);});
+        card.setOnMouseClicked(_ -> {
+            openOrder(orderNumber);
+            setProductNumberToSign(orderNumber);
+        });
 
         return card;
+    }
+
+    private void setProductNumberToSign(String orderNumber) {
+        this.productNumberToSign = orderNumber;
     }
 
     public void setLoggedinUser(User loggedinUser) {

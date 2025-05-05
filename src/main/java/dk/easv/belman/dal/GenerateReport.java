@@ -10,15 +10,17 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
 public class GenerateReport {
+    private final String productNo;
 
-
-    public static void GenerateReport(String productNo) {
+    public GenerateReport(String productNumber) {
+        this.productNo = productNumber;
         String filePath = FilePaths.BASE_PATH + "report/" + productNo + "/";
         Logger logger = Logger.getLogger(GenerateReport.class.getName());
         // Create a new PDF document
@@ -50,7 +52,7 @@ public class GenerateReport {
             // Set header
             contentStream.beginText();
             contentStream.setFont(dynamicFont, headerFontSize);
-            contentStream.newLineAtOffset(430, 810);
+            contentStream.newLineAtOffset(480, 810);
             for (String headTextLine : headText) {
                 contentStream.showText(headTextLine);
                 contentStream.newLineAtOffset(0, -15);
@@ -77,7 +79,7 @@ public class GenerateReport {
             contentStream.newLineAtOffset(centerXTitle, 720);
             contentStream.showText(title);
 
-            // Set font and add dynamic text
+            // Set font and add order number line
             contentStream.newLineAtOffset(centerXDynamic - centerXTitle, -20);
             contentStream.setFont(dynamicFont, productNoFontSize);
             contentStream.showText(dynamicText);
@@ -105,6 +107,8 @@ public class GenerateReport {
             contentStream.setFont(dynamicFont, 10);
             contentStream.newLineAtOffset(400, footerY);
             contentStream.showText(signedBy);
+            contentStream.newLineAtOffset(50, -15);
+            contentStream.showText("Søren");
             contentStream.endText();
 
             contentStream.close();
@@ -114,8 +118,27 @@ public class GenerateReport {
                 targetDir.mkdirs();
             }
             document.save(filePath + "report.pdf");
+            openDocument(productNo);
+
         } catch (IOException e) {
             logger.severe("Error generating PDF: " + e.getMessage());
+        }
+    }
+
+    public String getFilePath() {
+        return FilePaths.BASE_PATH + "report/" + productNo + "/report.pdf";
+    }
+
+    public void openDocument(String productNumber) {
+        File pdfFile = new File(FilePaths.BASE_PATH + "report/" + productNumber + "/report.pdf");
+        if (Desktop.isDesktopSupported() && pdfFile.exists()) {
+            try {
+                Desktop.getDesktop().open(pdfFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Desktop is not supported on this system.");
         }
     }
 
