@@ -1,5 +1,6 @@
 package dk.easv.belman.dal;
 
+import dk.easv.belman.be.QualityDocument;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.exceptions.BelmanException;
@@ -161,7 +162,7 @@ public class DALManager {
         else
         {
             // ADD LOGIC
-            selectSql = "SELECT * FROM Products WHERE hm;";
+            selectSql = "SELECT * FROM Products WHERE is_deleted = 0;";
         }
 
         try (Connection con = connectionManager.getConnection();
@@ -207,10 +208,11 @@ public class DALManager {
                 Long id = rs.getLong("id");
                 UUID uploadedBy = rs.getObject("uploaded_by", UUID.class);
                 String imagePath = rs.getString("image_path");
-                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();;
+                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();
                 Boolean isDeleted = rs.getBoolean("is_deleted");
                 UUID deletedBy = rs.getObject("deleted_by", UUID.class);
-                LocalDateTime deletedAt = rs.getTimestamp("deleted_at").toLocalDateTime();;
+                Timestamp deletedAtTS = rs.getTimestamp("deleted_at");
+                LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
 
                 Photo p = new Photo(id, uploadedBy, imagePath, uploadedAt, isDeleted, deletedBy, deletedAt);
                 photos.add(p);
@@ -273,6 +275,141 @@ public class DALManager {
 
         } catch (SQLException ex) {
             throw new RuntimeException("Error logging in user", ex);
+        }
+    }
+
+    public QualityDocument signOrder(String productNumber, UUID userId, String info, String qDocPath) {
+        String sql = "INSERT INTO dbo.QualityChecks (product_id, info, signed_by, signed_at) " +
+                "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)";
+        Long newId = (long) -1;
+        long productId = getProductIdFromProductNumber(productNumber);
+        if (productId == -1) {
+            throw new BelmanException("Product not found");
+        }
+        QualityDocument qDoc = new QualityDocument(userId, productId);
+
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, productNumber);
+            ps.setString(2, info);
+            ps.setObject(3, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                newId = rs.getLong(1);
+                qDoc.setId(newId);
+                qDoc.setProductId(productId);
+                qDoc.setGeneratedAt(rs.getTimestamp("signed_at").toLocalDateTime());
+                qDoc.setQcDocPath(qDocPath);
+            }
+            return qDoc;
+        } catch (SQLException _) {
+            throw new BelmanException("Error signing order");
+        }
+    }
+
+    public long getProductIdFromProductNumber(String productNumber) {
+        String sql = "SELECT id FROM dbo.Products WHERE product_number = ?";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, productNumber);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+        } catch (SQLException _) {
+            throw new BelmanException("Error fetching product ID");
+        }
+        return 0;
+    }
+
+    public boolean signQualityDocument(QualityDocument qcDoc) {
+        int noOfTableUpdated = 0;
+        String sqlPhotos = "UPDATE dbo.Photos SET is_signed = 1 WHERE product_id = ?";
+        String sqlQualityDocument = "INSERT INTO dbo.QualityCheckDoc (generated_by, product_id, generated_at, qc_doc_path) " +
+                "VALUES (?, ?, CURRENT_TIMESTAMP, ?)";
+
+        try (Connection c = connectionManager.getConnection();
+                PreparedStatement psPhotos = c.prepareStatement(sqlPhotos);
+                PreparedStatement psQualityDocument = c.prepareStatement(sqlQualityDocument)) {
+
+                psPhotos.setLong(1, qcDoc.getProductId());
+                int rowsUpdated = psPhotos.executeUpdate();
+                if (rowsUpdated > 0) {
+                    noOfTableUpdated++;
+                }
+
+                psQualityDocument.setObject(1, qcDoc.getGeneratedBy());
+                psQualityDocument.setLong(2, qcDoc.getProductId());
+                psQualityDocument.setString(3, qcDoc.getQcDocPath());
+                rowsUpdated = psQualityDocument.executeUpdate();
+                if (rowsUpdated > 0) {
+                    noOfTableUpdated++;
+                }
+            } catch (SQLException _) {
+                throw new BelmanException("Error signing quality document");
+            }
+
+        return noOfTableUpdated == 2;
+    }
+
+    public boolean checkIfDocumentExists(String orderNumber) {
+        long productId = getProductIdFromProductNumber(orderNumber);
+        String sql = "SELECT COUNT(*) FROM dbo.QualityCheckDoc WHERE product_id = ?";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException _) {
+            throw new BelmanException("Error checking if document exists");
+        }
+        return false;
+    }
+
+    public String getDocumentPath(String orderNumber) {
+        long productId = getProductIdFromProductNumber(orderNumber);
+        String sql = "SELECT qc_doc_path FROM dbo.QualityCheckDoc WHERE product_id = ?";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("qc_doc_path");
+            }
+        } catch (SQLException _) {
+            throw new BelmanException("Error fetching document path");
+        }
+        return null;
+    }
+
+    public void uploadPhotos(String orderNumber, ArrayList<String> fileNames, UUID userId) {
+        String sql = "INSERT INTO dbo.Photos (product_id, image_path, uploaded_by, uploaded_at) " +
+                "VALUES (?, ?, ?,  CURRENT_TIMESTAMP)";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            long productId = getProductIdFromProductNumber(orderNumber);
+            if (productId == -1) {
+                throw new BelmanException("Product not found");
+            }
+            c.setAutoCommit(false);
+            for (String fileName : fileNames) {
+                String filePath = "SavedImages/" + orderNumber + "/" + fileName;
+                ps.setLong(1, productId);
+                ps.setString(2, filePath);
+                ps.setObject(3, userId);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            c.commit();
+            c.setAutoCommit(true);
+        } catch (SQLException _) {
+            throw new BelmanException("Error uploading photos");
         }
     }
 }

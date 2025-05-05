@@ -2,9 +2,11 @@
   "title": "Quality Check Report",
   "dynamicText": "Order No: ",
   "headText": [
-    "Customer Name: Valued Customer",
-    "Order Date: 2024-12-04",
-    "Delivery Date: 2025-01-04"
+    "Belman A/S",
+    "Oddesundvej 18",
+    "6715 Esbjerg N",
+    "Denmark",
+    "+45 7515 5999"
   ],
   "bodyText": [
     "Status: Delivered",

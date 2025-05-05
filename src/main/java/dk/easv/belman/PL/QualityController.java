@@ -14,6 +14,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -25,9 +26,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 import javafx.stage.Stage;
-
-import org.w3c.dom.Text;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +41,8 @@ public class QualityController {
     private Label orderLabel;
     @FXML
     private TextField search;
+    @FXML
+    private Button btnSign;
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
     private FilteredList<VBox> filteredOrders = new FilteredList<>(orders);
     private String[] states = {"Images Needed", "Pending", "Signed ✅"};
@@ -51,18 +51,26 @@ public class QualityController {
     @FXML
     private FlowPane imagesPane;
 
-    private BLLManager bllManager = new BLLManager();
-
+    private String productNumberToSign;
+    private BLLManager bllManager;
 
     @FXML
     private void initialize()
     {
-        loggedinUser = null;
+        //loggedinUser = null;
         ordersPane.getChildren().clear();
 
-     //   orders.add(createCard("testProductNo", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
+        //orders.add(createCard("I524-08641", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
         ordersPane.getChildren().addAll(orders);
-
+        //this.productNumberToSign = null;
+        try
+        {
+            bllManager = new BLLManager();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
         orders.clear();
         addOrderCards();
     }
@@ -75,7 +83,6 @@ public class QualityController {
         }
 
         ordersPane.getChildren().addAll(filteredOrders);
-
     }
 
     @FXML
@@ -93,6 +100,7 @@ public class QualityController {
     private void cancel()
     {
         borderPane.setCenter(rightBox);
+        this.productNumberToSign = null;
     }
 
     @FXML
@@ -133,7 +141,6 @@ public class QualityController {
         alert.showAndWait();
     }
 
-
     @FXML
     private void deleteImage() {
         // Loop through all image nodes to find the selected one
@@ -172,100 +179,31 @@ public class QualityController {
     }
 
     @FXML
-    private void signOrder() {
-        // Get the order number from the label
-        String orderNumber = orderLabel.getText();
-
-        // Check if order number is valid
-        if (orderNumber == null || orderNumber.isEmpty()) {
-            // Show an alert if the order number is missing
+    private void signOrder()
+    {
+        if (productNumberToSign == null || productNumberToSign.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Missing Order Number");
-            alert.setHeaderText(null);
-            alert.setContentText("No order number selected to sign.");
+            alert.setTitle("Warning");
+            alert.setHeaderText("No Order Selected");
+            alert.setContentText("Please select an order to sign.");
             alert.showAndWait();
             return;
         }
-
-        // Print debug info to console
-        System.out.println("Signing order: " + orderNumber);
-
-        // TODO: Add logic to update the order status in the database or mark it as signed
-
-        // Show confirmation to the user
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Order Signed");
-        alert.setHeaderText(null);
-        alert.setContentText("Order " + orderNumber + " has been signed successfully.");
+        boolean isSuccess = bllManager.signOrder(productNumberToSign, loggedinUser.getId());
+        Alert alert;
+        if (isSuccess) {
+            alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText("Order Signed");
+            alert.setContentText("The order has been successfully signed.");
+        } else {
+            alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Signing Failed");
+            alert.setContentText("Failed to sign the order. Please try again.");
+        }
         alert.showAndWait();
-
-        // Optionally return to the overview or refresh UI
-        cancel(); // This resets the view to the previous screen
     }
-
-    // Loads and displays thumbnail images for the specified order number
-    private void loadImages(String orderNumber) {
-        // Clear any previously displayed images
-        imagesPane.getChildren().clear();
-
-        // Define the directory where thumbnail images are stored for this order
-        File imageDir = new File("src/main/resources/dk/easv/belman/SavedImages/" + orderNumber + "/thumbnail");
-
-        System.out.println("Looking in: " + imageDir.getAbsolutePath());
-
-        // If the directory does not exist, show a placeholder image
-        if (!imageDir.exists() || !imageDir.isDirectory()) {
-            System.out.println("No folder found for order: " + orderNumber);
-            showPlaceholderImage();
-            return;
-        }
-
-        // Filter and list only image files with supported extensions
-        File[] imageFiles = imageDir.listFiles((dir, name) ->
-                name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".gif"));
-
-        // If no images are found, show a placeholder image
-        if (imageFiles == null || imageFiles.length == 0) {
-            System.out.println("No images found in: " + imageDir.getAbsolutePath());
-            showPlaceholderImage();
-            return;
-        }
-
-        // Loop through found image files and create ImageView nodes for each
-        for (File file : imageFiles) {
-            // Load image with max width 150, preserving aspect ratio
-            Image image = new Image(file.toURI().toString(), 150, 0, true, true);
-            ImageView imgView = new ImageView(image);
-            imgView.setFitWidth(150);
-            imgView.setPreserveRatio(true);
-            imgView.setUserData(file); // Store file reference for later use (e.g., open/delete)
-
-            // Add click handler to highlight the selected image
-            imgView.setOnMouseClicked(e -> {
-                for (var node : imagesPane.getChildren()) {
-                    node.setStyle(""); // Remove highlight from others
-                }
-                imgView.setStyle("-fx-border-color: #019ee3; -fx-border-width: 3;"); // Highlight selected
-            });
-
-            // Add image view to the UI container
-            imagesPane.getChildren().add(imgView);
-        }
-    }
-
-    // Displays a default "no image" placeholder when no thumbnails are found
-    private void showPlaceholderImage() {
-        // Load placeholder image from resources
-        Image placeholder = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/nolmg.jpg"), 150, 0, true, true);
-        ImageView imgView = new ImageView(placeholder);
-        imgView.setFitWidth(150);
-        imgView.setPreserveRatio(true);
-
-        // Add placeholder to the image container
-        imagesPane.getChildren().add(imgView);
-    }
-
-
 
     private void openOrder(String orderNumber)
     {
@@ -276,11 +214,59 @@ public class QualityController {
             Parent root = fxmlLoader.load();
             borderPane.setCenter(root);
             orderLabel.setText(orderNumber);
+            this.productNumberToSign = orderNumber;
+            boolean documentExists = bllManager.checkIfDocumentExists(orderNumber);
+            if (documentExists) {
+                btnSign.setText("Open\nDocument");
+                btnSign.setOnAction(_ -> openDocument(orderNumber));
+                btnSign.setPrefWidth(88);
+            }
+            else {
+                btnSign.setText("Sign");
+                btnSign.setAlignment(Pos.CENTER);
+                btnSign.setOnAction(_ -> signOrder());
+                btnSign.setPrefWidth(88);
+            }
+
             loadImages(orderNumber);
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            e.printStackTrace();}
+    }
+
+    // Loads and displays thumbnail images for the specified order number
+    private void loadImages(String orderNumber) {
+        // Clear any previously displayed images
+        imagesPane.getChildren().clear();
+
+        // Define the directory where thumbnail images are stored for this order
+        File imageDir = new File("src/main/resources/dk/easv/belman/SavedImages/" + orderNumber + "/thumbnail");
+
+
+        // If the directory does not exist, show a placeholder image
+        if (!imageDir.exists() || !imageDir.isDirectory()) {
+            showPlaceholderImage();
+        }
+    }
+
+        // Displays a default "no image" placeholder when no thumbnails are found
+        private void showPlaceholderImage() {
+            // Load placeholder image from resources
+            Image placeholder = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/nolmg.jpg"), 150, 0, true, true);
+            ImageView imgView = new ImageView(placeholder);
+            imgView.setFitWidth(150);
+            imgView.setPreserveRatio(true);
+
+            // Add placeholder to the image container
+            imagesPane.getChildren().add(imgView);
+        }
+
+    private void openDocument(String orderNumber) {
+        String filePath = bllManager.getDocumentPath(orderNumber);
+        if (filePath != null) {
+            bllManager.openFile(filePath);
+
         }
     }
 
@@ -294,7 +280,7 @@ public class QualityController {
         }
         else
         {
-            imageView.setImage(new Image(order.getPhotos().getFirst().getImagePath()));
+            imageView.setImage(new Image(Main.class.getResourceAsStream(order.getPhotos().get(0).getImagePath())));
             if(order.getIsSigned())
             {
                 statusLabel.setText("Status: "+states[2]);
@@ -318,10 +304,19 @@ public class QualityController {
         card.setPrefWidth(Region.USE_COMPUTED_SIZE);
         card.setId("orderCard");
         card.setPrefHeight(160);
+
+        card.setOnMouseClicked(_ -> {
+            openOrder(order.getOrderNumber());
+            setProductNumberToSign(order.getOrderNumber());
+        });
         card.setOnMouseClicked(_ -> openOrder(order.getOrderNumber()));
         card.getProperties().put("orderNum", order.getOrderNumber());
 
         return card;
+    }
+
+    private void setProductNumberToSign(String orderNumber) {
+        this.productNumberToSign = orderNumber;
     }
 
     public void setLoggedinUser(User loggedinUser) {
