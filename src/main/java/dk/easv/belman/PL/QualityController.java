@@ -91,6 +91,8 @@ public class QualityController {
             alert.setTitle("Warning");
             alert.setHeaderText("No Order Selected");
             alert.setContentText("Please select an order to sign.");
+            btnSign.setText("Open\nDocument");
+            btnSign.setOnAction(_ -> openDocument(productNumberToSign));
             alert.showAndWait();
             return;
         }
