@@ -64,7 +64,7 @@ public class QualityController {
         ordersPane.getChildren().addAll(orders);
 
         orders.clear();
-      //  addOrderCards();
+      //  addOrderCards();//delete commit after fix
     }
 
     private void addOrderCards()
