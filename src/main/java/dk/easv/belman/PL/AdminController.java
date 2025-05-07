@@ -48,11 +48,17 @@ public class AdminController {
 
     private final AdminModel model = new AdminModel();
 
+    public void reloadUsers() {
+        model.loadUsers();
+        refreshContent();
+    }
+
     @FXML
     private void initialize() throws IOException {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/newUser.fxml"));
         newUserWindow   = loader.load();
         userController  = loader.getController();
+        userController.setAdminController(this);
 
         currentP.textProperty().bind(model.currentPageProperty());
 
@@ -115,6 +121,7 @@ public class AdminController {
 
         refreshContent();
     }
+
 
 @FXML
     private void applySearch(KeyEvent event) {
@@ -203,5 +210,7 @@ public class AdminController {
 
     private void editUser(User u) {
         newUserTab();
+        userController.setEditingUser(u);
     }
+
 }
