@@ -21,6 +21,8 @@ public class UserController {
     @FXML private VBox rightBox;
     @FXML private TextField txtTagId;
     private BLLManager bllManager;
+    private dk.easv.belman.PL.AdminController adminController;
+    private User editingUser = null;
 
     @FXML
     private void initialize() {
@@ -38,6 +40,26 @@ public class UserController {
         this.rightBox = rightBox;
     }
 
+    public void setAdminController(dk.easv.belman.PL.AdminController controller) {
+        this.adminController = controller;
+    }
+
+    public void setEditingUser(User user) {
+        this.editingUser = user;
+
+        txtFullName.setText(user.getFullName());
+        txtUsername.setText(user.getUsername());
+        txtUsername.setDisable(true);// Disable username field to prevent editing, since it's a unique identifier
+        txtTagId.setText(user.getTagId());
+
+        switch (user.getRoleId()) {
+            case 1 -> chkAdmin.setSelected(true);
+            case 2 -> chkQualityControl.setSelected(true);
+            case 3 -> chkOperator.setSelected(true);
+        }
+    }
+
+
     @FXML
     private void btnSaveClick() {
         if (bllManager == null) return;
@@ -52,24 +74,44 @@ public class UserController {
             return;
         }
 
-        String defaultPassword = "belman123";
-        String hashedPassword = bllManager.hashPass(username, defaultPassword);
+        if (editingUser == null) {
+            String defaultPassword = "belman123";
+            String hashedPassword = bllManager.hashPass(username, defaultPassword);
 
-        User u = new User();
-        u.setFullName(fullName);
-        u.setUsername(username);
-        u.setTagId(tagId);
-        u.setRoleId(roleId);
-        u.setPassword(hashedPassword);
+            User newUser = new User();
+            newUser.setFullName(fullName);
+            newUser.setUsername(username);
+            newUser.setTagId(tagId);
+            newUser.setRoleId(roleId);
+            newUser.setPassword(hashedPassword);
 
-        if (bllManager.addUser(u) != null) {
-            showSuccess("User created with default password: " + defaultPassword);
-            clearForm();
+            if (bllManager.addUser(newUser) != null) {
+                adminController.addUserCard(newUser);
+                showSuccess("User created with default password: " + defaultPassword);
+                clearForm();
+            } else {
+                showError("User was not created.");
+            }
         } else {
-            showError("User was not created.");
+            editingUser.setFullName(fullName);
+            editingUser.setTagId(tagId);
+            editingUser.setRoleId(roleId);
+
+            String defaultPassword = "belman123";
+            String hashedPassword = bllManager.hashPass(editingUser.getUsername(), defaultPassword);
+            editingUser.setPassword(hashedPassword);
+
+            if (bllManager.updateUser(editingUser)) {
+                showSuccess("User updated successfully.");
+                adminController.refreshUsers();
+                clearForm();
+            } else {
+                showError("User update failed.");
+            }
+
+            editingUser = null;
         }
     }
-
 
     private int getSelectedRoleId() {
         if (chkAdmin.isSelected()) return 1;
@@ -91,6 +133,8 @@ public class UserController {
         txtUsername.clear();
         txtTagId.clear();
         tgRole.selectToggle(null);
+        txtUsername.setDisable(false);
+        editingUser = null;
     }
 
     private void disableForm() {
