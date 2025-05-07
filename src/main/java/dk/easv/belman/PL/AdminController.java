@@ -172,6 +172,23 @@ public class AdminController {
         card.getProperties().put("orderNum", order.getOrderNumber());
         return card;
     }
+    public void addUserCard(User u) {
+        HBox card = createUserCard(u);
+        users.add(card);
+        filteredUsers.setPredicate(_ -> true);
+        if (!isOrdersWin) {
+            contentPane.getChildren().clear();
+            contentPane.getChildren().addAll(filteredUsers);
+        }
+    }
+
+
+
+    private void editUser(User user) {
+        newUserTab();
+        userController.setEditingUser(user);
+    }
+
 
     private HBox createUserCard(User u) {
         Label name      = new Label(u.getFullName());   name.setId("cardTitle");
@@ -200,6 +217,14 @@ public class AdminController {
         card.getProperties().put("username", u.getUsername());
         return card;
     }
+    public void refreshUsers() {
+        users.clear();
+        for (User u : bllManager.getAllUsers()) {
+            users.add(createUserCard(u));
+        }
+        applySearch();
+    }
+
 
     private void editUser(User u) {
         newUserTab();
