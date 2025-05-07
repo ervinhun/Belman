@@ -6,8 +6,6 @@
 package dk.easv.belman.dal;
 
 import java.io.File;
-
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -18,7 +16,7 @@ class GenerateReportTest {
     GenerateReportTest() {
     }
 
-    //@Disabled("Disabled for GHA tests")
+    @Disabled("Disabled for GHA tests")
     @Test
     void GenerateReport() {
         final String[] generatedFilePath = {""};
@@ -26,7 +24,7 @@ class GenerateReportTest {
             GenerateReport generateReport = new GenerateReport(productNoString);
             generatedFilePath[0] = generateReport.getFilePath();
         });
-        String reportFilePath = FilePaths.BASE_PATH + "report/" + productNoString + "/report.pdf";
+        String reportFilePath = FilePaths.REPORT_DIRECTORY + productNoString + "/report.pdf";
         Assertions.assertTrue((new File(reportFilePath)).exists(), "Report file should be created");
         Assertions.assertTrue((new File(reportFilePath)).isFile(), "Report file should be a file");
         Assertions.assertTrue((new File(reportFilePath)).length() > 0, "Report file should not be empty");
