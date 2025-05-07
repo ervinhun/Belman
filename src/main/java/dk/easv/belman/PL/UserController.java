@@ -68,25 +68,6 @@ public class UserController {
         this.rightBox = rightBox;
     }
 
-    public void setAdminController(dk.easv.belman.PL.AdminController controller) {
-        this.adminController = controller;
-    }
-
-    public void setEditingUser(User user) {
-        this.editingUser = user;
-
-        txtFullName.setText(user.getFullName());
-        txtUsername.setText(user.getUsername());
-        txtUsername.setDisable(true);// Disable username field to prevent editing, since it's a unique identifier
-        txtTagId.setText(user.getTagId());
-
-        switch (user.getRoleId()) {
-            case 1 -> chkAdmin.setSelected(true);
-            case 2 -> chkQualityControl.setSelected(true);
-            case 3 -> chkOperator.setSelected(true);
-        }
-    }
-
 
     @FXML
     private void btnSaveClick() {
