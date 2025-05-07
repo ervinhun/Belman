@@ -289,15 +289,27 @@ public class QualityController {
         Label statusLabel = new Label();
         if(order.getPhotos().isEmpty())
         {
-            imageView.setImage(new Image(Main.class.getResourceAsStream("Images/belman.png")));
+            imageView.setImage(new Image("dk/easv/belman/images/belman.png"));
             statusLabel.setText("Status: "+states[0]);
         }
         else
         {
-            imageView.setImage(new Image(order.getPhotos().getFirst().getImagePath()));
+            try
+            {
+                imageView.setImage(new Image(Main.class.getResourceAsStream(order.getPhotos().getFirst().getImagePath())));
+            }
+            catch (Exception e)
+            {
+                imageView.setImage(new Image("dk/easv/belman/images/belman.png"));
+            }
+
             if(order.getIsSigned())
             {
                 statusLabel.setText("Status: "+states[2]);
+            }
+            else if(order.getPhotos().isEmpty())
+            {
+                statusLabel.setText("Status: "+states[0]);
             }
             else
             {

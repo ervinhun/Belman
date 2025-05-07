@@ -29,6 +29,10 @@
     -fx-text-fill: white;
     -fx-cursor: hand;
 }
+#clickable
+{
+    -fx-cursor: hand;
+}
 
 #link
 {

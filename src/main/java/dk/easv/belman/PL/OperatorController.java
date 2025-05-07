@@ -18,6 +18,7 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 
 import java.io.IOException;
+import java.util.List;
 
 public class OperatorController {
     @FXML
@@ -28,6 +29,19 @@ public class OperatorController {
     private FlowPane ordersPane;
     @FXML
     private Label orderLabel;
+    @FXML
+    private ImageView frontImage;
+    @FXML
+    private ImageView topImage;
+    @FXML
+    private ImageView backImage;
+    @FXML
+    private ImageView rightImage;
+    @FXML
+    private ImageView leftImage;
+    @FXML
+    private ImageView additionalImage;
+
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
     private String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private User loggedinUser;
@@ -59,15 +73,14 @@ public class OperatorController {
     }
 
     @FXML
-    private void addImage()
+    private void confirmImages()
     {
 
     }
 
-    @FXML
-    private void confirmImages()
+    private void addImage(ImageView imageView)
     {
-
+        imageView.setImage(new Image("dk/easv/belman/images/noImg.jpg"));
     }
 
     private void openOrder(String orderNumber)
@@ -79,6 +92,18 @@ public class OperatorController {
             Parent root = fxmlLoader.load();
             borderPane.setCenter(root);
             orderLabel.setText(orderNumber);
+            List<ImageView> imageViews = List.of(
+                    frontImage,
+                    backImage,
+                    leftImage,
+                    rightImage,
+                    topImage,
+                    additionalImage
+            );
+
+            for (ImageView imageView : imageViews) {
+                imageView.setOnMouseClicked(_ -> addImage(imageView));
+            }
         }
         catch (IOException e)
         {
@@ -91,15 +116,27 @@ public class OperatorController {
         Label statusLabel = new Label();
         if(order.getPhotos().isEmpty())
         {
-            imageView.setImage(new Image(Main.class.getResourceAsStream("Images/belman.png")));
+            imageView.setImage(new Image("dk/easv/belman/images/belman.png"));
             statusLabel.setText("Status: "+states[0]);
         }
         else
         {
-            imageView.setImage(new Image(order.getPhotos().getFirst().getImagePath()));
+            try
+            {
+                imageView.setImage(new Image(Main.class.getResourceAsStream(order.getPhotos().getFirst().getImagePath())));
+            }
+            catch (Exception e)
+            {
+                imageView.setImage(new Image("dk/easv/belman/images/belman.png"));
+            }
+
             if(order.getIsSigned())
             {
                 statusLabel.setText("Status: "+states[2]);
+            }
+            else if(order.getPhotos().isEmpty())
+            {
+                statusLabel.setText("Status: "+states[0]);
             }
             else
             {

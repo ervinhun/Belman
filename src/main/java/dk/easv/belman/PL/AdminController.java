@@ -41,10 +41,10 @@ public class AdminController {
     private VBox newUserWindow;
     private boolean isOrdersWin = true;
     private VBox rightBox;
-    private Image userSel = new Image(getClass().getResourceAsStream("/dk/easv/belman/Images/user.png"));
-    private Image ordersSel = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/orders.png"));
-    private Image userDefault = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/userDef.png"));
-    private Image ordersDefault = new Image(Main.class.getResourceAsStream("/dk/easv/belman/Images/ordersDef.png"));
+    private Image userSel = new Image("dk/easv/belman/images/user.png");
+    private Image ordersSel = new Image("dk/easv/belman/images/orders.png");
+    private Image userDefault = new Image("dk/easv/belman/images/userDef.png");
+    private Image ordersDefault = new Image("dk/easv/belman/images/ordersDef.png");
     private ObservableList<VBox> orders = FXCollections.observableArrayList();
     private ObservableList<HBox> users = FXCollections.observableArrayList();
     private FilteredList<VBox> filteredOrders = new FilteredList<>(orders);
@@ -169,15 +169,27 @@ public class AdminController {
         Label statusLabel = new Label();
         if(order.getPhotos().isEmpty())
         {
-            imageView.setImage(new Image(Main.class.getResourceAsStream("Images/belman.png")));
+            imageView.setImage(new Image("dk/easv/belman/images/belman.png"));
             statusLabel.setText("Status: "+states[0]);
         }
         else
         {
-            imageView.setImage(new Image(order.getPhotos().getFirst().getImagePath()));
+            try
+            {
+                imageView.setImage(new Image(Main.class.getResourceAsStream(order.getPhotos().getFirst().getImagePath())));
+            }
+            catch (Exception e)
+            {
+                imageView.setImage(new Image("dk/easv/belman/images/belman.png"));
+            }
+
             if(order.getIsSigned())
             {
                 statusLabel.setText("Status: "+states[2]);
+            }
+            else if(order.getPhotos().isEmpty())
+            {
+                statusLabel.setText("Status: "+states[0]);
             }
             else
             {
