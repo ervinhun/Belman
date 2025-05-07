@@ -210,7 +210,8 @@ public class DALManager {
                 LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();;
                 Boolean isDeleted = rs.getBoolean("is_deleted");
                 UUID deletedBy = rs.getObject("deleted_by", UUID.class);
-                LocalDateTime deletedAt = rs.getTimestamp("deleted_at").toLocalDateTime();;
+                Timestamp deletedAtTS = rs.getTimestamp("deleted_at");
+                LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
 
                 Photo p = new Photo(id, uploadedBy, imagePath, uploadedAt, isDeleted, deletedBy, deletedAt);
                 photos.add(p);

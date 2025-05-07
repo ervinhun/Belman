@@ -1,0 +1,59 @@
+package dk.easv.belman.PL.model;
+
+import dk.easv.belman.be.Order;
+import dk.easv.belman.be.User;
+import dk.easv.belman.bll.BLLManager;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+
+import java.util.List;
+
+public class QualityModel {
+    private final BLLManager      bllManager   = new BLLManager();
+    private final ObservableList<Order> orders    = FXCollections.observableArrayList();
+    private final FilteredList<Order>   filtered   = new FilteredList<>(orders, o -> true);
+    private final StringProperty        searchQuery = new SimpleStringProperty("");
+    private final ObjectProperty<User>  loggedInUser = new SimpleObjectProperty<>();
+
+    public QualityModel() {
+        loadOrders();
+    }
+
+    public void loadOrders() {
+        List<Order> all = bllManager.getOrders(null);
+        orders.setAll(all);
+        applySearch();
+    }
+
+    public void applySearch() {
+        String q = searchQuery.get().trim().toLowerCase();
+        if (q.isEmpty()) {
+            filtered.setPredicate(o -> true);
+        } else {
+            filtered.setPredicate(o ->
+                    o.getOrderNumber().toLowerCase().contains(q)
+            );
+        }
+    }
+
+    public void setSearchQuery(String q) {
+        searchQuery.set(q);
+    }
+
+    public FilteredList<Order> getFilteredOrders() {
+        return filtered;
+    }
+
+    public void setLoggedInUser(User u) {
+        loggedInUser.set(u);
+    }
+
+    public ObjectProperty<User> loggedInUserProperty() {
+        return loggedInUser;
+    }
+}

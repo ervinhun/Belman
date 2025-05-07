@@ -3,10 +3,7 @@ package dk.easv.belman.PL;
 import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.User;
-import dk.easv.belman.bll.BLLManager;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
-import javafx.collections.ObservableList;
+import dk.easv.belman.PL.model.OperatorModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -17,119 +14,101 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 
+import java.io.File;
 import java.io.IOException;
 
 public class OperatorController {
-    @FXML
-    private BorderPane borderPane;
-    @FXML
-    private VBox rightBox;
-    @FXML
-    private FlowPane ordersPane;
-    @FXML
-    private Label orderLabel;
-    private ObservableList<VBox> orders = FXCollections.observableArrayList();
-    private String[] states = {"Images Needed", "Pending", "Signed ✅"};
+    @FXML private BorderPane borderPane;
+    @FXML private VBox       rightBox;
+    @FXML private FlowPane   ordersPane;
+    @FXML private Label      orderLabel;
+
+    private final String[] states        = {"Images Needed", "Pending", "Signed ✅"};
+    private final String   placeholderUrl =
+            getClass().getResource("/dk/easv/belman/Images/belman.png").toExternalForm();
+
+    private OperatorModel model;
+
     private User loggedinUser;
-    private BLLManager bllManager = new BLLManager();
 
     @FXML
-    private void initialize()
-    {
-        loggedinUser = null;
-        orders.clear();
+    private void initialize() {
+        model = new OperatorModel();
+        refreshOrders();
+    }
+
+    private void refreshOrders() {
         ordersPane.getChildren().clear();
-        addOrderCards();
-    }
-
-    private void addOrderCards()
-    {
-        for(Order o : bllManager.getOrders(null))
-        {
-            orders.add(createCard(o));
+        for (Order o : model.getOrders()) {
+            ordersPane.getChildren().add(createCard(o));
         }
-
-        ordersPane.getChildren().addAll(orders);
     }
 
     @FXML
-    private void cancel()
-    {
+    private void cancel() {
         borderPane.setCenter(rightBox);
     }
 
     @FXML
-    private void addImage()
-    {
-
+    private void addImage() {
+        // TODO: invoke file chooser / webcam / model
     }
 
     @FXML
-    private void confirmImages()
-    {
-
+    private void confirmImages() {
+        // TODO: call model / BLL to mark photos confirmed
     }
 
-    private void openOrder(String orderNumber)
-    {
-        try
-        {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/orderOperator.fxml"));
-            fxmlLoader.setController(this);
-            Parent root = fxmlLoader.load();
+    private void openOrder(String orderNumber) {
+        try {
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/orderOperator.fxml"));
+            loader.setController(this);
+            Parent root = loader.load();
             borderPane.setCenter(root);
             orderLabel.setText(orderNumber);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private VBox createCard(Order order) {
-        ImageView imageView = new ImageView();
-        Label statusLabel = new Label();
-        if(order.getPhotos().isEmpty())
-        {
-            imageView.setImage(new Image(Main.class.getResourceAsStream("Images/belman.png")));
-            statusLabel.setText("Status: "+states[0]);
+        ImageView iv    = new ImageView();
+        Label     state = new Label();
+
+        if (order.getPhotos().isEmpty()) {
+            iv.setImage(new Image(placeholderUrl));
+            state.setText("Status: " + states[0]);
+        } else {
+            String raw = order.getPhotos().getFirst().getImagePath();
+            File   f   = new File(raw);
+            iv.setImage(f.exists()
+                    ? new Image(f.toURI().toString())
+                    : new Image(placeholderUrl));
+            state.setText(order.getIsSigned()
+                    ? "Status: " + states[2]
+                    : "Status: " + states[1]);
         }
-        else
-        {
-            imageView.setImage(new Image(order.getPhotos().getFirst().getImagePath()));
-            if(order.getIsSigned())
-            {
-                statusLabel.setText("Status: "+states[2]);
-            }
-            else
-            {
-                statusLabel.setText("Status: "+states[1]);
-            }
-        }
-        imageView.setFitWidth(100);
-        imageView.setFitHeight(100);
+
+        iv.setFitWidth(100);
+        iv.setFitHeight(100);
         Rectangle clip = new Rectangle(100, 100);
         clip.setArcWidth(20);
         clip.setArcHeight(20);
-        imageView.setClip(clip);
+        iv.setClip(clip);
 
-        Label orderLabel = new Label("Order: " + order.getOrderNumber());
+        Label lbl = new Label("Order: " + order.getOrderNumber());
 
-        VBox card = new VBox(10, imageView, orderLabel, statusLabel);
+        VBox card = new VBox(10, iv, lbl, state);
         card.setAlignment(Pos.CENTER);
-        card.setPrefWidth(Region.USE_COMPUTED_SIZE);
         card.setId("orderCard");
         card.setPrefHeight(160);
-        card.setOnMouseClicked(_ -> openOrder(order.getOrderNumber()));
+        card.setOnMouseClicked(e -> openOrder(order.getOrderNumber()));
 
         return card;
     }
 
-    public void setLoggedinUser(User loggedinUser) {
-        if (loggedinUser != null) {
-            this.loggedinUser = loggedinUser;
-            System.out.println("LoggedinUser: " + loggedinUser);
-        } else
-            System.out.println("No user is set who logged in");
+    public void setLoggedinUser(User user) {
+        this.loggedinUser = user;
+        System.out.println("Logged in as: " + user.getUsername());
     }
 }

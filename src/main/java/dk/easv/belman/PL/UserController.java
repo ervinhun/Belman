@@ -1,42 +1,70 @@
 package dk.easv.belman.PL;
 
 import dk.easv.belman.be.User;
-import dk.easv.belman.bll.BLLManager;
+import dk.easv.belman.PL.model.UserModel;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.Toggle;
 
 public class UserController {
+    @FXML private TextField    txtFullName;
+    @FXML private TextField    txtUsername;
+    @FXML private TextField    txtTagId;
+    @FXML private RadioButton  chkAdmin;
+    @FXML private RadioButton  chkQualityControl;
+    @FXML private RadioButton  chkOperator;
+    @FXML private ToggleGroup  tgRole;
+    @FXML private Button       btnSave;
+    @FXML private Button       btnCancel;
+    @FXML private VBox         rootVBox;
 
-    @FXML private TextField txtFullName;
-    @FXML private TextField txtUsername;
-    @FXML private RadioButton chkAdmin;
-    @FXML private RadioButton chkQualityControl;
-    @FXML private RadioButton chkOperator;
-    @FXML private ToggleGroup tgRole;
-    @FXML private Button btnSave;
-    @FXML private Button btnCancel;
-    @FXML private VBox rootVBox;
-    @FXML private VBox rightBox;
-    @FXML private TextField txtTagId;
-    private BLLManager bllManager;
-    private dk.easv.belman.PL.AdminController adminController;
-    private User editingUser = null;
+    private VBox      rightBox;
+    private UserModel model;
+
 
     @FXML
     private void initialize() {
-        try {
-            bllManager = new BLLManager();
-        } catch (Exception e) {
-            showError("Database connection failed: " + e.getMessage());
-            disableForm();
-        }
+        model = new UserModel();
+
+        txtFullName.textProperty().bindBidirectional(model.fullNameProperty());
+        txtUsername.textProperty().bindBidirectional(model.usernameProperty());
+        txtTagId   .textProperty().bindBidirectional(model.tagIdProperty());
+
+        chkAdmin       .setUserData(1);
+        chkQualityControl.setUserData(2);
+        chkOperator    .setUserData(3);
+
+        tgRole.selectedToggleProperty().addListener((obs, oldT, newT) -> {
+            if (newT != null) {
+                model.roleIdProperty().set((int)newT.getUserData());
+            } else {
+                model.roleIdProperty().set(0);
+            }
+        });
+        model.roleIdProperty().addListener((obs, old, val) -> {
+            for (Toggle t : tgRole.getToggles()) {
+                if (Integer.valueOf((int)t.getUserData()).equals(val.intValue())) {
+                    tgRole.selectToggle(t);
+                    break;
+                }
+            }
+        });
+
+        model.errorMessageProperty().addListener((obs, o, msg) -> {
+            if (msg != null && !msg.isEmpty()) {
+                new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK).showAndWait();
+            }
+        });
+        model.successMessageProperty().addListener((obs, o, msg) -> {
+            if (msg != null && !msg.isEmpty()) {
+                new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK).showAndWait();
+            }
+        });
     }
 
-
-    public void getRightBox(VBox rightBox)
-    {
+    public void getRightBox(VBox rightBox) {
         this.rightBox = rightBox;
     }
 
@@ -62,91 +90,13 @@ public class UserController {
 
     @FXML
     private void btnSaveClick() {
-        if (bllManager == null) return;
-
-        String fullName = txtFullName.getText();
-        String username = txtUsername.getText();
-        String tagId = txtTagId.getText();
-        int roleId = getSelectedRoleId();
-
-        if (fullName.isEmpty() || username.isEmpty() || tagId.isEmpty() || roleId == 0) {
-            showError("Fill all fields and choose a role.");
-            return;
-        }
-
-        if (editingUser == null) {
-            String defaultPassword = "belman123";
-            String hashedPassword = bllManager.hashPass(username, defaultPassword);
-
-            User newUser = new User();
-            newUser.setFullName(fullName);
-            newUser.setUsername(username);
-            newUser.setTagId(tagId);
-            newUser.setRoleId(roleId);
-            newUser.setPassword(hashedPassword);
-
-            if (bllManager.addUser(newUser) != null) {
-                adminController.addUserCard(newUser);
-                showSuccess("User created with default password: " + defaultPassword);
-                clearForm();
-            } else {
-                showError("User was not created.");
-            }
-        } else {
-            editingUser.setFullName(fullName);
-            editingUser.setTagId(tagId);
-            editingUser.setRoleId(roleId);
-
-            String defaultPassword = "belman123";
-            String hashedPassword = bllManager.hashPass(editingUser.getUsername(), defaultPassword);
-            editingUser.setPassword(hashedPassword);
-
-            if (bllManager.updateUser(editingUser)) {
-                showSuccess("User updated successfully.");
-                adminController.refreshUsers();
-                clearForm();
-            } else {
-                showError("User update failed.");
-            }
-
-            editingUser = null;
-        }
-    }
-
-    private int getSelectedRoleId() {
-        if (chkAdmin.isSelected()) return 1;
-        if (chkQualityControl.isSelected()) return 2;
-        if (chkOperator.isSelected()) return 3;
-        return 0;
+        model.saveUser();
     }
 
     @FXML
     private void cancel() {
-        clearForm();
-        BorderPane borderPane = (BorderPane) rootVBox.getParent();
-        borderPane.setCenter(rightBox);
+        model.clear();
+        BorderPane bp = (BorderPane) rootVBox.getParent();
+        bp.setCenter(rightBox);
     }
-
-
-    private void clearForm() {
-        txtFullName.clear();
-        txtUsername.clear();
-        txtTagId.clear();
-        tgRole.selectToggle(null);
-        txtUsername.setDisable(false);
-        editingUser = null;
-    }
-
-    private void disableForm() {
-        btnSave.setDisable(true);
-    }
-
-    private void showError(String msg) {
-        new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK).showAndWait();
-    }
-
-    private void showSuccess(String msg) {
-        new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK).showAndWait();
-    }
-
 }
