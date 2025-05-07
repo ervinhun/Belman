@@ -67,13 +67,13 @@ public class DALManager {
 
     public UUID insertUser(User u) {
         String sql = """
-                INSERT INTO dbo.Users
-                    (id, full_name, username, password, tag_id,
-                     role_id, created_at, last_login_time, is_active)
-                OUTPUT INSERTED.ID
-                VALUES
-                    (NEWID(),?,?,?,?,?,?,?,1)
-                """;
+            INSERT INTO dbo.Users
+                (id, full_name, username, password, tag_id,
+                 role_id, created_at, last_login_time, is_active)
+            OUTPUT INSERTED.ID
+            VALUES
+                (NEWID(),?,?,?,?,?,?,?,1)
+            """;
         try (Connection c = connectionManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
@@ -94,6 +94,17 @@ public class DALManager {
                 if (rs.next()) {
                     UUID id = rs.getObject(1, UUID.class);
                     u.setId(id);
+
+                    String roleSql = "SELECT role FROM dbo.Roles WHERE id = ?";
+                    try (PreparedStatement roleStmt = c.prepareStatement(roleSql)) {
+                        roleStmt.setInt(1, u.getRoleId());
+                        try (ResultSet roleRs = roleStmt.executeQuery()) {
+                            if (roleRs.next()) {
+                                u.setRole(roleRs.getString("role"));
+                            }
+                        }
+                    }
+
                     return id;
                 }
             }
@@ -102,6 +113,7 @@ public class DALManager {
             throw new RuntimeException("Error inserting user", ex);
         }
     }
+
 
     public boolean updateUser(User u) {
         String sql = """

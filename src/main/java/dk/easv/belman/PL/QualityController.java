@@ -64,7 +64,7 @@ public class QualityController {
         ordersPane.getChildren().addAll(orders);
 
         orders.clear();
-        addOrderCards();
+      //  addOrderCards();
     }
 
     private void addOrderCards()

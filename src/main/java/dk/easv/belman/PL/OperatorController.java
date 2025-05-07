@@ -39,7 +39,7 @@ public class OperatorController {
         loggedinUser = null;
         orders.clear();
         ordersPane.getChildren().clear();
-        addOrderCards();
+       // addOrderCards();
     }
 
     private void addOrderCards()

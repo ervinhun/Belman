@@ -57,7 +57,7 @@ public class AdminController {
     @FXML
     private void initialize()
     {
-        addOrderCards();
+     //   addOrderCards();
         for (User u : bllManager.getAllUsers()) users.add(createUserCard(u));
         loggedinUser = null;
         try {
