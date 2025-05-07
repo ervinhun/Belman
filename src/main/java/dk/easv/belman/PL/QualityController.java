@@ -57,6 +57,7 @@ public class QualityController {
         for (Order o : model.getFilteredOrders()) {
             ordersPane.getChildren().add(createCard(o));
         }
+    }
 
     @FXML
     private void openImage() {
