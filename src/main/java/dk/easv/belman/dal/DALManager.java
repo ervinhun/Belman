@@ -1,8 +1,12 @@
 package dk.easv.belman.dal;
 
+import dk.easv.belman.be.Order;
+import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.QualityDocument;
 import dk.easv.belman.exceptions.BelmanException;
 import dk.easv.belman.be.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,6 +17,8 @@ import java.util.UUID;
 public class DALManager {
 
     private final ConnectionManager connectionManager;
+    private static final Logger logger = LoggerFactory.getLogger(DALManager.class);
+
 
     public DALManager() throws BelmanException {
         connectionManager = new ConnectionManager();
@@ -60,8 +66,9 @@ public class DALManager {
             }
             return list;
         } catch (SQLException ex) {
-            throw new RuntimeException("Error fetching users from DB", ex);
+            logger.error("Error fetching users from DB", ex);
         }
+        return null;
     }
 
     public UUID insertUser(User u) {
@@ -98,8 +105,9 @@ public class DALManager {
             }
             return null;
         } catch (SQLException ex) {
-            throw new RuntimeException("Error inserting user", ex);
+            logger.error("Error inserting user", ex);
         }
+        return null;
     }
 
     public boolean updateUser(User u) {
@@ -132,8 +140,9 @@ public class DALManager {
 
             return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
-            throw new RuntimeException("Error updating user", ex);
+            logger.error("Error updating user", ex);
         }
+        return false;
     }
 
     public void deleteUser(UUID id) {
@@ -144,7 +153,7 @@ public class DALManager {
             ps.setObject(1, id);
             ps.executeUpdate();
         } catch (SQLException ex) {
-            throw new RuntimeException("Error deleting user", ex);
+            logger.error("Error deleting user", ex);
         }
     }
 
@@ -196,13 +205,14 @@ public class DALManager {
             }
 
         } catch (SQLException ex) {
-            throw new RuntimeException("Error logging in user", ex);
+            logger.error("Error logging in user", ex);
         }
+        return null;
     }
 
     public QualityDocument signOrder(String productNumber, UUID userId, String info, String qDocPath) {
         String sql = "INSERT INTO dbo.QualityChecks (product_id, info, signed_by, signed_at) " +
-                "VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)";
+                "VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
         Long newId = (long) -1;
         long productId = getProductIdFromProductNumber(productNumber);
         if (productId == -1) {
@@ -291,5 +301,118 @@ public class DALManager {
             throw new BelmanException("Error checking if document exists");
         }
         return false;
+    }
+
+    public List<Order> getOrders(String username) {
+        List<Order> orders = new ArrayList<>();
+        String selectSql;
+
+        if(username == null)
+        {
+            selectSql = "SELECT * FROM Products;";
+        }
+        else
+        {
+            // ADD LOGIC
+            selectSql = "SELECT * FROM Products WHERE is_deleted = 0;";
+        }
+
+        try (Connection con = connectionManager.getConnection();
+             PreparedStatement psSelect = con.prepareStatement(selectSql);
+             ResultSet rs = psSelect.executeQuery())
+        {
+
+            while(rs.next())
+            {
+                Long id = rs.getLong("id");
+                String orderNumber = rs.getString("product_number");
+                LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
+                Boolean isDeleted = rs.getBoolean("is_deleted");
+                //ADD IS SIGNED TO ORDERS IN DB
+                //Boolean isSigned = rs.getBoolean("is_signed");
+                List<Photo> photos = getPhotos(id);
+
+                Order o = new Order(id, orderNumber, createdAt, isDeleted, photos, false);
+                orders.add(o);
+            }
+
+            return orders;
+        }
+        catch (SQLException e)
+        {
+            logger.error("Error fetching the orders: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    public List<Photo> getPhotos(Long orderId)
+    {
+        List<Photo> photos = new ArrayList<>();
+        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ?";
+
+        try(Connection con = connectionManager.getConnection();
+            PreparedStatement psSelect = con.prepareStatement(selectSql))
+        {
+            psSelect.setObject(1, orderId);
+            ResultSet rs = psSelect.executeQuery();
+
+            while(rs.next())
+            {
+                Long id = rs.getLong("id");
+                UUID uploadedBy = rs.getObject("uploaded_by", UUID.class);
+                String imagePath = rs.getString("image_path");
+                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();
+                Boolean isDeleted = rs.getBoolean("is_deleted");
+                UUID deletedBy = rs.getObject("deleted_by", UUID.class);
+                Timestamp deletedAtTS = rs.getTimestamp("deleted_at");
+                LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
+
+                Photo p = new Photo(id, uploadedBy, imagePath, uploadedAt, isDeleted, deletedBy, deletedAt);
+                photos.add(p);
+            }
+
+            return photos;
+        }
+        catch (SQLException e)
+        {
+            logger.error("Error fetching photos: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    public List<String> getPhotoPaths(String productNumber)
+    {
+        long orderId = getProductIdFromProductNumber(productNumber);
+        List<String> photoPaths = new ArrayList<>();
+        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ?";
+
+        try(Connection con = connectionManager.getConnection();
+            PreparedStatement psSelect = con.prepareStatement(selectSql))
+        {
+            psSelect.setObject(1, orderId);
+            ResultSet rs = psSelect.executeQuery();
+
+            while(rs.next())
+            {
+                Long id = rs.getLong("id");
+                UUID uploadedBy = rs.getObject("uploaded_by", UUID.class);
+                String imagePath = rs.getString("image_path");
+                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();
+                Boolean isDeleted = rs.getBoolean("is_deleted");
+                UUID deletedBy = rs.getObject("deleted_by", UUID.class);
+                Timestamp deletedAtTS = rs.getTimestamp("deleted_at");
+                LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
+
+                Photo p = new Photo(id, uploadedBy, imagePath, uploadedAt, isDeleted, deletedBy, deletedAt);
+                photoPaths.add(p.getImagePath());
+            }
+
+            return photoPaths;
+        }
+        catch (SQLException e)
+        {
+            logger.error("Error fetching photos: {}", e.getMessage());
+        }
+        return photoPaths;
     }
 }

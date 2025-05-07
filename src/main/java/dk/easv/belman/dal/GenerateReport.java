@@ -35,7 +35,8 @@ public class GenerateReport {
         float availableWidth;
         float minY = 100;
         ArrayList<String> imagePaths = new ArrayList<>();
-
+        DALManager dalManager = new DALManager();
+        imagePaths.addAll(dalManager.getPhotoPaths(productNo));
         // Create a new PDF document
 
         try (PDDocument document = new PDDocument()) {
@@ -43,7 +44,6 @@ public class GenerateReport {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
             availableWidth = page.getMediaBox().getWidth() - 2 * margin;
-
 
             // FOR TEST creating the image paths
             imagePaths.add("src/test/resources/test_image.jpg");
