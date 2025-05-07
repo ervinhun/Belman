@@ -53,7 +53,7 @@ public class AdminController {
     private final BLLManager bllManager = new BLLManager();
     private User loggedinUser;
     private UserController userController;
-  
+
     @FXML
     private void initialize()
     {
@@ -64,6 +64,7 @@ public class AdminController {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/newUser.fxml"));
             newUserWindow = fxmlLoader.load();
             userController = fxmlLoader.getController();
+            userController.setAdminController(this);
         } catch (IOException ex) { ex.printStackTrace(); }
         sideBtnNotSelected.setOnMouseEntered(e -> usersImage.setImage(userSel));
         sideBtnNotSelected.setOnMouseExited(e -> usersImage.setImage(userDefault));
@@ -201,10 +202,22 @@ public class AdminController {
 
         return card;
     }
+    public void addUserCard(User u) {
+        HBox card = createUserCard(u);
+        users.add(card);
+        filteredUsers.setPredicate(_ -> true);
+        if (!isOrdersWin) {
+            contentPane.getChildren().clear();
+            contentPane.getChildren().addAll(filteredUsers);
+        }
+    }
+
 
     private void editUser(User user) {
         newUserTab();
+        userController.setEditingUser(user);
     }
+
 
     private HBox createUserCard(User u) {
         Label name = new Label(u.getFullName());
@@ -243,6 +256,14 @@ public class AdminController {
 
         return card;
     }
+    public void refreshUsers() {
+        users.clear();
+        for (User u : bllManager.getAllUsers()) {
+            users.add(createUserCard(u));
+        }
+        applySearch();
+    }
+
 
     public void setLoggedinUser(User loggedinUser) {
         if (loggedinUser != null) {
