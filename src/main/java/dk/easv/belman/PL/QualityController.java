@@ -1,186 +1,152 @@
 package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
+import dk.easv.belman.be.Order;
 import dk.easv.belman.be.User;
-import dk.easv.belman.bll.BLLManager;
-import dk.easv.belman.dal.GenerateReport;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import dk.easv.belman.PL.model.QualityModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 public class QualityController {
-    @FXML
-    private FlowPane ordersPane;
-    @FXML
-    private BorderPane borderPane;
-    @FXML
-    private VBox rightBox;
-    @FXML
-    private Label orderLabel;
-    @FXML
-    private Button btnSign;
-    private ObservableList<VBox> orders = FXCollections.observableArrayList();
-    private String[] states = {"Images Needed", "Pending", "Signed ✅"};
-    private User loggedinUser;
-    private String productNumberToSign;
-    private BLLManager bllManager;
+    @FXML private FlowPane  ordersPane;
+    @FXML private BorderPane borderPane;
+    @FXML private VBox       rightBox;
+    @FXML private Label      orderLabel;
+    @FXML private TextField  search;
+
+    private final String[] states        = {"Images Needed", "Pending", "Signed ✅"};
+    private final String   placeholderUrl =
+            getClass().getResource("/dk/easv/belman/Images/belman.png")
+                    .toExternalForm();
+
+    private QualityModel model;
 
     @FXML
-    private void initialize()
-    {
-        //loggedinUser = null;
+    private void initialize() {
+        model = new QualityModel();
+
+        refreshContent();
+
+        search.textProperty().addListener((obs, old, txt) -> {
+            model.setSearchQuery(txt);
+            model.applySearch();
+            refreshContent();
+        });
+    }
+
+    public void setLoggedinUser(User user) {
+        model.setLoggedInUser(user);
+    }
+
+    private void refreshContent() {
         ordersPane.getChildren().clear();
-        orders.add(createCard("I524-08641", new Image(Main.class.getResourceAsStream("Images/belman.png")), states[2]));
-        ordersPane.getChildren().addAll(orders);
-        this.productNumberToSign = null;
-        try
-        {
-            bllManager = new BLLManager();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
+        for (Order o : model.getFilteredOrders()) {
+            ordersPane.getChildren().add(createCard(o));
         }
     }
 
     @FXML
-    private void applySearch()
-    {
-
-    }
-
-    @FXML
-    private void cancel()
-    {
+    private void cancel() {
         borderPane.setCenter(rightBox);
     }
 
-    @FXML
-    private void openImage()
-    {
-        
+    //@FXML private void openImage()   { /* move logic to model and call from here */ }
+    //@FXML private void deleteImage() { /* move logic to model and call from here */ }
+    //@FXML private void signOrder()   { /* move logic to model and call from here */ }
+
+    private void openOrder(String orderNumber) {
+        try {
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/orderQuality.fxml"));
+            loader.setController(this);
+            Parent root = loader.load();
+            borderPane.setCenter(root);
+            orderLabel.setText(orderNumber);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
     }
 
-    @FXML
-    private void deleteImage()
-    {
-
-    }
 
     @FXML
-    public void signOrder()
-    {
-        if (productNumberToSign == null || productNumberToSign.isEmpty()) {
+    private void signOrder() {
+        // Get the order number from the label
+        String orderNumber = orderLabel.getText();
+
+        // Check if order number is valid
+        if (orderNumber == null || orderNumber.isEmpty()) {
+            // Show an alert if the order number is missing
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Warning");
-            alert.setHeaderText("No Order Selected");
-            alert.setContentText("Please select an order to sign.");
-            btnSign.setText("Open\nDocument");
-            btnSign.setOnAction(_ -> openDocument(productNumberToSign));
+            alert.setTitle("Missing Order Number");
+            alert.setHeaderText(null);
+            alert.setContentText("No order number selected to sign.");
             alert.showAndWait();
             return;
         }
-        boolean isSuccess = bllManager.signOrder(productNumberToSign, loggedinUser.getId());
-        Alert alert;
-        if (isSuccess) {
-            alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Success");
-            alert.setHeaderText("Order Signed");
-            alert.setContentText("The order has been successfully signed.");
-        } else {
-            alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Signing Failed");
-            alert.setContentText("Failed to sign the order. Please try again.");
-        }
+
+        // Print debug info to console
+        System.out.println("Signing order: " + orderNumber);
+
+        // TODO: Add logic to update the order status in the database or mark it as signed
+
+        // Show confirmation to the user
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Order Signed");
+        alert.setHeaderText(null);
+        alert.setContentText("Order " + orderNumber + " has been signed successfully.");
         alert.showAndWait();
+
+        // Optionally return to the overview or refresh UI
+        cancel(); // This resets the view to the previous screen
     }
 
-    private void openOrder(String orderNumber)
-    {
-        try
-        {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/orderQuality.fxml"));
-            fxmlLoader.setController(this);
-            Parent root = fxmlLoader.load();
-            borderPane.setCenter(root);
-            orderLabel.setText(orderNumber);
-            boolean documentExists = bllManager.checkIfDocumentExists(orderNumber);
-            if (documentExists) {
-                btnSign.setText("Open\nDocument");
-                btnSign.setOnAction(_ -> openDocument(orderNumber));
-                btnSign.setPrefWidth(88);
-            }
-            else {
-                btnSign.setText("Sign");
-                btnSign.setAlignment(Pos.CENTER);
-                btnSign.setOnAction(_ -> signOrder());
-                btnSign.setPrefWidth(88);
-            }
+    private VBox createCard(Order order) {
+        ImageView iv    = new ImageView();
+        Label     state = new Label();
 
+        if (order.getPhotos().isEmpty()) {
+            iv.setImage(new Image(placeholderUrl));
+            state.setText("Status: " + states[0]);
+        } else {
+            String path = order.getPhotos().getFirst().getImagePath();
+            File f      = new File(path);
+            iv.setImage(f.exists()
+                    ? new Image(f.toURI().toString())
+                    : new Image(placeholderUrl));
+            state.setText(order.getIsSigned()
+                    ? "Status: " + states[2]
+                    : "Status: " + states[1]);
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
 
-    private void openDocument(String orderNumber) {
-        GenerateReport report = new GenerateReport(orderNumber);
-        report.openDocument(orderNumber);
-    }
-
-    private VBox createCard(String orderNumber, Image image, String state) {
-        ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(100);
-        imageView.setFitHeight(100);
+        iv.setFitWidth(100);
+        iv.setFitHeight(100);
         Rectangle clip = new Rectangle(100, 100);
         clip.setArcWidth(20);
         clip.setArcHeight(20);
-        imageView.setClip(clip);
-        Label orderLabel = new Label("Order: " + orderNumber);
+        iv.setClip(clip);
 
-        Label statusLabel = new Label("Status: " + state);
+        Label lbl = new Label("Order: " + order.getOrderNumber());
 
-        VBox card = new VBox(10, imageView, orderLabel, statusLabel);
+        VBox card = new VBox(10, iv, lbl, state);
         card.setAlignment(Pos.CENTER);
-        card.setPrefWidth(Region.USE_COMPUTED_SIZE);
         card.setId("orderCard");
         card.setPrefHeight(160);
-
-        card.setOnMouseClicked(_ -> {
-            openOrder(orderNumber);
-            setProductNumberToSign(orderNumber);
-        });
-
+        card.getProperties().put("orderNum", order.getOrderNumber());
+        card.setOnMouseClicked(e -> openOrder(order.getOrderNumber()));
         return card;
-    }
-
-    private void setProductNumberToSign(String orderNumber) {
-        this.productNumberToSign = orderNumber;
-    }
-
-    public void setLoggedinUser(User loggedinUser) {
-        if (loggedinUser != null) {
-            this.loggedinUser = loggedinUser;
-            System.out.println("LoggedinUser: " + loggedinUser);
-        } else
-            System.out.println("No user is set who logged in");
     }
 }

@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GenerateReport {
-private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
+    private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
     static {
         new DALManager();
     }
@@ -177,7 +177,7 @@ private static final Logger logger = LoggerFactory.getLogger(GenerateReport.clas
         }
     }
 
-        public String getFilePath() {
+    public String getFilePath() {
         return FilePaths.REPORT_DIRECTORY + productNo + "/" + FILE_NAME;
     }
 

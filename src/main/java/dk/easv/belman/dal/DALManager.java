@@ -147,8 +147,8 @@ public class DALManager {
             throw new RuntimeException("Error deleting user", ex);
         }
     }
-  
-  public User login(String username, String hashedPassword) {
+
+    public User login(String username, String hashedPassword) {
         final String selectSql =
                 "SELECT id, full_name, username, password, tag_id, role_id, created_at, last_login_time, is_active " +
                         "FROM Users WHERE username = ? AND password = ?";
@@ -253,25 +253,25 @@ public class DALManager {
                 "VALUES (?, ?, CURRENT_TIMESTAMP, ?)";
 
         try (Connection c = connectionManager.getConnection();
-                PreparedStatement psPhotos = c.prepareStatement(sqlPhotos);
-                PreparedStatement psQualityDocument = c.prepareStatement(sqlQualityDocument)) {
+             PreparedStatement psPhotos = c.prepareStatement(sqlPhotos);
+             PreparedStatement psQualityDocument = c.prepareStatement(sqlQualityDocument)) {
 
-                psPhotos.setLong(1, qcDoc.getProductId());
-                int rowsUpdated = psPhotos.executeUpdate();
-                if (rowsUpdated > 0) {
-                    noOfTableUpdated++;
-                }
-
-                psQualityDocument.setObject(1, qcDoc.getGeneratedBy());
-                psQualityDocument.setLong(2, qcDoc.getProductId());
-                psQualityDocument.setString(3, qcDoc.getQcDocPath());
-                rowsUpdated = psQualityDocument.executeUpdate();
-                if (rowsUpdated > 0) {
-                    noOfTableUpdated++;
-                }
-            } catch (SQLException _) {
-                throw new BelmanException("Error signing quality document");
+            psPhotos.setLong(1, qcDoc.getProductId());
+            int rowsUpdated = psPhotos.executeUpdate();
+            if (rowsUpdated > 0) {
+                noOfTableUpdated++;
             }
+
+            psQualityDocument.setObject(1, qcDoc.getGeneratedBy());
+            psQualityDocument.setLong(2, qcDoc.getProductId());
+            psQualityDocument.setString(3, qcDoc.getQcDocPath());
+            rowsUpdated = psQualityDocument.executeUpdate();
+            if (rowsUpdated > 0) {
+                noOfTableUpdated++;
+            }
+        } catch (SQLException _) {
+            throw new BelmanException("Error signing quality document");
+        }
 
         return noOfTableUpdated == 2;
     }

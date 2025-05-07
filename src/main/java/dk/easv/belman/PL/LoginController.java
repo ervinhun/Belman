@@ -1,18 +1,12 @@
 package dk.easv.belman.PL;
 
-import com.github.sarxos.webcam.Webcam;
-import com.google.zxing.*;
-import com.google.zxing.common.HybridBinarizer;
-
 import dk.easv.belman.Main;
-import javafx.application.Platform;
-import javafx.embed.swing.SwingFXUtils;
 import dk.easv.belman.be.User;
-import dk.easv.belman.bll.BLLManager;
-
+import dk.easv.belman.PL.model.LoginModel;
 import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
-
+import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -20,127 +14,81 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import com.github.sarxos.webcam.Webcam;
+import com.google.zxing.*;
+import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
+import javafx.scene.input.KeyEvent;
 
-import java.awt.*;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class LoginController {
-    @FXML
-    private Button confirm;
-    @FXML
-    private ImageView cameraView;
+    @FXML private MFXTextField     username;
+    @FXML private MFXPasswordField password;
+    @FXML private Button           confirm;
+    @FXML private ImageView        cameraView;
+
+    private LoginModel model;
+
     private Webcam webcam;
     private ScheduledExecutorService executor;
 
     @FXML
-    private MFXPasswordField password;
-    @FXML
-    private MFXTextField username;
-
-    private BLLManager bllManager;
-
-    @FXML
     public void initialize() {
-        try {
-            bllManager = new BLLManager();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        model = new LoginModel();
+
+        model.loggedInUserProperty().addListener((obs, oldUser, newUser) -> {
+            if (newUser != null) {
+                Platform.runLater(() -> openNextWindow(newUser));
+            }
+        });
     }
 
     @FXML
     private void login() {
-        String uName = username.getText().trim();
-        String pwd = password.getText().trim();
-
-        if (uName.isEmpty() || pwd.isEmpty()) {
-            System.out.println("Please fill in username and password!");
-            return;
-        }
-
-        User foundUser = bllManager.login(uName, pwd);
-
-        if (foundUser == null) {
-            System.out.println("Invalid username or password!");
-            return;
-        }
-
-        int roleID = foundUser.getRoleId();
-        System.out.println("Login roleId:" + roleID);
-        switch (roleID) {
-            case 1:
-                openAdminWindow(foundUser);
-                break;
-            case 2:
-                openQualityControllerWindow(foundUser);
-                break;
-            case 3:
-                openOperatorWindow(foundUser);
-                break;
-            default:
-                System.out.println("Unknown roleID: " + roleID);
-        }
+        model.login(
+                username.getText().trim(),
+                password.getText().trim()
+        );
     }
 
-    private void openQualityControllerWindow(User foundUser) {
+    private void openNextWindow(User user) {
+        int role = user.getRoleId();
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/quality.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-            QualityController qcController;
-            qcController = fxmlLoader.getController();
-            qcController.setLoggedinUser(foundUser);
-            Stage stage = (Stage) username.getScene().getWindow();
+            FXMLLoader loader;
+            switch (role) {
+                case 1 -> loader = new FXMLLoader(Main.class.getResource("FXML/admin.fxml"));
+                case 2 -> loader = new FXMLLoader(Main.class.getResource("FXML/quality.fxml"));
+                case 3 -> loader = new FXMLLoader(Main.class.getResource("FXML/operator.fxml"));
+                default -> throw new IllegalStateException("Unknown role: " + role);
+            }
+            Scene scene = new Scene(loader.load());
+            Object controller = loader.getController();
+            controller.getClass()
+                    .getMethod("setLoggedinUser", User.class)
+                    .invoke(controller, user);
+
+            Stage stage = (Stage) confirm.getScene().getWindow();
             stage.setScene(scene);
             stage.show();
         } catch (Exception e) {
-            System.out.println("Error opening Coordinator window!");
-            e.printStackTrace();
-        }
-    }
-
-    private void openAdminWindow(User foundUser) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/admin.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-            AdminController aController;
-            aController = fxmlLoader.getController();
-            aController.setLoggedinUser(foundUser);
-            Stage stage = (Stage) username.getScene().getWindow();
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
-            System.out.println("Error opening Admin window!");
-            e.printStackTrace();
-        }
-    }
-
-    private void openOperatorWindow(User foundUser) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/operator.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-            OperatorController oController;
-            oController = fxmlLoader.getController();
-            oController.setLoggedinUser(foundUser);
-            Stage stage = (Stage) username.getScene().getWindow();
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
-            System.out.println("Error opening Admin window!");
             e.printStackTrace();
         }
     }
 
     @FXML
-    private void cameraLogin()
-    {
+    private void cameraLogin() {
         Stage stage = (Stage) confirm.getScene().getWindow();
-        stage.setOnCloseRequest(_ -> {webcam.close(); executor.shutdownNow();});
+        stage.setOnCloseRequest(_ -> {
+            if (webcam != null)  webcam.close();
+            if (executor != null) executor.shutdownNow();
+        });
 
         cameraView.setVisible(true);
         webcam = Webcam.getDefault();
@@ -150,21 +98,25 @@ public class LoginController {
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(() -> {
             try {
-                BufferedImage image = webcam.getImage();
-                if (image != null) {
-                    Platform.runLater(() -> cameraView.setImage(SwingFXUtils.toFXImage(image, null)));
+                BufferedImage img = webcam.getImage();
+                if (img != null) {
+                    Platform.runLater(() ->
+                            cameraView.setImage(SwingFXUtils.toFXImage(img, null))
+                    );
 
-                    //find and read QR code
-                    LuminanceSource source = new BufferedImageLuminanceSource(image);
-                    BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+                    // try decoding a QR code
+                    LuminanceSource source = new BufferedImageLuminanceSource(img);
+                    BinaryBitmap bitmap    = new BinaryBitmap(new HybridBinarizer(source));
+                    Result result          = new MultiFormatReader().decode(bitmap);
 
-                    //throws NotFoundException if no QR
-                    Result result = new MultiFormatReader().decode(bitmap);
-                    System.out.println("QR Code text: " + result.getText());
-
+                    // on success, shut down camera and invoke login
                     executor.shutdown();
                     webcam.close();
-                    Platform.runLater(this::login);
+                    Platform.runLater(() -> {
+                        cameraView.setVisible(false);
+                        // assume QR text == username, empty password
+                        model.login(result.getText(), "");
+                    });
                 }
             } catch (NotFoundException e) {
             } catch (Exception e) {
