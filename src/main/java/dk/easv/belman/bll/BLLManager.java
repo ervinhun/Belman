@@ -20,11 +20,11 @@ public class BLLManager {
 
     public String hashPass(String username, String pass) {
         PasswordHasher hasher = new PasswordHasher();
-        String hashedPass = null;
+        String hashedPass = "";
         try {
             hashedPass = hasher.hashPassword(pass, username);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
         return hashedPass;
     }

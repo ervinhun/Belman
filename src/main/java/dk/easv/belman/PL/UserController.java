@@ -1,6 +1,7 @@
 package dk.easv.belman.PL;
 
 import dk.easv.belman.PL.model.UserModel;
+import dk.easv.belman.be.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
