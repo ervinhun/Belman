@@ -22,6 +22,7 @@ public class UserController {
 
     private VBox      rightBox;
     private UserModel model;
+    private AdminController adminController;
 
 
     @FXML
@@ -64,6 +65,10 @@ public class UserController {
         });
     }
 
+    public void setAdminController(AdminController adminController) {
+        this.adminController = adminController;
+    }
+
     public void getRightBox(VBox rightBox) {
         this.rightBox = rightBox;
     }
@@ -72,7 +77,20 @@ public class UserController {
     @FXML
     private void btnSaveClick() {
         model.saveUser();
+
+        String success = model.successMessageProperty().get();
+        if (success != null && !success.isEmpty()) {
+            adminController.reloadUsers();
+            cancel();
+        }
     }
+
+
+    public void setEditingUser(User u) {
+        model.setEditingUser(u);
+        txtUsername.setDisable(true);
+    }
+
 
     @FXML
     private void cancel() {
