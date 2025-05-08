@@ -213,4 +213,15 @@
     -fx-padding: 6px 16px;
     -fx-cursor: hand;
 }
+.clickable-image {
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-border-width: 3;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.image-selected {
+    -fx-effect: dropshadow(gaussian, #019ee3, 10, 0.5, 0, 0);
+}
 
