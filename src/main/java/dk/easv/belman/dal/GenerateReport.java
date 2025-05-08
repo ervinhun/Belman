@@ -10,23 +10,40 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GenerateReport {
+    private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
+    static {
+        new DALManager();
+    }
+    private final String productNo;
+    private static final String FILE_NAME = "report.pdf";
 
-
-    public static void GenerateReport(String productNo) {
-        String filePath = FilePaths.BASE_PATH + "report/" + productNo + "/";
-        Logger logger = Logger.getLogger(GenerateReport.class.getName());
+    public GenerateReport(String productNumber) {
+        this.productNo = productNumber;
+        String filePath = FilePaths.REPORT_DIRECTORY + productNo;
+        float currentYPosition = 0;
+        float margin = 40;
+        float availableWidth;
+        float minY = 100;
+        ArrayList<String> imagePaths = new ArrayList<>();
+        DALManager dalManager = new DALManager();
+        imagePaths.addAll(dalManager.getPhotoPaths(productNo));
         // Create a new PDF document
 
         try (PDDocument document = new PDDocument()) {
             ObjectMapper objectMapper = new ObjectMapper();
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
+            availableWidth = page.getMediaBox().getWidth() - 2 * margin;
 
             //Loading the json file
             QualityCheckJsonReader report = objectMapper.readValue(new File("report.json"), QualityCheckJsonReader.class);
@@ -50,16 +67,13 @@ public class GenerateReport {
             // Set header
             contentStream.beginText();
             contentStream.setFont(dynamicFont, headerFontSize);
-            contentStream.newLineAtOffset(430, 810);
+            contentStream.newLineAtOffset(480, 810);
             for (String headTextLine : headText) {
                 contentStream.showText(headTextLine);
                 contentStream.newLineAtOffset(0, -15);
             }
             contentStream.endText();
-
-            // Set font and add title
-
-
+            // Calculate width of the title
             float titleWidth = titleFont.getStringWidth(title) / 1000 * titleFontSize;
 
             // Calculate width of the dynamic text
@@ -76,35 +90,70 @@ public class GenerateReport {
             contentStream.setFont(titleFont, titleFontSize);
             contentStream.newLineAtOffset(centerXTitle, 720);
             contentStream.showText(title);
+            currentYPosition = 720 - titleFontSize - 20;
 
-            // Set font and add dynamic text
+            // Set font and add order number line
             contentStream.newLineAtOffset(centerXDynamic - centerXTitle, -20);
             contentStream.setFont(dynamicFont, productNoFontSize);
             contentStream.showText(dynamicText);
             contentStream.endText();
+            currentYPosition -= productNoFontSize + 20;
 
 
             // Add body text
             contentStream.beginText();
             contentStream.setFont(dynamicFont, bodyTextFontSize);
-            contentStream.newLineAtOffset(100, 620);
+            contentStream.newLineAtOffset(100, currentYPosition);
             for (String bodyTextLine : bodyText) {
                 contentStream.showText(bodyTextLine);
                 contentStream.newLineAtOffset(0, -15);
+                currentYPosition -= bodyTextFontSize + 15;
             }
             contentStream.endText();
-            float totalHeight = bodyText.size() * bodyTextFontSize + (bodyText.size() - 1) * 15;
-            float imageBegginingY = 620 - totalHeight - 20;
-            // Add image
-            PDImageXObject pdImage = PDImageXObject.createFromFile("src/test/resources/test_image.jpg", document);
-            contentStream.drawImage(pdImage, 100, 380, (float) pdImage.getWidth() / 2, (float) pdImage.getHeight() / 2);
 
+            currentYPosition -= 10;
+
+            // Add image
+            for (String imagePath : imagePaths) {
+                PDImageXObject pdImage = PDImageXObject.createFromFile(imagePath, document);
+                float originalWidth = pdImage.getWidth();
+                float originalHeight = pdImage.getHeight();
+
+                // Scale to fit available width
+                float scale = availableWidth / originalWidth;
+                float scaledWidth = originalWidth * scale;
+                float scaledHeight = originalHeight * scale;
+
+                // Add new page if not enough space
+                if (currentYPosition - scaledHeight < minY) {
+                    contentStream.close();
+                    page = new PDPage(PDRectangle.A4);
+                    document.addPage(page);
+                    contentStream = new PDPageContentStream(document, page);
+                    currentYPosition = page.getMediaBox().getHeight() - margin;
+                }
+
+                // Draw the scaled image
+                contentStream.drawImage(pdImage, margin, currentYPosition - scaledHeight, scaledWidth, scaledHeight);
+                currentYPosition -= scaledHeight + 20; // spacing between images
+            }
             // Add footer
-            float footerY = imageBegginingY - pdImage.getHeight() - 20;
+            float footerHeight = 35; // font size 10 * 2 (because it's two lines) plus 15 for spacing
+            if (currentYPosition - footerHeight < margin) {
+                contentStream.close();
+                page = new PDPage(PDRectangle.A4);
+                document.addPage(page);
+                contentStream = new PDPageContentStream(document, page);
+                currentYPosition = page.getMediaBox().getHeight() - margin;
+            }
+            float footerY = currentYPosition - 20;
+
             contentStream.beginText();
             contentStream.setFont(dynamicFont, 10);
             contentStream.newLineAtOffset(400, footerY);
             contentStream.showText(signedBy);
+            contentStream.newLineAtOffset(50, -15);
+            contentStream.showText("Søren");
             contentStream.endText();
 
             contentStream.close();
@@ -113,9 +162,28 @@ public class GenerateReport {
             if (!targetDir.exists()) {
                 targetDir.mkdirs();
             }
-            document.save(filePath + "report.pdf");
+            document.save(filePath + "/" + FILE_NAME);
+            openDocument(productNo);
+
         } catch (IOException e) {
-            logger.severe("Error generating PDF: " + e.getMessage());
+            logger.error("Error generating PDF: {}", e.getMessage());
+        }
+    }
+
+    public String getFilePath() {
+        return FilePaths.REPORT_DIRECTORY + productNo + "/" + FILE_NAME;
+    }
+
+    public void openDocument(String productNumber) {
+        File pdfFile = new File(FilePaths.BASE_PATH + "report/" + productNumber + "/report.pdf");
+        if (Desktop.isDesktopSupported() && pdfFile.exists()) {
+            try {
+                Desktop.getDesktop().open(pdfFile);
+            } catch (IOException e) {
+                logger.error("Error opening PDF: {}", e.getMessage());
+            }
+        } else {
+            logger.error("Desktop is not supported on this system.");
         }
     }
 

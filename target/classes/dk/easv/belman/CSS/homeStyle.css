@@ -1,0 +1,213 @@
+#leftBox
+{
+    -fx-min-width: 125px;
+    -fx-pref-width: 125px;
+}
+#vSeparator
+{
+}
+#rightBox
+{
+    -fx-pref-width: 475px;
+}
+#title
+{
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 20px 0px 0px 20px;
+}
+#currentP
+{
+    -fx-font-weight: bold;
+    -fx-font-size: 20px;
+    -fx-translate-x: -20px;
+}
+#btn
+{
+    -fx-background-color: #019ee3;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+#link
+{
+    -fx-font-size: 12px;
+    -fx-text-fill: #019ee3;
+    -fx-cursor: hand;
+}
+#searchBox
+{
+    -fx-background-color: #F5F5F5;
+    -fx-alignment: center-left;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 10px;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1px;
+    -fx-translate-x: -20px;
+}
+#search
+{
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-font-size: 14px;
+    -fx-text-fill: #757575;
+}
+#searchIcon
+{
+    -fx-translate-x: 5px;
+}
+#sideBtnSelected
+{
+    -fx-background-color: rgba(1, 158, 227, 0.05);
+    -fx-text-fill: #019ee3;
+}
+#sideBtnNotSelected
+{
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+}
+#sideBtnNotSelected:hover
+{
+    -fx-background-color: rgba(1, 158, 227, 0.05);
+    -fx-text-fill: #019ee3;
+}
+#newUser
+{
+    -fx-background-color: #019ee3;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+}
+#inputField
+{
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-pref-width: 190px;
+    -fx-min-width: 190px;
+}
+#descInput
+{
+    -fx-pref-height: 100px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+}
+#addNewEvent
+{
+    -fx-background-color: #019ee3;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 8px;
+    -fx-pref-width: 100px;
+    -fx-cursor: hand;
+}
+#orderCard
+{
+    -fx-padding: 10;
+    -fx-border-color: black;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+    -fx-cursor: hand;
+}
+#user
+{
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+#userCard
+{
+    -fx-background-color: #E8E8E8;
+    -fx-border-color: #019ee3;
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-pref-width: 220px;
+    -fx-pref-height: 80px;
+    -fx-padding: 10px 10px 10px 10px;
+
+}.popup_background {
+     -fx-background-color: #FFFFFF;
+     -fx-border-color: #666;
+     -fx-border-width: 2px;
+     -fx-padding: 10;
+     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0.5, 0, 0);
+ }
+
+.alert-success {
+    -fx-background-color: #D4EDDA;
+    -fx-background-radius: 5;
+}
+.alert-warning {
+    -fx-background-color: #FFF3CD;
+    -fx-background-radius: 5;
+}
+.alert-danger {
+    -fx-background-color: #F8D7DA;
+    -fx-background-radius: 5;
+}
+.alert-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+.alert-body {
+    -fx-font-size: 10px;
+}
+.error {
+    -fx-border-width: 2px;
+    -fx-border-color: red;
+    -fx-background-color: #ffe6e6;
+    -fx-transition: all 0.3s ease;
+}
+
+.error:focus {
+    -fx-border-color: darkred; /* Darker red on focus */
+    -fx-background-color: #ffcccc; /* Lighter background on focus */
+}
+
+.coordinator_button {
+    -fx-background-image: url("/dk/easv/ticketsys/Images/people.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 25px;
+    -fx-min-height: 30px;
+    -fx-min-width: 30px;
+}
+.list_button {
+    -fx-background-image: url("/dk/easv/ticketsys/Images/list.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 25px;
+    -fx-min-height: 30px;
+    -fx-min-width: 30px;
+}
+.delete_button {
+    -fx-background-image: url("/dk/easv/ticketsys/Images/delete.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 25px;
+    -fx-min-height: 30px;
+    -fx-min-width: 30px;
+}
+.edit_button {
+    -fx-background-image: url("/dk/easv/ticketsys/Images/edit.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 25px;
+    -fx-min-height: 30px;
+    -fx-min-width: 30px;
+}
+.newUserBtn {
+    -fx-background-color: #019ee3;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 16px;
+    -fx-cursor: hand;
+}
+
