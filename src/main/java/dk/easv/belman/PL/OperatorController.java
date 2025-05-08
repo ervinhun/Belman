@@ -12,6 +12,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -37,6 +39,7 @@ public class OperatorController {
     @FXML private ImageView leftImage;
     @FXML private ImageView additionalImage;
     @FXML private GridPane gridPane;
+    @FXML private ChoiceBox<String> user;
     private HBox selectMethod;
     private String orderNo;
     private ArrayList<String> fileNames = new ArrayList<>();
@@ -192,8 +195,30 @@ public class OperatorController {
         return card;
     }
 
-    public void setLoggedinUser(User user) {
-        this.loggedinUser = user;
-        System.out.println("Logged in as: " + user.getUsername());
+    public void setLoggedinUser(User u) {
+        model.setLoggedInUser(u);
+        user.getItems().setAll(
+                u.getFullName(),
+                "Logout"
+        );
+        user.getSelectionModel().selectFirst();
+        user.setOnAction(evt -> {
+            if ("Logout".equals(user.getValue())) {
+                model.logout();
+                loggedOut();
+            }
+        });
+    }
+
+    private void loggedOut() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/login.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+            Stage stage = (Stage) user.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

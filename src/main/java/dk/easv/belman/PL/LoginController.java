@@ -58,21 +58,38 @@ public class LoginController {
         int role = user.getRoleId();
         try {
             FXMLLoader loader;
-            switch (role) {
-                case 1 -> loader = new FXMLLoader(Main.class.getResource("FXML/admin.fxml"));
-                case 2 -> loader = new FXMLLoader(Main.class.getResource("FXML/quality.fxml"));
-                case 3 -> loader = new FXMLLoader(Main.class.getResource("FXML/operator.fxml"));
-                default -> throw new IllegalStateException("Unknown role: " + role);
-            }
-            Scene scene = new Scene(loader.load());
-            Object controller = loader.getController();
-            controller.getClass()
-                    .getMethod("setLoggedinUser", User.class)
-                    .invoke(controller, user);
-
             Stage stage = (Stage) confirm.getScene().getWindow();
+            Scene scene;
+
+            switch (role) {
+                case 1:
+                    loader = new FXMLLoader(Main.class.getResource("FXML/admin.fxml"));
+                    scene  = new Scene(loader.load());
+                    AdminController adminController = loader.getController();
+                    adminController.setLoggedinUser(user);
+                    break;
+
+                case 2:
+                    loader = new FXMLLoader(Main.class.getResource("FXML/quality.fxml"));
+                    scene  = new Scene(loader.load());
+                    QualityController qcController = loader.getController();
+                    qcController.setLoggedinUser(user);
+                    break;
+
+                case 3:
+                    loader = new FXMLLoader(Main.class.getResource("FXML/operator.fxml"));
+                    scene  = new Scene(loader.load());
+                    OperatorController opController = loader.getController();
+                    opController.setLoggedinUser(user);
+                    break;
+
+                default:
+                    throw new IllegalStateException("Unknown role: " + role);
+            }
+
             stage.setScene(scene);
             stage.show();
+
         } catch (Exception e) {
             e.printStackTrace();
         }

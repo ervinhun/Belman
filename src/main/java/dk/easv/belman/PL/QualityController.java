@@ -10,14 +10,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +34,7 @@ public class QualityController {
     private TextField search;
     @FXML
     Button btnSign;
+    @FXML private ChoiceBox<String> user;
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private final String placeholderUrl =
@@ -57,8 +57,31 @@ public class QualityController {
         });
     }
 
-    public void setLoggedinUser(User user) {
-        model.setLoggedInUser(user);
+    public void setLoggedinUser(User u) {
+        model.setLoggedInUser(u);
+        user.getItems().setAll(
+                u.getFullName(),
+                "Logout"
+        );
+        user.getSelectionModel().selectFirst();
+        user.setOnAction(evt -> {
+            if ("Logout".equals(user.getValue())) {
+                model.logout();
+                loggedOut();
+            }
+        });
+    }
+
+    private void loggedOut() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/login.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+            Stage stage = (Stage) user.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void refreshContent() {

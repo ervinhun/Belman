@@ -36,6 +36,11 @@ public class BLLManager {
         return user;
     }
 
+    public void logout(User user) {
+        UUID id = user.getId();
+        dalManager.logout(id);
+    }
+
     public List<User> getAllUsers() {
         return dalManager.getAllUsers();
     }

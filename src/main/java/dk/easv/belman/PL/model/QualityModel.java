@@ -51,6 +51,12 @@ public class QualityModel {
 
     public void setLoggedInUser(User u) {
         loggedInUser.set(u);
+        System.out.println("Logged in user: " + u.getUsername());
+    }
+
+    public void logout() {
+        bllManager.logout(loggedInUser.get());
+        loggedInUser.set(null);
     }
 
     public ObjectProperty<User> loggedInUserProperty() {

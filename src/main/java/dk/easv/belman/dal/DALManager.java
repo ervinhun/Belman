@@ -338,6 +338,18 @@ public class DALManager {
         return photoPaths;
     }
 
+    private void insertLoginLog(Connection conn, UUID userId, String method) throws SQLException {
+        String sql = """
+        INSERT INTO LoginLogs (user_id, login_time, method)
+        VALUES (?, CURRENT_TIMESTAMP, ?)
+    """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+            ps.setString(2, method);
+            ps.executeUpdate();
+        }
+    }
+
     public User login(String username, String hashedPassword) {
         final String selectSql =
                 "SELECT id, full_name, username, password, tag_id, role_id, created_at, last_login_time, is_active " +
@@ -345,48 +357,56 @@ public class DALManager {
         final String updateSql =
                 "UPDATE Users SET last_login_time = CURRENT_TIMESTAMP WHERE id = ?";
 
-        try (Connection con = connectionManager.getConnection();
-             PreparedStatement psSelect = con.prepareStatement(selectSql)) {
+        try (Connection con = connectionManager.getConnection()) {
+            con.setAutoCommit(false);
 
-            psSelect.setString(1, username);
-            psSelect.setString(2, hashedPassword);
-
-            try (ResultSet rs = psSelect.executeQuery()) {
-                if (!rs.next()) return null;
-
-                String idStr = rs.getString("id");
-                UUID id = UUID.fromString(idStr);
-
-                String fullName        = rs.getString("full_name");
-                String user            = rs.getString("username");
-                String storedHash      = rs.getString("password");
-                String tagId           = rs.getString("tag_id");
-                int    roleId          = rs.getInt("role_id");
-                LocalDateTime createdAt       = rs.getTimestamp("created_at").toLocalDateTime();
-                boolean active       = rs.getBoolean("is_active");
-
-                // update last_login_time
-                try (PreparedStatement psUpdate = con.prepareStatement(updateSql)) {
-                    psUpdate.setString(1, id.toString());
-                    psUpdate.executeUpdate();
+            UUID id;
+            User user;
+            try (PreparedStatement psSelect = con.prepareStatement(selectSql)) {
+                psSelect.setString(1, username);
+                psSelect.setString(2, hashedPassword);
+                try (ResultSet rs = psSelect.executeQuery()) {
+                    if (!rs.next()) {
+                        con.rollback();
+                        return null;
+                    }
+                    id = UUID.fromString(rs.getString("id"));
+                    user = new User(
+                            id,
+                            rs.getString("full_name"),
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getString("tag_id"),
+                            rs.getInt("role_id"),
+                            rs.getTimestamp("created_at").toLocalDateTime(),
+                            null,
+                            rs.getBoolean("is_active")
+                    );
                 }
-                LocalDateTime newLastLogin = LocalDateTime.now();
-
-                return new User(
-                        id,
-                        fullName,
-                        user,
-                        storedHash,
-                        tagId,
-                        roleId,
-                        createdAt,
-                        newLastLogin,
-                        active
-                );
             }
+
+            try (PreparedStatement psUpdate = con.prepareStatement(updateSql)) {
+                psUpdate.setObject(1, id);
+                psUpdate.executeUpdate();
+            }
+
+            insertLoginLog(con, id, "login");
+
+            con.commit();
+
+            user.setLastLoginTime(java.time.LocalDateTime.now());
+            return user;
 
         } catch (SQLException ex) {
             throw new RuntimeException("Error logging in user", ex);
+        }
+    }
+
+    public void logout(UUID userId) {
+        try (Connection con = connectionManager.getConnection()) {
+            insertLoginLog(con, userId, "logout");
+        } catch (SQLException ex) {
+            throw new RuntimeException("Error logging out user", ex);
         }
     }
 
