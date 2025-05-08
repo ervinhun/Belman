@@ -88,7 +88,7 @@ public class AdminController {
 
         if (showOrders) {
             sideBtnNotSelected.setId("sideBtnNotSelected");
-            sideBtnSelected  .setId("sideBtnSelected");
+            sideBtnSelected.setId("sideBtnSelected");
             usersImage.setImage(userDefault);
             ordersImage.setImage(ordersSel);
             newUser.setVisible(false);
@@ -96,8 +96,8 @@ public class AdminController {
 
             sideBtnNotSelected.setOnMouseEntered(e -> usersImage.setImage(userSel));
             sideBtnNotSelected.setOnMouseExited(e -> usersImage.setImage(userDefault));
-            sideBtnSelected  .setOnMouseEntered(e -> {});
-            sideBtnSelected  .setOnMouseExited(e -> {});
+            sideBtnSelected.setOnMouseEntered(e -> {});
+            sideBtnSelected.setOnMouseExited(e -> {});
 
         } else {
             sideBtnNotSelected.setId("sideBtnSelected");
@@ -109,8 +109,8 @@ public class AdminController {
 
             sideBtnNotSelected.setOnMouseEntered(e -> {});
             sideBtnNotSelected.setOnMouseExited(e -> {});
-            sideBtnSelected  .setOnMouseEntered(e -> ordersImage.setImage(ordersSel));
-            sideBtnSelected  .setOnMouseExited(e -> ordersImage.setImage(ordersDefault));
+            sideBtnSelected.setOnMouseEntered(e -> ordersImage.setImage(ordersSel));
+            sideBtnSelected.setOnMouseExited(e -> ordersImage.setImage(ordersDefault));
         }
 
         refreshContent();
@@ -139,7 +139,7 @@ public class AdminController {
 
     private VBox createOrderCard(Order order) {
         ImageView imageView = new ImageView();
-        Label    status    = new Label();
+        Label status = new Label();
 
         if (order.getPhotos().isEmpty()) {
             imageView.setImage(new Image(placeholderUrl));
@@ -174,8 +174,8 @@ public class AdminController {
     }
 
     private HBox createUserCard(User u) {
-        Label name      = new Label(u.getFullName());   name.setId("cardTitle");
-        Label role      = new Label("Role: " + u.getRole());    role.setId("cardText");
+        Label name = new Label(u.getFullName());   name.setId("cardTitle");
+        Label role = new Label("Role: " + u.getRole());    role.setId("cardText");
         Label lastLogin = new Label("Last login: " + u.getLastLoginTime()); lastLogin.setId("cardText");
 
         VBox details = new VBox(5, name, role, lastLogin);

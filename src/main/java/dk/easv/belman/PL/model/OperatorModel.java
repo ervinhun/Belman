@@ -23,4 +23,5 @@ public class OperatorModel {
     public ObservableList<Order> getOrders() {
         return orders;
     }
+
 }

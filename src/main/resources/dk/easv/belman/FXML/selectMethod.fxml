@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+
+<HBox alignment="CENTER" prefHeight="129.0" prefWidth="200.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <ImageView id="clickable" fitHeight="120.0" fitWidth="100.0" onMouseClicked="#photoUpload" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../Images/upload.png" />
+         </image>
+      </ImageView>
+      <ImageView id="clickable" fitHeight="120.0" fitWidth="100.0" layoutX="10.0" layoutY="10.0" onMouseClicked="#photoCamera" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../Images/camera.png" />
+         </image>
+      </ImageView>
+   </children>
+</HBox>
