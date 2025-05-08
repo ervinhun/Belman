@@ -13,6 +13,7 @@ public class Photo {
     // SWITCH TO USER
     private UUID deletedBy;
     private LocalDateTime deletedAt;
+    private String angle;
 
     public Photo(Long id, UUID uploadedBy, String imagePath, LocalDateTime uploadedAt, Boolean isDeleted, UUID deletedBy, LocalDateTime deletedAt)
     {
@@ -58,5 +59,11 @@ public class Photo {
     public LocalDateTime getDeletedAt()
     {
         return deletedAt;
+    }
+
+    public String getAngle() { return angle; }
+
+    public void setAngle(String angle) {
+        this.angle = angle;
     }
 }

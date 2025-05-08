@@ -2,6 +2,7 @@ package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
+import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.PL.model.QualityModel;
 import dk.easv.belman.dal.FilePaths;
@@ -20,6 +21,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class QualityController {
     @FXML
@@ -34,6 +36,17 @@ public class QualityController {
     private TextField search;
     @FXML
     Button btnSign;
+
+    // ImageViews for different angles
+    @FXML private ImageView topImage;
+    @FXML private ImageView leftImage;
+    @FXML private ImageView rightImage;
+    @FXML private ImageView frontImage;
+    @FXML private ImageView backImage;
+    @FXML private ImageView additionalImage;
+
+    private ImageView selectedImageView;
+
     @FXML private ChoiceBox<String> user;
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
@@ -55,6 +68,29 @@ public class QualityController {
             model.applySearch();
             refreshContent();
         });
+
+        setupImageClickHandlers();
+    }
+
+    private void setupImageClickHandlers() {
+        ImageView[] views = {topImage, leftImage, rightImage, frontImage, backImage, additionalImage};
+        for (ImageView iv : views) {
+            if (iv == null) continue;
+            iv.getStyleClass().add("clickable-image");
+            iv.setOnMouseClicked(e -> {
+                clearImageSelectionBorders();
+                selectedImageView = iv;
+                iv.getStyleClass().add("image-selected");
+            });
+        }
+    }
+
+    private void clearImageSelectionBorders() {
+        ImageView[] views = {topImage, leftImage, rightImage, frontImage, backImage, additionalImage};
+        for (ImageView iv : views) {
+            if (iv != null)
+                iv.getStyleClass().remove("image-selected");
+        }
     }
 
     public void setLoggedinUser(User u) {
@@ -97,7 +133,23 @@ public class QualityController {
     }
 
     @FXML
-    private void openImage() { /* move logic to model and call from here */ }
+    private void openImage() {
+        if (selectedImageView == null) {
+            showAlert("No image selected", "Please select an image to open.");
+            return;
+        }
+
+        File file = (File) selectedImageView.getUserData();
+        model.openFullImage(file);
+    }
+
+    private void showAlert(String title, String msg) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.showAndWait();
+    }
 
     @FXML
     private void deleteImage() { /* move logic to model and call from here */ }
@@ -111,6 +163,10 @@ public class QualityController {
             orderNumberToSign = orderNumber;
             borderPane.setCenter(root);
             orderLabel.setText(orderNumber);
+
+            // Load images for preview
+            loadOrderImages(orderNumber);
+
             if(model.isDocumentExists(orderNumber)) {
                 btnSign.setText("Open\nDocument");
                 btnSign.setOnAction(e -> {
@@ -123,6 +179,57 @@ public class QualityController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void loadOrderImages(String orderNumber) {
+
+        List<Photo> photos = model.getPhotosForOrder(orderNumber);
+
+
+        setPlaceholder(topImage);
+        setPlaceholder(leftImage);
+        setPlaceholder(rightImage);
+        setPlaceholder(frontImage);
+        setPlaceholder(backImage);
+        setPlaceholder(additionalImage);
+
+        for (Photo photo : photos) {
+            String angle = photo.getAngle();
+            File file = new File(photo.getImagePath());
+            Image image = file.exists() ? new Image(file.toURI().toString()) : new Image(placeholderUrl);
+
+            switch (angle.toUpperCase()) {
+                case "TOP" -> {
+                    topImage.setImage(image);
+                    topImage.setUserData(file);
+                }
+                case "LEFT" -> {
+                    leftImage.setImage(image);
+                    leftImage.setUserData(file);
+                }
+                case "RIGHT" -> {
+                    rightImage.setImage(image);
+                    rightImage.setUserData(file);
+                }
+                case "FULL" -> {
+                    frontImage.setImage(image);
+                    frontImage.setUserData(file);
+                }
+                case "BOTTOM" -> {
+                    backImage.setImage(image);
+                    backImage.setUserData(file);
+                }
+                case "ADDITIONAL" -> {
+                    additionalImage.setImage(image);
+                    additionalImage.setUserData(file);
+                }
+            }
+
+        }
+    }
+
+    private void setPlaceholder(ImageView iv) {
+        iv.setImage(new Image(placeholderUrl));
     }
 
 
