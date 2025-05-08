@@ -5,6 +5,7 @@ import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.User;
 import dk.easv.belman.PL.model.OperatorModel;
+import dk.easv.belman.bll.BLLManager;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,6 +22,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class OperatorController {
@@ -36,6 +38,8 @@ public class OperatorController {
     @FXML private ImageView additionalImage;
     @FXML private GridPane gridPane;
     private HBox selectMethod;
+    private String orderNo;
+    private ArrayList<String> fileNames = new ArrayList<>();
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private final String placeholderUrl =
@@ -50,6 +54,7 @@ public class OperatorController {
 
     @FXML
     private void initialize() {
+        //loggedinUser = null;
         model = new OperatorModel();
         refreshOrders();
     }
@@ -69,6 +74,12 @@ public class OperatorController {
     @FXML
     private void confirmImages() {
         // TODO: call model / BLL to mark photos confirmed
+    }
+
+    private void cancelUpload() {
+        fileNames.clear();
+        orderNo = null;
+        cancel();
     }
 
     private void showSelectMethod(ImageView clickedImage) {
@@ -125,6 +136,8 @@ public class OperatorController {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/selectMethod.fxml"));
             fxmlLoader.setController(this);
             selectMethod = fxmlLoader.load();
+
+            this.orderNo = orderNumber;
 
             List<ImageView> imageViews = List.of(
                     frontImage,

@@ -56,4 +56,12 @@ public class QualityModel {
     public ObjectProperty<User> loggedInUserProperty() {
         return loggedInUser;
     }
+
+    public boolean signOrder(String orderNumber) {
+        return bllManager.signOrder(orderNumber, loggedInUser.get().getId());
+    }
+
+    public boolean isDocumentExists(String orderNumber) {
+        return bllManager.isDocumentExists(orderNumber);
+    }
 }

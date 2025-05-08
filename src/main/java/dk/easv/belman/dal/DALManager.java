@@ -389,4 +389,21 @@ public class DALManager {
             throw new RuntimeException("Error logging in user", ex);
         }
     }
+
+    public boolean isDocumentExists(String orderNumber) {
+        String sql = "SELECT COUNT(*) FROM dbo.QualityCheckDoc WHERE product_id = ?";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            long productId = getProductIdFromProductNumber(orderNumber);
+            ps.setLong(1, productId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException _) {
+            throw new BelmanException("Error checking if document exists");
+        }
+        return false;
+    }
 }

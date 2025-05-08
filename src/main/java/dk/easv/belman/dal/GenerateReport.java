@@ -45,13 +45,6 @@ public class GenerateReport {
             document.addPage(page);
             availableWidth = page.getMediaBox().getWidth() - 2 * margin;
 
-            // FOR TEST creating the image paths
-            imagePaths.add("src/test/resources/test_image.jpg");
-            imagePaths.add("src/test/resources/test_image2.jpg");
-            imagePaths.add("src/test/resources/test_image31.jpeg");
-            imagePaths.add("src/test/resources/test_image4.jpg");
-            imagePaths.add("src/test/resources/test_image5.jpg");
-
             //Loading the json file
             QualityCheckJsonReader report = objectMapper.readValue(new File("report.json"), QualityCheckJsonReader.class);
             String title = report.getTitle();

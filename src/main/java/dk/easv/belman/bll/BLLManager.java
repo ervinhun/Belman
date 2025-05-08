@@ -1,9 +1,11 @@
 package dk.easv.belman.bll;
 
 import dk.easv.belman.be.Order;
+import dk.easv.belman.be.QualityDocument;
 import dk.easv.belman.be.User;
 import dk.easv.belman.dal.DALManager;
 
+import dk.easv.belman.dal.GenerateReport;
 import dk.easv.belman.exceptions.BelmanException;
 
 import java.util.List;
@@ -54,4 +56,19 @@ public class BLLManager {
     }
 
     public List<Order> getOrders(String username) { return dalManager.getOrders(username); }
+
+    public boolean signOrder(String orderNumber, UUID userId) {
+        long productId = dalManager.getProductIdFromProductNumber(orderNumber);
+        if (productId == -1) return false;
+        QualityDocument qcDoc = new QualityDocument(userId, productId);
+        GenerateReport report = new GenerateReport(orderNumber);
+        String filePath = report.getFilePath();
+        qcDoc.setQcDocPath(filePath);
+        qcDoc.setGeneratedBy(userId);
+        return dalManager.signQualityDocument(qcDoc);
+    }
+
+    public boolean isDocumentExists(String orderNumber) {
+        return dalManager.isDocumentExists(orderNumber);
+    }
 }
