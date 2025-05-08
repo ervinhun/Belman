@@ -13,6 +13,7 @@ public class UserModel {
     private final IntegerProperty roleId  = new SimpleIntegerProperty(0);
 
     private final String defaultPassword = "belman123";
+    private User editingUser;
 
     private final StringProperty errorMessage   = new SimpleStringProperty();
     private final StringProperty successMessage = new SimpleStringProperty();
@@ -34,7 +35,18 @@ public class UserModel {
             errorMessage.set("Error hashing password: " + e.getMessage());
             return;
         }
+        if (editingUser != null) {
+            editingUser.setFullName(fullName.get());
+            editingUser.setTagId(tagId.get());
+            editingUser.setRoleId(roleId.get());
+            editingUser.setPassword(bllManager.hashPass(editingUser.getUsername(), defaultPassword));
 
+            boolean ok = bllManager.updateUser(editingUser);
+            if (ok) successMessage.set("User updated.");
+            else         errorMessage.set("Update failed.");
+            editingUser = null;
+            return;
+        }
         User u = new User();
         u.setFullName(fullName.get());
         u.setUsername(username.get());
@@ -53,6 +65,14 @@ public class UserModel {
             errorMessage.set("Error creating user: " + ex.getMessage());
         }
     }
+    public void setEditingUser(User u) {
+        this.editingUser = u;
+        fullName.set(u.getFullName());
+        username.set(u.getUsername());
+        tagId.set(u.getTagId());
+        roleId.set(u.getRoleId());
+    }
+
 
     public void clear() {
         fullName.set("");

@@ -153,90 +153,7 @@ public class DALManager {
             ps.setObject(1, id);
             ps.executeUpdate();
         } catch (SQLException ex) {
-            logger.error("Error deleting user", ex);
-        }
-    }
-
-    public User login(String username, String hashedPassword) {
-        final String selectSql =
-                "SELECT id, full_name, username, password, tag_id, role_id, created_at, last_login_time, is_active " +
-                        "FROM Users WHERE username = ? AND password = ?";
-        final String updateSql =
-                "UPDATE Users SET last_login_time = CURRENT_TIMESTAMP WHERE id = ?";
-
-        try (Connection con = connectionManager.getConnection();
-             PreparedStatement psSelect = con.prepareStatement(selectSql)) {
-
-            psSelect.setString(1, username);
-            psSelect.setString(2, hashedPassword);
-
-            try (ResultSet rs = psSelect.executeQuery()) {
-                if (!rs.next()) return null;
-
-                String idStr = rs.getString("id");
-                UUID id = UUID.fromString(idStr);
-
-                String fullName        = rs.getString("full_name");
-                String user            = rs.getString("username");
-                String storedHash      = rs.getString("password");
-                String tagId           = rs.getString("tag_id");
-                int    roleId          = rs.getInt("role_id");
-                LocalDateTime createdAt       = rs.getTimestamp("created_at").toLocalDateTime();
-                boolean active       = rs.getBoolean("is_active");
-
-                // update last_login_time
-                try (PreparedStatement psUpdate = con.prepareStatement(updateSql)) {
-                    psUpdate.setString(1, id.toString());
-                    psUpdate.executeUpdate();
-                }
-                LocalDateTime newLastLogin = LocalDateTime.now();
-
-                return new User(
-                        id,
-                        fullName,
-                        user,
-                        storedHash,
-                        tagId,
-                        roleId,
-                        createdAt,
-                        newLastLogin,
-                        active
-                );
-            }
-
-        } catch (SQLException ex) {
-            logger.error("Error logging in user", ex);
-        }
-        return null;
-    }
-
-    public QualityDocument signOrder(String productNumber, UUID userId, String info, String qDocPath) {
-        String sql = "INSERT INTO dbo.QualityChecks (product_id, info, signed_by, signed_at) " +
-                "VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
-        Long newId = (long) -1;
-        long productId = getProductIdFromProductNumber(productNumber);
-        if (productId == -1) {
-            throw new BelmanException("Product not found");
-        }
-        QualityDocument qDoc = new QualityDocument(userId, productId);
-
-        try (Connection c = connectionManager.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setString(1, productNumber);
-            ps.setString(2, info);
-            ps.setObject(3, userId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                newId = rs.getLong(1);
-                qDoc.setId(newId);
-                qDoc.setProductId(productId);
-                qDoc.setGeneratedAt(rs.getTimestamp("signed_at").toLocalDateTime());
-                qDoc.setQcDocPath(qDocPath);
-            }
-            return qDoc;
-        } catch (SQLException _) {
-            throw new BelmanException("Error signing order");
+            throw new RuntimeException("Error deleting user", ex);
         }
     }
 
@@ -313,26 +230,32 @@ public class DALManager {
         }
         else
         {
-            // ADD LOGIC
-            selectSql = "SELECT * FROM Products WHERE is_deleted = 0;";
+            /*selectSql = "SELECT Products.* \n" +
+                    "FROM Products \n" +
+                    "JOIN Users ON Products.id = Users.product_id \n" +
+                    "WHERE Users.username = ?;";*/
+            selectSql = "";
         }
 
         try (Connection con = connectionManager.getConnection();
-             PreparedStatement psSelect = con.prepareStatement(selectSql);
-             ResultSet rs = psSelect.executeQuery())
+             PreparedStatement psSelect = con.prepareStatement(selectSql))
         {
+            if(username != null)
+            {
+                psSelect.setString(1, username);
+            }
+            ResultSet rs = psSelect.executeQuery();
 
             while(rs.next())
             {
                 Long id = rs.getLong("id");
                 String orderNumber = rs.getString("product_number");
-                LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
+                LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();;
                 Boolean isDeleted = rs.getBoolean("is_deleted");
-                //ADD IS SIGNED TO ORDERS IN DB
-                //Boolean isSigned = rs.getBoolean("is_signed");
+                Boolean isSigned = rs.getBoolean("is_signed");
                 List<Photo> photos = getPhotos(id);
 
-                Order o = new Order(id, orderNumber, createdAt, isDeleted, photos, false);
+                Order o = new Order(id, orderNumber, createdAt, isDeleted, photos, isSigned);
                 orders.add(o);
             }
 
@@ -345,7 +268,7 @@ public class DALManager {
         return null;
     }
 
-    public List<Photo> getPhotos(Long orderId)
+    private List<Photo> getPhotos(Long orderId)
     {
         List<Photo> photos = new ArrayList<>();
         final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ?";
@@ -361,7 +284,7 @@ public class DALManager {
                 Long id = rs.getLong("id");
                 UUID uploadedBy = rs.getObject("uploaded_by", UUID.class);
                 String imagePath = rs.getString("image_path");
-                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();
+                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();;
                 Boolean isDeleted = rs.getBoolean("is_deleted");
                 UUID deletedBy = rs.getObject("deleted_by", UUID.class);
                 Timestamp deletedAtTS = rs.getTimestamp("deleted_at");
@@ -375,9 +298,8 @@ public class DALManager {
         }
         catch (SQLException e)
         {
-            logger.error("Error fetching photos: {}", e.getMessage());
+            throw new RuntimeException("Error fetching photos: "+e.getMessage());
         }
-        return null;
     }
 
     public List<String> getPhotoPaths(String productNumber)
