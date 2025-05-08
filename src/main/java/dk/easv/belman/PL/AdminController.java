@@ -7,12 +7,14 @@ import dk.easv.belman.PL.model.AdminModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +29,7 @@ public class AdminController {
     @FXML private ImageView ordersImage;
     @FXML private BorderPane borderPane;
     @FXML private TextField search;
+    @FXML private ChoiceBox<String> user;
 
     private VBox newUserWindow;
     private UserController userController;
@@ -87,6 +90,17 @@ public class AdminController {
 
     public void setLoggedinUser(User u) {
         model.setLoggedInUser(u);
+        user.getItems().setAll(
+                u.getFullName(),
+                "Logout"
+        );
+        user.getSelectionModel().selectFirst();
+        user.setOnAction(evt -> {
+            if ("Logout".equals(user.getValue())) {
+                model.logout();
+                loggedOut();
+            }
+        });
     }
 
     private void updateTabStyles() {
@@ -128,6 +142,18 @@ public class AdminController {
         model.searchQueryProperty().set(search.getText());
         model.applySearch();
         refreshContent();
+    }
+
+    private void loggedOut() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/login.fxml"));
+            Scene scene = new Scene(fxmlLoader.load());
+            Stage stage = (Stage) user.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private void refreshContent() {
