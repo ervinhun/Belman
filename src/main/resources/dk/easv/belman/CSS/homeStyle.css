@@ -29,7 +29,10 @@
     -fx-text-fill: white;
     -fx-cursor: hand;
 }
-
+#clickable
+{
+    -fx-cursor: hand;
+}
 #link
 {
     -fx-font-size: 12px;

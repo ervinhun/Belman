@@ -1,6 +1,5 @@
 package dk.easv.belman.PL;
 
-import dk.easv.belman.be.User;
 import dk.easv.belman.PL.model.UserModel;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;

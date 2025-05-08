@@ -160,14 +160,21 @@ public class DALManager {
         }
         else
         {
-            // ADD LOGIC
-            selectSql = "SELECT * FROM Products WHERE hm;";
+            /*selectSql = "SELECT Products.* \n" +
+                    "FROM Products \n" +
+                    "JOIN Users ON Products.id = Users.product_id \n" +
+                    "WHERE Users.username = ?;";*/
+            selectSql = "";
         }
 
         try (Connection con = connectionManager.getConnection();
-             PreparedStatement psSelect = con.prepareStatement(selectSql);
-             ResultSet rs = psSelect.executeQuery())
+             PreparedStatement psSelect = con.prepareStatement(selectSql))
         {
+            if(username != null)
+            {
+                psSelect.setString(1, username);
+            }
+            ResultSet rs = psSelect.executeQuery();
 
             while(rs.next())
             {
@@ -175,11 +182,10 @@ public class DALManager {
                 String orderNumber = rs.getString("product_number");
                 LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();;
                 Boolean isDeleted = rs.getBoolean("is_deleted");
-                //ADD IS SIGNED TO ORDERS IN DB
-                //Boolean isSigned = rs.getBoolean("is_signed");
+                Boolean isSigned = rs.getBoolean("is_signed");
                 List<Photo> photos = getPhotos(id);
 
-                Order o = new Order(id, orderNumber, createdAt, isDeleted, photos, false);
+                Order o = new Order(id, orderNumber, createdAt, isDeleted, photos, isSigned);
                 orders.add(o);
             }
 

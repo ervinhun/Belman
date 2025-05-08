@@ -6,10 +6,8 @@ import dk.easv.belman.be.User;
 import dk.easv.belman.PL.model.QualityModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -17,7 +15,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +22,7 @@ import java.io.IOException;
 public class QualityController {
     @FXML private FlowPane  ordersPane;
     @FXML private BorderPane borderPane;
-    @FXML private VBox       rightBox;
+    @FXML private VBox rightBox;
     @FXML private Label      orderLabel;
     @FXML private TextField  search;
 
@@ -65,9 +62,8 @@ public class QualityController {
         borderPane.setCenter(rightBox);
     }
 
-    //@FXML private void openImage()   { /* move logic to model and call from here */ }
-    //@FXML private void deleteImage() { /* move logic to model and call from here */ }
-    //@FXML private void signOrder()   { /* move logic to model and call from here */ }
+    @FXML private void openImage()   { /* move logic to model and call from here */ }
+    @FXML private void deleteImage() { /* move logic to model and call from here */ }
 
     private void openOrder(String orderNumber) {
         try {
