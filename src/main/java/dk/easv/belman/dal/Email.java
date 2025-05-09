@@ -28,7 +28,7 @@ public class Email {
     }
 
 
-    public String encode(String input) {
+    public static String encode(String input) {
         return URLEncoder.encode(input, StandardCharsets.UTF_8);
     }
 }
