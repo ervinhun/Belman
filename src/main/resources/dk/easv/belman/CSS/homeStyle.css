@@ -76,6 +76,22 @@
     -fx-background-color: rgba(1, 158, 227, 0.05);
     -fx-text-fill: #019ee3;
 }
+#cameraButton {
+    -fx-background-color: radial-gradient(center 50% 50%, radius 60%, #ffffff, #cccccc);
+    -fx-background-radius: 100;
+    -fx-border-color: #888888;
+    -fx-border-radius: 100;
+    -fx-border-width: 3;
+    -fx-pref-width: 50px;
+    -fx-pref-height: 50px;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0.3, 0, 2);
+}
+
+#cameraButton:pressed {
+    -fx-background-color: radial-gradient(center 50% 50%, radius 60%, #dddddd, #aaaaaa);
+    -fx-effect: innershadow(gaussian, rgba(0, 0, 0, 0.4), 4, 0.3, 0, 1);
+}
 #newUser
 {
     -fx-background-color: #019ee3;

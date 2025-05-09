@@ -5,14 +5,14 @@ import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.User;
 import dk.easv.belman.PL.model.OperatorModel;
-import dk.easv.belman.bll.BLLManager;
-import javafx.collections.ObservableList;
+import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -22,10 +22,15 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class OperatorController {
     @FXML private BorderPane borderPane;
@@ -40,6 +45,9 @@ public class OperatorController {
     @FXML private ImageView additionalImage;
     @FXML private GridPane gridPane;
     @FXML private ChoiceBox<String> user;
+    @FXML private ImageView cameraImage;
+    @FXML private Button deleteBtn;
+    @FXML private Button doneBtn;
     private HBox selectMethod;
     private String orderNo;
     private ArrayList<String> fileNames = new ArrayList<>();
@@ -50,6 +58,10 @@ public class OperatorController {
     private final String addPhoto = getClass().getResource("/dk/easv/belman/Images/addPhoto.png").toExternalForm();
     private VBox previousVBox = null;
     private ImageView previousImageView = null;
+    private Webcam webcam;
+    private ScheduledExecutorService executor;
+    private VBox prevOrderView;
+    private Image takenImage;
 
     private OperatorModel model;
 
@@ -125,6 +137,76 @@ public class OperatorController {
 
     @FXML
     private void photoCamera() {
+        try
+        {
+                prevOrderView = (VBox) borderPane.getCenter();
+                FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/takeImage.fxml"));
+                loader.setController(this);
+                Parent root = loader.load();
+                borderPane.setCenter(root);
+
+                showCameraImage();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void showCameraImage()
+    {
+        deleteBtn.setVisible(false);
+        deleteBtn.setDisable(true);
+        doneBtn.setVisible(false);
+        doneBtn.setDisable(true);
+        Stage stage = (Stage) borderPane.getScene().getWindow();
+        stage.setOnCloseRequest(_ -> {
+            if (webcam != null)  webcam.close();
+            if (executor != null) executor.shutdownNow();
+        });
+
+        webcam = Webcam.getDefault();
+        webcam.setViewSize(new Dimension(640, 480));
+        webcam.open();
+
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(() -> {
+            try {
+                BufferedImage img = webcam.getImage();
+                if (img != null) {
+                    Platform.runLater(() ->
+                            cameraImage.setImage(SwingFXUtils.toFXImage(img, null))
+                    );
+                }
+            } catch (Exception _) {
+            }
+        }, 0, 100, TimeUnit.MILLISECONDS);
+    }
+
+    @FXML
+    private void takeImage()
+    {
+        executor.shutdown();
+        webcam.close();
+        deleteBtn.setVisible(true);
+        deleteBtn.setDisable(false);
+        doneBtn.setVisible(true);
+        doneBtn.setDisable(false);
+    }
+
+    @FXML
+    private void confirmImage()
+    {
+        takenImage = cameraImage.getImage();
+        borderPane.setCenter(prevOrderView);
+        previousVBox.getChildren().remove(selectMethod);
+        previousVBox.getChildren().add(previousImageView);
+        previousImageView.setImage(takenImage);
+        previousVBox = null;
+        previousImageView.setOnMouseClicked(_ -> {});
+        previousImageView.setId(null);
+        previousImageView = null;
 
     }
 
