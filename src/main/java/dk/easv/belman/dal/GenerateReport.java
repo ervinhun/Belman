@@ -179,6 +179,7 @@ public class GenerateReport {
         if (Desktop.isDesktopSupported() && pdfFile.exists()) {
             try {
                 Desktop.getDesktop().open(pdfFile);
+                Email.sendEmail("Belman Quality Control Report", "Please find the report attached.", pdfFile.getAbsolutePath());
             } catch (IOException e) {
                 logger.error("Error opening PDF: {}", e.getMessage());
             }
@@ -186,5 +187,4 @@ public class GenerateReport {
             logger.error("Desktop is not supported on this system.");
         }
     }
-
 }
