@@ -302,6 +302,38 @@ public class DALManager {
         }
     }
 
+    //photos with angle
+    public List<Photo> getPhotos(String orderNumber) {
+        long productId = getProductIdFromProductNumber(orderNumber);
+        List<Photo> photos = new ArrayList<>();
+        final String selectSql = "SELECT * FROM Photos WHERE product_id = ?";
+
+        try (Connection con = connectionManager.getConnection();
+             PreparedStatement ps = con.prepareStatement(selectSql)) {
+            ps.setLong(1, productId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String angle = rs.getString("angle");
+                Photo p = new Photo(
+                        rs.getLong("id"),
+                        rs.getObject("uploaded_by", UUID.class),
+                        rs.getString("image_path"),
+                        rs.getTimestamp("uploaded_at").toLocalDateTime(),
+                        rs.getBoolean("is_deleted"),
+                        rs.getObject("deleted_by", UUID.class),
+                        rs.getTimestamp("deleted_at") != null ? rs.getTimestamp("deleted_at").toLocalDateTime() : null
+                );
+                p.setAngle(angle);
+                photos.add(p);
+            }
+        } catch (SQLException e) {
+            logger.error("Error fetching photos for order: {}", e.getMessage());
+        }
+        return photos;
+    }
+
+
     public List<String> getPhotoPaths(String productNumber)
     {
         long orderId = getProductIdFromProductNumber(productNumber);

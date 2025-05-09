@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+
+<BorderPane minHeight="400" minWidth="600" prefHeight="400" prefWidth="600" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.PL.PhotoPreviewController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10;" BorderPane.alignment="CENTER">
+            <Button fx:id="btnBack" onAction="#goBack" style="-fx-font-size: 14px;                            -fx-background-color: transparent;                            -fx-text-fill: #019ee3;                            -fx-cursor: hand;" text="⟨ Back" />
+        </HBox>
+    </top>
+
+    <center>
+        <StackPane maxHeight="300" maxWidth="560" minHeight="300" minWidth="560" prefHeight="300" prefWidth="560" style="-fx-padding: 10;">
+            <ImageView fx:id="imageView" fitHeight="300" fitWidth="560" preserveRatio="true" style="-fx-effect: dropshadow(gaussian, gray, 12, 0.5, 0, 0);" />
+        </StackPane>
+    </center>
+
+
+    <bottom>
+        <HBox alignment="CENTER" spacing="40" style="-fx-padding: 10;">
+            <Button fx:id="btnPrev" onAction="#prevImage" style="-fx-font-size: 20px;" text="⟨" />
+            <Button fx:id="btnNext" onAction="#nextImage" style="-fx-font-size: 20px;" text="⟩" />
+        </HBox>
+    </bottom>
+
+</BorderPane>

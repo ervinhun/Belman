@@ -1,6 +1,7 @@
 package dk.easv.belman.bll;
 
 import dk.easv.belman.be.Order;
+import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.QualityDocument;
 import dk.easv.belman.be.User;
 import dk.easv.belman.dal.DALManager;
@@ -75,5 +76,9 @@ public class BLLManager {
 
     public boolean isDocumentExists(String orderNumber) {
         return dalManager.isDocumentExists(orderNumber);
+    }
+
+    public List<Photo> getPhotosForOrder(String orderNumber) {
+        return dalManager.getPhotos(orderNumber);
     }
 }
