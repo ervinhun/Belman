@@ -1,4 +1,4 @@
-package dk.easv.belman.be;
+package dk.easv.belman.NOT_USED;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
