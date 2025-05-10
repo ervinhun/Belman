@@ -230,11 +230,10 @@ public class DALManager {
         }
         else
         {
-            /*selectSql = "SELECT Products.* \n" +
+            selectSql = "SELECT Products.* \n" +
                     "FROM Products \n" +
-                    "JOIN Users ON Products.id = Users.product_id \n" +
-                    "WHERE Users.username = ?;";*/
-            selectSql = "";
+                    "JOIN Users ON Products.operator_id = Users.id \n" +
+                    "WHERE Users.username = ?;";
         }
 
         try (Connection con = connectionManager.getConnection();
@@ -250,7 +249,7 @@ public class DALManager {
             {
                 Long id = rs.getLong("id");
                 String orderNumber = rs.getString("product_number");
-                LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();;
+                LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
                 Boolean isDeleted = rs.getBoolean("is_deleted");
                 Boolean isSigned = rs.getBoolean("is_signed");
                 List<Photo> photos = getPhotos(id);
@@ -284,13 +283,14 @@ public class DALManager {
                 Long id = rs.getLong("id");
                 UUID uploadedBy = rs.getObject("uploaded_by", UUID.class);
                 String imagePath = rs.getString("image_path");
-                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();;
+                String angle = rs.getString("angle");
+                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();
                 Boolean isDeleted = rs.getBoolean("is_deleted");
                 UUID deletedBy = rs.getObject("deleted_by", UUID.class);
                 Timestamp deletedAtTS = rs.getTimestamp("deleted_at");
                 LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
 
-                Photo p = new Photo(id, uploadedBy, imagePath, uploadedAt, isDeleted, deletedBy, deletedAt);
+                Photo p = new Photo(id, uploadedBy, imagePath, angle, uploadedAt, isDeleted, deletedBy, deletedAt);
                 photos.add(p);
             }
 
@@ -303,7 +303,7 @@ public class DALManager {
     }
 
     //photos with angle
-    public List<Photo> getPhotos(String orderNumber) {
+    public List<Photo> getPhotosByONum(String orderNumber) {
         long productId = getProductIdFromProductNumber(orderNumber);
         List<Photo> photos = new ArrayList<>();
         final String selectSql = "SELECT * FROM Photos WHERE product_id = ?";
@@ -314,17 +314,16 @@ public class DALManager {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                String angle = rs.getString("angle");
                 Photo p = new Photo(
                         rs.getLong("id"),
                         rs.getObject("uploaded_by", UUID.class),
                         rs.getString("image_path"),
+                        rs.getString("angle"),
                         rs.getTimestamp("uploaded_at").toLocalDateTime(),
                         rs.getBoolean("is_deleted"),
                         rs.getObject("deleted_by", UUID.class),
                         rs.getTimestamp("deleted_at") != null ? rs.getTimestamp("deleted_at").toLocalDateTime() : null
                 );
-                p.setAngle(angle);
                 photos.add(p);
             }
         } catch (SQLException e) {
@@ -351,13 +350,14 @@ public class DALManager {
                 Long id = rs.getLong("id");
                 UUID uploadedBy = rs.getObject("uploaded_by", UUID.class);
                 String imagePath = rs.getString("image_path");
+                String angle = rs.getString("angle");
                 LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();
                 Boolean isDeleted = rs.getBoolean("is_deleted");
                 UUID deletedBy = rs.getObject("deleted_by", UUID.class);
                 Timestamp deletedAtTS = rs.getTimestamp("deleted_at");
                 LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
 
-                Photo p = new Photo(id, uploadedBy, imagePath, uploadedAt, isDeleted, deletedBy, deletedAt);
+                Photo p = new Photo(id, uploadedBy, imagePath, angle, uploadedAt, isDeleted, deletedBy, deletedAt);
                 photoPaths.add(p.getImagePath());
             }
 
@@ -368,6 +368,33 @@ public class DALManager {
             logger.error("Error fetching photos: {}", e.getMessage());
         }
         return photoPaths;
+    }
+
+    public void savePhotos(List<Photo> photos, String orderNumber) {
+        String sql = "INSERT INTO dbo.Photos (product_id, image_path, angle, uploaded_by, uploaded_at) " +
+                "VALUES (?, ?, ?, ?, ?)";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            long productId = getProductIdFromProductNumber(orderNumber);
+            if (productId == -1) {
+                throw new BelmanException("Product not found");
+            }
+            c.setAutoCommit(false);
+            for (Photo photo : photos) {
+                Timestamp uploadedAt = Timestamp.valueOf(photo.getUploadedAt());
+                ps.setLong(1, productId);
+                ps.setString(2, photo.getImagePath());
+                ps.setString(3, photo.getAngle());
+                ps.setObject(4, photo.getUploadedBy());
+                ps.setObject(5, uploadedAt);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            c.commit();
+            c.setAutoCommit(true);
+        } catch (SQLException _) {
+            throw new BelmanException("Error uploading photos");
+        }
     }
 
     private void insertLoginLog(Connection conn, UUID userId, String method) throws SQLException {

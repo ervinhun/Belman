@@ -79,6 +79,8 @@ public class BLLManager {
     }
 
     public List<Photo> getPhotosForOrder(String orderNumber) {
-        return dalManager.getPhotos(orderNumber);
+        return dalManager.getPhotosByONum(orderNumber);
     }
+
+    public void savePhotos(List<Photo> photos, String orderNumber) { dalManager.savePhotos(photos, orderNumber); }
 }
