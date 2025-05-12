@@ -3,6 +3,7 @@ package dk.easv.belman.PL;
 import com.github.sarxos.webcam.Webcam;
 import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
+import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.PL.model.OperatorModel;
 import javafx.application.Platform;
@@ -26,8 +27,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -62,6 +65,8 @@ public class OperatorController {
     private ScheduledExecutorService executor;
     private VBox prevOrderView;
     private Image takenImage;
+    private List<ImageView> imageViews;
+    private List<String> angles = List.of("Front", "Back", "Left", "Right", "Top", "Additional");
 
     private OperatorModel model;
 
@@ -70,8 +75,6 @@ public class OperatorController {
     @FXML
     private void initialize() {
         //loggedinUser = null;
-        model = new OperatorModel();
-        refreshOrders();
     }
 
     private void refreshOrders() {
@@ -88,7 +91,20 @@ public class OperatorController {
 
     @FXML
     private void confirmImages() {
-        // TODO: call model / BLL to mark photos confirmed
+        for (int i = 0; i < imageViews.size(); i++)
+        {
+            if(Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto) && i < imageViews.size() - 1)
+            {
+                System.out.println("At least 5 image is required");
+                return;
+            }
+            else if(Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto))
+            {
+                imageViews.get(i).setImage(null);
+            }
+        }
+        model.savePhotos(imageViews, angles, orderLabel.getText());
+        borderPane.setCenter(rightBox);
     }
 
     private void cancelUpload() {
@@ -207,47 +223,55 @@ public class OperatorController {
         previousImageView.setOnMouseClicked(_ -> {});
         previousImageView.setId(null);
         previousImageView = null;
-
     }
 
-    private void openOrder(String orderNumber) {
-        try {
-            FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/orderOperator.fxml"));
-            loader.setController(this);
-            Parent root = loader.load();
-            borderPane.setCenter(root);
-            orderLabel.setText(orderNumber);
+    private void openOrder(Order order, Boolean isOpenable) {
+        if(isOpenable)
+        {
+            try {
+                FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/orderOperator.fxml"));
+                loader.setController(this);
+                Parent root = loader.load();
+                borderPane.setCenter(root);
+                orderLabel.setText(order.getOrderNumber());
 
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/selectMethod.fxml"));
-            fxmlLoader.setController(this);
-            selectMethod = fxmlLoader.load();
+                FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/selectMethod.fxml"));
+                fxmlLoader.setController(this);
+                selectMethod = fxmlLoader.load();
 
-            this.orderNo = orderNumber;
+                this.orderNo = order.getOrderNumber();
 
-            List<ImageView> imageViews = List.of(
-                    frontImage,
-                    backImage,
-                    leftImage,
-                    rightImage,
-                    topImage,
-                    additionalImage
-            );
+                imageViews = List.of(
+                        frontImage,
+                        backImage,
+                        leftImage,
+                        rightImage,
+                        topImage,
+                        additionalImage
+                );
 
-            for (ImageView imageView : imageViews) {
-                imageView.setOnMouseClicked(_ -> showSelectMethod(imageView));
+                for (ImageView imageView : imageViews) {
+                    imageView.setOnMouseClicked(_ -> showSelectMethod(imageView));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        else
+        {
+            System.out.println("Order already sent for signing");
         }
     }
 
     private VBox createCard(Order order) {
         ImageView iv = new ImageView();
         Label state = new Label();
+        Boolean isOpenable;
 
         if (order.getPhotos().isEmpty()) {
             iv.setImage(new Image(placeholderUrl));
             state.setText("Status: " + states[0]);
+            isOpenable = true;
         } else {
             String raw = order.getPhotos().getFirst().getImagePath();
             File   f   = new File(raw);
@@ -257,6 +281,7 @@ public class OperatorController {
             state.setText(order.getIsSigned()
                     ? "Status: " + states[2]
                     : "Status: " + states[1]);
+            isOpenable = false;
         }
 
         iv.setFitWidth(100);
@@ -272,19 +297,24 @@ public class OperatorController {
         card.setAlignment(Pos.CENTER);
         card.setId("orderCard");
         card.setPrefHeight(160);
-        card.setOnMouseClicked(e -> openOrder(order.getOrderNumber()));
+        card.setOnMouseClicked(e -> openOrder(order, isOpenable));
 
         return card;
     }
 
     public void setLoggedinUser(User u) {
+        if(model == null)
+        {
+            model = new OperatorModel();
+        }
         model.setLoggedInUser(u);
+        refreshOrders();
         user.getItems().setAll(
                 u.getFullName(),
                 "Logout"
         );
         user.getSelectionModel().selectFirst();
-        user.setOnAction(evt -> {
+        user.setOnAction(_ -> {
             if ("Logout".equals(user.getValue())) {
                 model.logout();
                 loggedOut();

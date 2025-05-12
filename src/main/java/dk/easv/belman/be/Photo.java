@@ -15,11 +15,12 @@ public class Photo {
     private LocalDateTime deletedAt;
     private String angle;
 
-    public Photo(Long id, UUID uploadedBy, String imagePath, LocalDateTime uploadedAt, Boolean isDeleted, UUID deletedBy, LocalDateTime deletedAt)
+    public Photo(Long id, UUID uploadedBy, String imagePath, String angle, LocalDateTime uploadedAt, Boolean isDeleted, UUID deletedBy, LocalDateTime deletedAt)
     {
         this.id = id;
         this.uploadedBy = uploadedBy;
         this.imagePath = imagePath;
+        this.angle = angle;
         this.uploadedAt = uploadedAt;
         this.isDeleted = isDeleted;
         this.deletedBy = deletedBy;
@@ -62,8 +63,4 @@ public class Photo {
     }
 
     public String getAngle() { return angle; }
-
-    public void setAngle(String angle) {
-        this.angle = angle;
-    }
 }
