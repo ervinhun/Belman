@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="439.0" prefWidth="600.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <VBox prefHeight="74.0" prefWidth="600.0">
+            <children>
+                <HBox alignment="TOP_RIGHT" prefHeight="40.0" prefWidth="580.0">
+                    <children>
+                        <ChoiceBox fx:id="user" prefWidth="150.0" />
+                    </children>
+                    <opaqueInsets>
+                        <Insets />
+                    </opaqueInsets>
+                    <VBox.margin>
+                        <Insets />
+                    </VBox.margin>
+                    <padding>
+                        <Insets right="10.0" top="10.0" />
+                    </padding>
+                </HBox>
+                <Label fx:id="orderLabel" text="OrderNumber">
+                    <font>
+                        <Font name="System Bold" size="16.0" />
+                    </font>
+                </Label>
+            </children>
+            <padding>
+                <Insets bottom="10.0" left="20.0" />
+            </padding>
+        </VBox>
+        <GridPane prefHeight="290.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+            <children>
+                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+                    <children>
+                        <Label text="Left" translateX="-2.0">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <ImageView id="clickable" fx:id="leftImage" fitHeight="80.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../Images/noImg.jpg" />
+                            </image>
+                        </ImageView>
+                  <Label fx:id="uploadedByText" layoutX="99.0" layoutY="12.0" text="Uploaded by:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="uploadedAtText" layoutX="71.0" layoutY="121.0" text="Uploaded at:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                    </children>
+                </VBox>
+                <VBox alignment="CENTER" layoutX="10.0" layoutY="3.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
+                    <children>
+                        <Label text="Top" translateX="-2.0">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <ImageView id="clickable" fx:id="topImage" fitHeight="80.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../Images/noImg.jpg" />
+                            </image>
+                        </ImageView>
+                  <Label fx:id="uploadedByText1" text="Uploaded by:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="uploadedAtText1" text="Uploaded at:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                    </children>
+                </VBox>
+                <VBox alignment="CENTER" layoutX="210.0" layoutY="3.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
+                    <children>
+                        <Label text="Right" translateX="-2.0">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <ImageView id="clickable" fx:id="rightImage" fitHeight="80.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../Images/noImg.jpg" />
+                            </image>
+                        </ImageView>
+                  <Label fx:id="uploadedByText2" text="Uploaded by:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="uploadedAtText2" text="Uploaded at:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                    </children>
+                </VBox>
+                <VBox alignment="CENTER" layoutX="410.0" layoutY="3.0" prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
+                    <children>
+                        <Label text="Back" translateX="-2.0">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <ImageView id="clickable" fx:id="backImage" fitHeight="80.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../Images/noImg.jpg" />
+                            </image>
+                        </ImageView>
+                  <Label fx:id="uploadedByText3" text="Uploaded by:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="uploadedAtText3" text="Uploaded at:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                    </children>
+                </VBox>
+                <VBox alignment="CENTER" layoutX="10.0" layoutY="123.0" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                    <children>
+                        <Label text="Front" translateX="-2.0">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <ImageView id="clickable" fx:id="frontImage" fitHeight="80.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../Images/noImg.jpg" />
+                            </image>
+                        </ImageView>
+                  <Label fx:id="uploadedByText4" text="Uploaded by:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="uploadedAtText4" text="Uploaded at:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                    </children>
+                </VBox>
+                <VBox alignment="CENTER" layoutX="210.0" layoutY="123.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                    <children>
+                        <Label text="Additional" translateX="-2.0">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Label>
+                        <ImageView id="clickable" fx:id="additionalImage" fitHeight="80.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../Images/noImg.jpg" />
+                            </image>
+                        </ImageView>
+                  <Label fx:id="uploadedByText5" text="Uploaded by:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="uploadedAtText5" text="Uploaded at:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                    </children>
+                </VBox>
+            </children>
+        </GridPane>
+        <HBox prefHeight="100.0" prefWidth="200.0">
+            <children>
+                <HBox alignment="BOTTOM_LEFT" minWidth="300.0" prefHeight="88.0" prefWidth="426.0" spacing="30.0" HBox.hgrow="ALWAYS">
+                    <children>
+                        <Button id="btn" layoutX="10.0" layoutY="18.0" mnemonicParsing="false" onAction="#cancel" prefHeight="60.0" prefWidth="88.0" text="Cancel" textAlignment="CENTER" wrapText="true" />
+                    </children>
+                    <padding>
+                        <Insets bottom="20.0" />
+                    </padding>
+                </HBox>
+            <VBox alignment="CENTER" prefHeight="92.0" prefWidth="390.0">
+               <children>
+                  <Label fx:id="signedByText" text="Signed by:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="signedAtText" layoutX="115.0" layoutY="47.0" text="Signed at:">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            </children>
+            <padding>
+                <Insets left="20.0" />
+            </padding>
+        </HBox>
+    </children>
+</VBox>
