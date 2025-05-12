@@ -1,6 +1,7 @@
 package dk.easv.belman.PL.model;
 
 import dk.easv.belman.be.Order;
+import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import javafx.beans.property.*;
@@ -10,6 +11,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 
 import java.util.List;
+import java.util.UUID;
 
 public class AdminModel {
     private final BLLManager bllManager = new BLLManager();
@@ -85,4 +87,8 @@ public class AdminModel {
     public StringProperty      currentPageProperty()   { return currentPage;   }
     public StringProperty      searchQueryProperty()   { return searchQuery;   }
     public ObjectProperty<User> loggedInUserProperty() { return loggedInUser;  }
+
+    public List<Photo> getPhotosForOrder(String orderNumber) {
+        return bllManager.getPhotosForOrder(orderNumber);
+    }
 }

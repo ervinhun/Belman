@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class QualityController {
+public class QualityController extends AbstractOrderController {
     @FXML
     private FlowPane ordersPane;
     @FXML
@@ -84,7 +84,6 @@ public class QualityController {
 
             iv.setOnMouseClicked(e -> {
                 if (iv.equals(selectedImageView)) {
-                    // Зняти виділення при повторному кліку
                     iv.getStyleClass().remove("image-selected");
                     selectedImageView = null;
                 } else {
@@ -96,40 +95,11 @@ public class QualityController {
         }
     }
 
-
-
     private void clearImageSelectionBorders() {
         ImageView[] views = {topImage, leftImage, rightImage, frontImage, backImage, additionalImage};
         for (ImageView iv : views) {
             if (iv != null)
                 iv.getStyleClass().remove("image-selected");
-        }
-    }
-
-    public void setLoggedinUser(User u) {
-        model.setLoggedInUser(u);
-        user.getItems().setAll(
-                u.getFullName(),
-                "Logout"
-        );
-        user.getSelectionModel().selectFirst();
-        user.setOnAction(evt -> {
-            if ("Logout".equals(user.getValue())) {
-                model.logout();
-                loggedOut();
-            }
-        });
-    }
-
-    private void loggedOut() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/login.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-            Stage stage = (Stage) user.getScene().getWindow();
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
         }
     }
 
@@ -179,30 +149,6 @@ public class QualityController {
     @FXML
     private void deleteImage() { /* move logic to model and call from here */ }
 
-    private void openOrder(String orderNumber) {
-        try {
-            FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/orderQuality.fxml"));
-            loader.setController(this);
-            Parent root = loader.load();
-            orderNumberToSign = orderNumber;
-            borderPane.setCenter(root);
-            orderLabel.setText(orderNumber);
-
-            loadOrderImages(orderNumber);
-
-            setupImageClickHandlers();
-
-            if (model.isDocumentExists(orderNumber)) {
-                btnSign.setText("Open\nDocument");
-                btnSign.setOnAction(e -> new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumber + "/report.pdf"));
-            } else {
-                btnSign.setText("Sign\nOrder");
-                btnSign.setOnAction(e -> signOrder());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     private void openFullImage(File file) {
         Image image = model.getFullImage(file);
         if (image == null) {
@@ -220,55 +166,6 @@ public class QualityController {
         stage.setTitle("Image Preview");
         stage.setScene(new Scene(container));
         stage.show();
-    }
-
-
-
-    private void loadOrderImages(String orderNumber) {
-
-        List<Photo> photos = model.getPhotosForOrder(orderNumber);
-
-
-        setPlaceholder(topImage);
-        setPlaceholder(leftImage);
-        setPlaceholder(rightImage);
-        setPlaceholder(frontImage);
-        setPlaceholder(backImage);
-        setPlaceholder(additionalImage);
-
-        for (Photo photo : photos) {
-            String angle = photo.getAngle();
-            File file = new File(photo.getImagePath());
-            Image image = file.exists() ? new Image(file.toURI().toString()) : new Image(placeholderUrl);
-
-            switch (angle.toUpperCase()) {
-                case "TOP" -> {
-                    topImage.setImage(image);
-                    topImage.setUserData(file);
-                }
-                case "LEFT" -> {
-                    leftImage.setImage(image);
-                    leftImage.setUserData(file);
-                }
-                case "RIGHT" -> {
-                    rightImage.setImage(image);
-                    rightImage.setUserData(file);
-                }
-                case "FULL" -> {
-                    frontImage.setImage(image);
-                    frontImage.setUserData(file);
-                }
-                case "BOTTOM" -> {
-                    backImage.setImage(image);
-                    backImage.setUserData(file);
-                }
-                case "ADDITIONAL" -> {
-                    additionalImage.setImage(image);
-                    additionalImage.setUserData(file);
-                }
-            }
-
-        }
     }
 
     private void setPlaceholder(ImageView iv) {
@@ -327,7 +224,32 @@ public class QualityController {
         card.setId("orderCard");
         card.setPrefHeight(160);
         card.getProperties().put("orderNum", order.getOrderNumber());
-        card.setOnMouseClicked(e -> openOrder(order.getOrderNumber()));
+        card.setOnMouseClicked(e ->
+                openOrderDetail("FXML/orderQuality.fxml", order.getOrderNumber())
+        );
         return card;
+    }
+
+    @Override
+    protected List<Photo> getPhotosForOrder(String orderNumber) {
+        return model.getPhotosForOrder(orderNumber);
+    }
+
+    @Override
+    protected void onUserLogout() {
+        model.logout();
+    }
+
+    @Override
+    protected void onDetailLoaded(String orderNumber) {
+        if (model.isDocumentExists(orderNumber)) {
+            btnSign.setText("Open\nDocument");
+            btnSign.setOnAction(e ->
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumber + "/report.pdf")
+            );
+        } else {
+            btnSign.setText("Sign\nOrder");
+            btnSign.setOnAction(e -> signOrder());
+        }
     }
 }

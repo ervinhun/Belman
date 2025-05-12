@@ -2,6 +2,7 @@ package dk.easv.belman.PL;
 
 import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
+import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.PL.model.AdminModel;
 import javafx.fxml.FXML;
@@ -18,8 +19,10 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-public class AdminController {
+public class AdminController extends AbstractOrderController{
     @FXML private FlowPane  contentPane;
     @FXML private Label     currentP;
     @FXML private Button    newUser;
@@ -48,6 +51,16 @@ public class AdminController {
             new Image(getClass().getResourceAsStream("/dk/easv/belman/Images/ordersDef.png"));
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
+
+    @FXML private Label uploadedByText,  uploadedAtText;
+    @FXML private Label uploadedByText1, uploadedAtText1;
+    @FXML private Label uploadedByText2, uploadedAtText2;
+    @FXML private Label uploadedByText3, uploadedAtText3;
+    @FXML private Label uploadedByText4, uploadedAtText4;
+    @FXML private Label uploadedByText5, uploadedAtText5;
+
+    private final DateTimeFormatter dtf =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final AdminModel model = new AdminModel();
 
@@ -86,21 +99,6 @@ public class AdminController {
         model.currentPageProperty().set("Create user");
         newUser.setVisible(false);
         newUser.setDisable(true);
-    }
-
-    public void setLoggedinUser(User u) {
-        model.setLoggedInUser(u);
-        user.getItems().setAll(
-                u.getFullName(),
-                "Logout"
-        );
-        user.getSelectionModel().selectFirst();
-        user.setOnAction(evt -> {
-            if ("Logout".equals(user.getValue())) {
-                model.logout();
-                loggedOut();
-            }
-        });
     }
 
     private void updateTabStyles() {
@@ -142,18 +140,6 @@ public class AdminController {
         model.searchQueryProperty().set(search.getText());
         model.applySearch();
         refreshContent();
-    }
-
-    private void loggedOut() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/login.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-            Stage stage = (Stage) user.getScene().getWindow();
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
     }
 
     private void refreshContent() {
@@ -203,6 +189,9 @@ public class AdminController {
         card.setAlignment(Pos.CENTER);
         card.setId("orderCard");
         card.getProperties().put("orderNum", order.getOrderNumber());
+        card.setOnMouseClicked(e ->
+                openOrderDetail("FXML/orderAdmin.fxml", order.getOrderNumber())
+        );
         return card;
     }
 
@@ -239,4 +228,62 @@ public class AdminController {
         userController.setEditingUser(u);
     }
 
+    @Override
+    protected List<Photo> getPhotosForOrder(String orderNumber) {
+        return model.getPhotosForOrder(orderNumber);
+    }
+
+    @Override
+    protected void onUserLogout() {
+        model.logout();
+    }
+
+    @Override
+    protected void onDetailLoaded(String orderNumber) {
+        // clear any old text
+        for (Label lbl : List.of(
+                uploadedByText, uploadedAtText,
+                uploadedByText1, uploadedAtText1,
+                uploadedByText2, uploadedAtText2,
+                uploadedByText3, uploadedAtText3,
+                uploadedByText4, uploadedAtText4,
+                uploadedByText5, uploadedAtText5
+        )) {
+            lbl.setText("");
+        }
+
+        List<Photo> photos = model.getPhotosForOrder(orderNumber);
+        for (Photo p : photos) {
+            String angle = p.getAngle().toUpperCase();
+            String id  = p.getUploadedBy().toString();
+            String when  = dtf.format(p.getUploadedAt());
+
+            switch (angle) {
+                case "LEFT"        -> {
+                    uploadedByText.setText(id);
+                    uploadedAtText.setText(when);
+                }
+                case "TOP"         -> {
+                    uploadedByText1.setText(id);
+                    uploadedAtText1.setText(when);
+                }
+                case "RIGHT"       -> {
+                    uploadedByText2.setText(id);
+                    uploadedAtText2.setText(when);
+                }
+                case "BACK"        -> {
+                    uploadedByText3.setText(id);
+                    uploadedAtText3.setText(when);
+                }
+                case "FULL", "FRONT" -> {
+                    uploadedByText4.setText(id);
+                    uploadedAtText4.setText(when);
+                }
+                case "ADDITIONAL"  -> {
+                    uploadedByText5.setText(id);
+                    uploadedAtText5.setText(when);
+                }
+            }
+        }
+    }
 }
