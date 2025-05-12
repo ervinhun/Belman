@@ -159,16 +159,21 @@ public class AdminController {
     private void refreshContent() {
         contentPane.getChildren().clear();
 
-        if (model.showingOrdersProperty().get()) {
-            for (Order o : model.getFilteredOrders()) {
-                contentPane.getChildren().add(createOrderCard(o));
+        if (!model.showingOrdersProperty().get()) {
+            for (User user : model.getFilteredUsers()) {
+                HBox card = loadUserCard(user);
+                contentPane.getChildren().add(card);
             }
-        } else {
-            for (User u : model.getFilteredUsers()) {
-                contentPane.getChildren().add(createUserCard(u));
+        }
+        else {
+            for (Order order : model.getFilteredOrders()) {
+                VBox card = createOrderCard(order);
+                contentPane.getChildren().add(card);
             }
         }
     }
+
+
 
     private VBox createOrderCard(Order order) {
         ImageView imageView = new ImageView();
@@ -206,37 +211,26 @@ public class AdminController {
         return card;
     }
 
-    private HBox createUserCard(User u) {
-        Label name = new Label(u.getFullName());   name.setId("cardTitle");
-        Label role = new Label("Role: " + u.getRole());    role.setId("cardText");
-        Label lastLogin = new Label("Last login: " + u.getLastLoginTime()); lastLogin.setId("cardText");
+    private HBox loadUserCard(User u) {
+        try {
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/userCard.fxml"));
+            HBox card = loader.load();
 
-        VBox details = new VBox(5, name, role, lastLogin);
-        details.setId("cardDetails");
+            UserCardController controller = loader.getController();
 
-        Button edit = new Button("✎");
-        edit.getStyleClass().add("edit_button");
-        edit.setOnAction(e -> editUser(u));
+            controller.setData(u, model, this, this::refreshContent);
 
-        Button del = new Button("🗑");
-        del.getStyleClass().add("delete_button");
-        del.setOnAction(e -> {
-            model.deleteUser(u);
-            refreshContent();
-        });
-
-        HBox controls = new HBox(5, edit, del);
-        controls.setAlignment(Pos.CENTER_RIGHT);
-
-        HBox card = new HBox(20, details, controls);
-        card.setId("userCard");
-        card.getProperties().put("username", u.getUsername());
-        return card;
+            return card;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new HBox();
+        }
     }
 
-    private void editUser(User u) {
+    public void editUser(User u) {
         newUserTab();
         userController.setEditingUser(u);
     }
+
 
 }
