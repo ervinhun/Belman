@@ -14,14 +14,13 @@ import dk.easv.belman.exceptions.BelmanException;
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
+import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.*;
 import java.io.*;
 import java.security.GeneralSecurityException;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -32,7 +31,7 @@ public class GmailService {
     private static final List<String> SCOPES = Collections.singletonList("https://www.googleapis.com/auth/gmail.send");
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
-    private Gmail service;
+    private final Gmail service;
 
     public GmailService() throws BelmanException, GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -54,7 +53,7 @@ public class GmailService {
     }
 
     public void sendEmailWithAttachment(String userId, String to, String subject,
-                                        String bodyText, File file) throws Exception {
+                                        String bodyText, File file) throws BelmanException, IOException, MessagingException {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
 
@@ -78,7 +77,8 @@ public class GmailService {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         email.writeTo(buffer);
         byte[] rawMessageBytes = buffer.toByteArray();
-        String encodedEmail = com.google.api.client.util.Base64.encodeBase64URLSafeString(rawMessageBytes);
+        //String encodedEmail = com.google.api.client.util.Base64.encodeBase64URLSafeString(rawMessageBytes);
+        String encodedEmail = Base64.getUrlEncoder().encodeToString(rawMessageBytes);
 
         Message message = new Message();
         message.setRaw(encodedEmail);

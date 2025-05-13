@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class GenerateReportTest {
-    private String productNoString = "I524-08641";
+    private String productNoString = "I524-08642";
     GenerateReportTest() {
     }
 
