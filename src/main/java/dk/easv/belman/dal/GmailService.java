@@ -5,10 +5,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.gmail.Gmail;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
+import dk.easv.belman.exceptions.BelmanException;
+
 
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
@@ -19,26 +21,26 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import java.io.*;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-public class Gmail {
+public class GmailService {
     private static final String APPLICATION_NAME = "GmailFXSender";
-    private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Collections.singletonList("https://www.googleapis.com/auth/gmail.send");
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
     private Gmail service;
 
-    public void GmailService() throws Exception {
+    public GmailService() throws BelmanException, GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        InputStream in = getClass().getResourceAsStream("/credentials.json");
+        InputStream in = getClass().getResourceAsStream("/credential.json");
         if (in == null) {
-            throw new FileNotFoundException("credentials.json not found");
+            throw new FileNotFoundException("credential.json not found");
         }
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new File(TOKENS_DIRECTORY_PATH)))

@@ -34,9 +34,9 @@ public class GenerateReport {
         float margin = 40;
         float availableWidth;
         float minY = 100;
-        ArrayList<String> imagePaths = new ArrayList<>();
         DALManager dalManager = new DALManager();
-        imagePaths.addAll(dalManager.getPhotoPaths(productNo));
+        ArrayList<String> imagePaths = new ArrayList<>(dalManager.getPhotoPathsForReport(productNo));
+
         // Create a new PDF document
 
         try (PDDocument document = new PDDocument()) {
@@ -165,7 +165,7 @@ public class GenerateReport {
             document.save(filePath + "/" + FILE_NAME);
             openDocument(productNo);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Error generating PDF: {}", e.getMessage());
         }
     }
@@ -174,7 +174,7 @@ public class GenerateReport {
         return FilePaths.REPORT_DIRECTORY + productNo + "/" + FILE_NAME;
     }
 
-    public void openDocument(String productNumber) {
+    public void openDocument(String productNumber) throws Exception {
         File pdfFile = new File(FilePaths.BASE_PATH + "report/" + productNumber + "/report.pdf");
         if (Desktop.isDesktopSupported() && pdfFile.exists()) {
             try {
@@ -185,6 +185,11 @@ public class GenerateReport {
         } else {
             logger.error("Desktop is not supported on this system.");
         }
+        GmailService gmailService = new GmailService();
+        try {
+            gmailService.sendEmailWithAttachment("me", "nyeres@gmail.com", "Quality Check Report", "Please find the attached report.", pdfFile);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
-
 }
