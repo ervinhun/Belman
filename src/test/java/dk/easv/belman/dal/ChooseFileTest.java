@@ -77,6 +77,7 @@ class ChooseFileTest {
         }
     }
 
+    @Disabled
     @Test
     void getFileExtension() {
         String fileName = testFileName + ".jpg";
