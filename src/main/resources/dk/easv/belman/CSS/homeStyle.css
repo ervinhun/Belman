@@ -143,12 +143,6 @@
 {
     -fx-background-color: #E8E8E8;
     -fx-border-color: #019ee3;
-    -fx-border-width: 2px;
-    -fx-border-radius: 10px;
-    -fx-background-radius: 10px;
-    -fx-pref-width: 220px;
-    -fx-pref-height: 80px;
-    -fx-padding: 10px 10px 10px 10px;
 
 }.popup_background {
      -fx-background-color: #FFFFFF;
