@@ -116,4 +116,8 @@ fabric.properties
 
 /target/**
 
+# credential file for gmail
+/src/main/resources/credential.json
+
+
 # End of https://www.toptal.com/developers/gitignore/api/intellij

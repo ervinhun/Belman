@@ -1,5 +1,6 @@
 package dk.easv.belman.dal;
 
+import dk.easv.belman.exceptions.BelmanException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -13,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,9 +36,9 @@ public class GenerateReport {
         float margin = 40;
         float availableWidth;
         float minY = 100;
-        ArrayList<String> imagePaths = new ArrayList<>();
         DALManager dalManager = new DALManager();
-        imagePaths.addAll(dalManager.getPhotoPaths(productNo));
+        ArrayList<String> imagePaths = new ArrayList<>(dalManager.getPhotoPathsForReport(productNo));
+
         // Create a new PDF document
 
         try (PDDocument document = new PDDocument()) {
@@ -166,7 +168,13 @@ public class GenerateReport {
             openDocument(productNo);
 
         } catch (IOException e) {
-            logger.error("Error generating PDF: {}", e.getMessage());
+            logger.error("I/O error while generating PDF: {}", e.getMessage());
+        } catch (IllegalStateException e) {
+            logger.error("Illegal state encountered while generating PDF: {}", e.getMessage());
+        } catch (SecurityException e) {
+            logger.error("Security exception while accessing file system: {}", e.getMessage());
+            } catch (Exception e) {
+            throw new BelmanException(e.getMessage());
         }
     }
 
@@ -185,6 +193,16 @@ public class GenerateReport {
         } else {
             logger.error("Desktop is not supported on this system.");
         }
+        GmailService gmailService = null;
+        try {
+            gmailService = new GmailService();
+        } catch (GeneralSecurityException | IOException e) {
+            throw new BelmanException(e.getMessage());
+        }
+        try {
+            gmailService.sendEmailWithAttachment("me", "nyeres@gmail.com", "Quality Check Report", "Please find the attached report.", pdfFile);
+        } catch (Exception e) {
+            logger.error("Error while trying to send an e-mail: {}", e.getMessage());
+        }
     }
-
 }

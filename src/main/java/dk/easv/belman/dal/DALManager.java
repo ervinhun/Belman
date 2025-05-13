@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -337,7 +338,7 @@ public class DALManager {
     {
         long orderId = getProductIdFromProductNumber(productNumber);
         List<String> photoPaths = new ArrayList<>();
-        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ?";
+        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ? ORDER BY angle";
 
         try(Connection con = connectionManager.getConnection();
             PreparedStatement psSelect = con.prepareStatement(selectSql))
@@ -368,6 +369,30 @@ public class DALManager {
             logger.error("Error fetching photos: {}", e.getMessage());
         }
         return photoPaths;
+    }
+
+    public List<String> getPhotoPathsForReport(String productNumber)
+    {
+        long orderId = getProductIdFromProductNumber(productNumber);
+        List<String> photoPaths = new ArrayList<>();
+        final String selectSql = "SELECT * FROM Photos WHERE product_id = ? ORDER BY angle";
+
+        try(Connection con = connectionManager.getConnection();
+            PreparedStatement psSelect = con.prepareStatement(selectSql))
+        {
+            psSelect.setObject(1, orderId);
+            ResultSet rs = psSelect.executeQuery();
+            while(rs.next())
+            {
+                photoPaths.add(rs.getString("image_path"));
+            }
+            return photoPaths;
+        }
+        catch (SQLException e)
+        {
+            logger.error("Error fetching photos: {}", e.getMessage());
+        }
+        return Collections.emptyList();
     }
 
     public void savePhotos(List<Photo> photos, String orderNumber) {
