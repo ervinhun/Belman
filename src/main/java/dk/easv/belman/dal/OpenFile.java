@@ -12,7 +12,7 @@ public class OpenFile {
             try {
                 Desktop.getDesktop().open(fileToOpen);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         } else {
             System.out.println("Desktop is not supported on this system.");
@@ -25,7 +25,7 @@ public class OpenFile {
             try {
                 Desktop.getDesktop().open(fileToOpen);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         } else {
             System.out.println("Desktop is not supported on this system.");
