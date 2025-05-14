@@ -242,7 +242,7 @@ public class QualityController extends AbstractOrderController {
 
     @Override
     protected void onDetailLoaded(String orderNumber) {
-        this.orderNumberToSign = orderNumber;
+        this.orderNumberToSign = orderNumber;//
         if (model.isDocumentExists(orderNumber)) {
             btnSign.setText("Open\nDocument");
             btnSign.setOnAction(e ->
