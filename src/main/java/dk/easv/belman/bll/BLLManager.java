@@ -63,11 +63,12 @@ public class BLLManager {
 
     public List<Order> getOrders(String username) { return dalManager.getOrders(username); }
 
-    public boolean signOrder(String orderNumber, UUID userId) {
+    public boolean signOrder(String orderNumber, UUID userId, boolean isSendingEmail, String email) {
         long productId = dalManager.getProductIdFromProductNumber(orderNumber);
         if (productId == -1) return false;
         QualityDocument qcDoc = new QualityDocument(userId, productId);
-        GenerateReport report = new GenerateReport(orderNumber);
+        User user = dalManager.getUserById(userId);
+        GenerateReport report = new GenerateReport(orderNumber, user, isSendingEmail, email);
         String filePath = report.getFilePath();
         qcDoc.setQcDocPath(filePath);
         qcDoc.setGeneratedBy(userId);

@@ -37,6 +37,10 @@ public class QualityController extends AbstractOrderController {
     private TextField search;
     @FXML
     Button btnSign;
+    @FXML
+    private TextField txtemail;
+    @FXML
+    private CheckBox cbSendingEmail;
 
     // ImageViews for different angles
     @FXML private ImageView topImage;
@@ -57,6 +61,7 @@ public class QualityController extends AbstractOrderController {
 
     private QualityModel model;
     private String orderNumberToSign;
+    private final static String reportFileName = "/report.pdf";
 
     @FXML
     private void initialize() {
@@ -182,10 +187,13 @@ public class QualityController extends AbstractOrderController {
 
             return;
         }
-        if (model.signOrder(orderNumberToSign)) {
+        if (model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())) {
             btnSign.setText("Open\nDocument");
             btnSign.setOnAction(e -> {
-                OpenFile openFile = new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + "/report.pdf");
+                if (cbSendingEmail.isSelected())
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName, true, txtemail.getText());
+                else
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName);
             });
 
             cancel(); // This resets the view to the previous screen
@@ -228,6 +236,16 @@ public class QualityController extends AbstractOrderController {
                 openOrderDetail("FXML/orderQuality.fxml", order.getOrderNumber())
         );
         return card;
+    }
+
+    @FXML
+    private void cbSendingEmailClicked() {
+        txtemail.setVisible(!txtemail.isVisible());
+        if (cbSendingEmail.isSelected())
+            new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName, true, txtemail.getText());
+        else
+            new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName);
+
     }
 
     @Override

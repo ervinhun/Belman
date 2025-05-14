@@ -18,4 +18,17 @@ public class OpenFile {
             System.out.println("Desktop is not supported on this system.");
         }
     }
+
+    public OpenFile(String filePath, boolean isSendingEmail, String email) {
+        File fileToOpen = new File(filePath);
+        if (Desktop.isDesktopSupported() && fileToOpen.exists()) {
+            try {
+                Desktop.getDesktop().open(fileToOpen);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Desktop is not supported on this system.");
+        }
+    }
 }
