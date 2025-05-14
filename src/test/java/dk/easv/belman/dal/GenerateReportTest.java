@@ -6,6 +6,10 @@
 package dk.easv.belman.dal;
 
 import java.io.File;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import dk.easv.belman.be.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -20,8 +24,10 @@ class GenerateReportTest {
     @Test
     void GenerateReport() {
         final String[] generatedFilePath = {""};
+        User user = new User(UUID.randomUUID(), "Test Albert", "test", "Test", "001", 2, null, null, true);
+
         Assertions.assertDoesNotThrow(() -> {
-            GenerateReport generateReport = new GenerateReport(productNoString);
+            GenerateReport generateReport = new GenerateReport(productNoString, user, true, "nyeres@gmail.com");
             generatedFilePath[0] = generateReport.getFilePath();
         });
         String reportFilePath = FilePaths.REPORT_DIRECTORY + productNoString + "/report.pdf";
