@@ -78,8 +78,8 @@ public class QualityModel {
         return loggedInUser;
     }
 
-    public boolean signOrder(String orderNumber) {
-        return bllManager.signOrder(orderNumber, loggedInUser.get().getId());
+    public boolean signOrder(String orderNumber, boolean isSendingEmail, String email) {
+        return bllManager.signOrder(orderNumber, loggedInUser.get().getId(), isSendingEmail, email);
     }
 
     public boolean isDocumentExists(String orderNumber) {

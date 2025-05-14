@@ -12,7 +12,20 @@ public class OpenFile {
             try {
                 Desktop.getDesktop().open(fileToOpen);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        } else {
+            System.out.println("Desktop is not supported on this system.");
+        }
+    }
+
+    public OpenFile(String filePath, boolean isSendingEmail, String email) {
+        File fileToOpen = new File(filePath);
+        if (Desktop.isDesktopSupported() && fileToOpen.exists()) {
+            try {
+                Desktop.getDesktop().open(fileToOpen);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         } else {
             System.out.println("Desktop is not supported on this system.");

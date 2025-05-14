@@ -180,9 +180,24 @@ public class DALManager {
         String sqlQualityDocument = "INSERT INTO dbo.QualityCheckDoc (generated_by, product_id, generated_at, qc_doc_path) " +
                 "VALUES (?, ?, CURRENT_TIMESTAMP, ?)";
 
+        // Merge statement to update or insert into QualityChecks table
+        String sqlUpdateQuailityCheck = "MERGE dbo.QualityChecks AS target " +
+                "USING (SELECT ? AS product_id, ? AS info, ? AS signed_at, ? AS signed_by, 1 AS is_signed) AS source " +
+                "    ON target.product_id = source.product_id " +
+                "WHEN MATCHED THEN " +
+                "    UPDATE SET " +
+                "        is_signed = 1, " +
+                "        signed_at = source.signed_at, " +
+                "        signed_by = source.signed_by, " +
+                "        info = source.info " +
+                "WHEN NOT MATCHED THEN " +
+                "    INSERT (product_id, info, signed_at, signed_by, is_signed) " +
+                "    VALUES (source.product_id, source.info, source.signed_at, source.signed_by, 1); ";
+
         try (Connection c = connectionManager.getConnection();
              PreparedStatement psPhotos = c.prepareStatement(sqlPhotos);
-             PreparedStatement psQualityDocument = c.prepareStatement(sqlQualityDocument)) {
+             PreparedStatement psQualityDocument = c.prepareStatement(sqlQualityDocument);
+             PreparedStatement psUpdateQualityCheck = c.prepareStatement(sqlUpdateQuailityCheck)) {
 
             psPhotos.setLong(1, qcDoc.getProductId());
             int rowsUpdated = psPhotos.executeUpdate();
@@ -197,11 +212,21 @@ public class DALManager {
             if (rowsUpdated > 0) {
                 noOfTableUpdated++;
             }
+
+            psUpdateQualityCheck.setLong(1, qcDoc.getProductId());
+            //Later if we need to add the info, we can add it here
+            psUpdateQualityCheck.setString(2, "");
+            psUpdateQualityCheck.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            psUpdateQualityCheck.setObject(4, qcDoc.getGeneratedBy());
+            rowsUpdated = psUpdateQualityCheck.executeUpdate();
+            if (rowsUpdated > 0) {
+                noOfTableUpdated++;
+            }
         } catch (SQLException _) {
             throw new BelmanException("Error signing quality document");
         }
 
-        return noOfTableUpdated == 2;
+        return noOfTableUpdated >= 2;
     }
 
     public boolean checkIfDocumentExists(String orderNumber) {
@@ -509,5 +534,31 @@ public class DALManager {
             throw new BelmanException("Error checking if document exists");
         }
         return false;
+    }
+
+    public User getUserById(UUID userId) {
+        String sql = "SELECT * FROM Users WHERE id = ? AND is_active = 1";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setObject(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new User(
+                        rs.getObject("id", UUID.class),
+                        rs.getString("full_name"),
+                        rs.getString("username"),
+                        rs.getString("password"),
+                        rs.getString("tag_id"),
+                        rs.getInt("role_id"),
+                        rs.getTimestamp("created_at").toLocalDateTime(),
+                        null,
+                        rs.getBoolean("is_active")
+                );
+            }
+        } catch (SQLException e) {
+            logger.error("Error fetching user by ID: {}", e.getMessage());
+        }
+        return null;
     }
 }

@@ -1,5 +1,6 @@
 package dk.easv.belman.dal;
 
+import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -28,9 +29,16 @@ public class GenerateReport {
     }
     private final String productNo;
     private static final String FILE_NAME = "report.pdf";
+    private boolean isSendingEmail;
+    private String email;
 
-    public GenerateReport(String productNumber) {
+
+
+
+    public GenerateReport(String productNumber, User loggedInUser, boolean isSendingEmail, String email) {
         this.productNo = productNumber;
+        this.isSendingEmail = isSendingEmail;
+        this.email = email;
         String filePath = FilePaths.REPORT_DIRECTORY + productNo;
         float currentYPosition = 0;
         float margin = 40;
@@ -155,7 +163,7 @@ public class GenerateReport {
             contentStream.newLineAtOffset(400, footerY);
             contentStream.showText(signedBy);
             contentStream.newLineAtOffset(50, -15);
-            contentStream.showText("Søren");
+            contentStream.showText(loggedInUser.getFullName());
             contentStream.endText();
 
             contentStream.close();
@@ -193,16 +201,24 @@ public class GenerateReport {
         } else {
             logger.error("Desktop is not supported on this system.");
         }
-        GmailService gmailService = null;
-        try {
-            gmailService = new GmailService();
-        } catch (GeneralSecurityException | IOException e) {
-            throw new BelmanException(e.getMessage());
-        }
-        try {
-            gmailService.sendEmailWithAttachment("me", "nyeres@gmail.com", "Quality Check Report", "Please find the attached report.", pdfFile);
-        } catch (Exception e) {
-            logger.error("Error while trying to send an e-mail: {}", e.getMessage());
+        if (isSendingEmail && pdfFile.exists()) {
+
+            GmailService gmailService = null;
+            try {
+                gmailService = new GmailService();
+            } catch (GeneralSecurityException | IOException e) {
+                throw new BelmanException(e.getMessage());
+            }
+            try {
+                if (email != null && !email.isEmpty()) {
+                    gmailService.sendEmailWithAttachment("me", "nyeres@gmail.com",
+                            "Quality Check Report", "Please find the attached report.", pdfFile);
+                } else {
+                    logger.error("Email address is null or empty.");
+                }
+            } catch (Exception e) {
+                logger.error("Error while trying to send an e-mail: {}", e.getMessage());
+            }
         }
     }
 }
