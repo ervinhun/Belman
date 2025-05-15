@@ -239,7 +239,7 @@ public class OperatorController {
                     imageView.setOnMouseClicked(_ -> showSelectMethod(imageView));
                 }
             } catch (IOException e) {
-                logger.error("I/O exception in Operator controller, LN 242: {0}", e);
+                logger.error("I/O exception in Operator controller, LN 242: {}", e);
             }
         }
         else

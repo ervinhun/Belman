@@ -17,6 +17,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.*;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -222,10 +223,26 @@ public class GenerateReport {
         return bufferedImages;
     }
 
-    private void sleepForFileCreation (String filepath) throws InterruptedException {
+    private void sleepForFileCreation(String filepath) throws IOException, InterruptedException {
         File file = new File(filepath);
-        while (!file.exists()) {
-            Thread.sleep(1000);
+        if (file.exists()) {
+            return;
+        }
+        Path directory = file.getParentFile().toPath();
+        try (WatchService watchService = directory.getFileSystem().newWatchService()) {
+            directory.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
+            while (true) {
+                WatchKey key = watchService.take();
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    Path createdFile = directory.resolve((Path) event.context());
+                    if (createdFile.toFile().equals(file)) {
+                        return;
+                    }
+                }
+                if (!key.reset()) {
+                    break;
+                }
+            }
         }
     }
 
