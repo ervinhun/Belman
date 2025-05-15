@@ -65,8 +65,8 @@ public abstract class AbstractOrderController extends BaseController {
                 case "TOP"        -> assign(topImage, f, img);
                 case "LEFT"       -> assign(leftImage, f, img);
                 case "RIGHT"      -> assign(rightImage, f, img);
-                case "FULL"       -> assign(frontImage, f, img);
-                case "BOTTOM"     -> assign(backImage, f, img);
+                case "FRONT"       -> assign(frontImage, f, img);
+                case "BACK"     -> assign(backImage, f, img);
                 case "ADDITIONAL" -> assign(additionalImage, f, img);
             }
         }

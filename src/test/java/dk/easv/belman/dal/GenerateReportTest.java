@@ -8,7 +8,6 @@ package dk.easv.belman.dal;
 import java.io.File;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import dk.easv.belman.be.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

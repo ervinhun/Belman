@@ -7,12 +7,14 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -46,6 +48,24 @@ public class GenerateReport {
         float minY = 100;
         DALManager dalManager = new DALManager();
         ArrayList<String> imagePaths = new ArrayList<>(dalManager.getPhotoPathsForReport(productNo));
+        if (imagePaths.isEmpty()) {
+            logger.error("No images found for product number: {}", productNo);
+            return;
+        }
+        List<BufferedImage> bufferedImages = new ArrayList<>();
+        for (String imagePath : imagePaths) {
+            File file = new File(imagePath);
+            if (file.exists()) {
+                try {
+                    BufferedImage image = javax.imageio.ImageIO.read(file);
+                    bufferedImages.add(image);
+                } catch (IOException e) {
+                    logger.error("Error reading image file: {}", e.getMessage());
+                }
+            } else {
+                logger.error("Image file does not exist: {}", imagePath);
+            }
+        }
 
         // Create a new PDF document
 
@@ -124,29 +144,31 @@ public class GenerateReport {
             currentYPosition -= 10;
 
             // Add image
-            for (String imagePath : imagePaths) {
-                PDImageXObject pdImage = PDImageXObject.createFromFile(imagePath, document);
-                float originalWidth = pdImage.getWidth();
-                float originalHeight = pdImage.getHeight();
+            for (BufferedImage bImage : bufferedImages) {
 
-                // Scale to fit available width
-                float scale = availableWidth / originalWidth;
-                float scaledWidth = originalWidth * scale;
-                float scaledHeight = originalHeight * scale;
+                // Create PDImageXObject from BufferedImage
+            PDImageXObject pdImage = LosslessFactory.createFromImage(document, bImage);
+            float originalWidth = pdImage.getWidth();
+            float originalHeight = pdImage.getHeight();
 
-                // Add new page if not enough space
-                if (currentYPosition - scaledHeight < minY) {
-                    contentStream.close();
-                    page = new PDPage(PDRectangle.A4);
-                    document.addPage(page);
-                    contentStream = new PDPageContentStream(document, page);
-                    currentYPosition = page.getMediaBox().getHeight() - margin;
-                }
+            // Scale to fit available width
+            float scale = availableWidth / originalWidth;
+            float scaledWidth = originalWidth * scale;
+            float scaledHeight = originalHeight * scale;
 
-                // Draw the scaled image
-                contentStream.drawImage(pdImage, margin, currentYPosition - scaledHeight, scaledWidth, scaledHeight);
-                currentYPosition -= scaledHeight + 20; // spacing between images
+            // Add new page if not enough space
+            if (currentYPosition - scaledHeight < minY) {
+                contentStream.close();
+                page = new PDPage(PDRectangle.A4);
+                document.addPage(page);
+                contentStream = new PDPageContentStream(document, page);
+                currentYPosition = page.getMediaBox().getHeight() - margin;
             }
+
+            // Draw the scaled image
+            contentStream.drawImage(pdImage, margin, currentYPosition - scaledHeight, scaledWidth, scaledHeight);
+            currentYPosition -= scaledHeight + 20; // spacing between images
+        }
             // Add footer
             float footerHeight = 35; // font size 10 * 2 (because it's two lines) plus 15 for spacing
             if (currentYPosition - footerHeight < margin) {
@@ -172,7 +194,9 @@ public class GenerateReport {
             if (!targetDir.exists()) {
                 targetDir.mkdirs();
             }
+            Thread.sleep(2000);
             document.save(filePath + "/" + FILE_NAME);
+            document.close();
             openDocument(productNo);
 
         } catch (IOException e) {
@@ -202,7 +226,6 @@ public class GenerateReport {
             logger.error("Desktop is not supported on this system.");
         }
         if (isSendingEmail && pdfFile.exists()) {
-
             GmailService gmailService = null;
             try {
                 gmailService = new GmailService();
@@ -211,7 +234,7 @@ public class GenerateReport {
             }
             try {
                 if (email != null && !email.isEmpty()) {
-                    gmailService.sendEmailWithAttachment("me", "nyeres@gmail.com",
+                    gmailService.sendEmailWithAttachment("me", email,
                             "Quality Check Report", "Please find the attached report.", pdfFile);
                 } else {
                     logger.error("Email address is null or empty.");
