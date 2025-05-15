@@ -1,4 +1,4 @@
-package dk.easv.belman.PL.model;
+package dk.easv.belman.pl.model;
 
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
@@ -41,7 +41,6 @@ public class OperatorModel {
 
     public void setLoggedInUser(User u) {
         loggedInUser.set(u);
-        System.out.println("Logged in user: " + u.getUsername());
     }
 
     public void logout() {
@@ -65,14 +64,12 @@ public class OperatorModel {
 
                 try {
                     File file = new File(imagePath);
-                    System.out.println(file.getParentFile().mkdirs());
                     ImageIO.write(bufferedImage, "png", file);
-                    System.out.println("Image saved to: " + imagePath);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                photos.add(new Photo(null, user.getId(), imagePath, angles.get(i), LocalDateTime.now(), false, null, null));
+                photos.add(new Photo(null, user.getId(), imagePath, angles.get(i), LocalDateTime.now(), false));
             }
         }
 

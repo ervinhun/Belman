@@ -1,4 +1,4 @@
-package dk.easv.belman.PL.model;
+package dk.easv.belman.pl.model;
 
 import java.io.File;
 import java.util.List;

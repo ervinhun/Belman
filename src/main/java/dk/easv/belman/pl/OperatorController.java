@@ -1,11 +1,11 @@
-package dk.easv.belman.PL;
+package dk.easv.belman.pl;
 
 import com.github.sarxos.webcam.Webcam;
 import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
-import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
-import dk.easv.belman.PL.model.OperatorModel;
+import dk.easv.belman.exceptions.BelmanException;
+import dk.easv.belman.pl.model.OperatorModel;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -22,13 +22,13 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -52,8 +52,6 @@ public class OperatorController {
     @FXML private Button deleteBtn;
     @FXML private Button doneBtn;
     private HBox selectMethod;
-    private String orderNo;
-    private ArrayList<String> fileNames = new ArrayList<>();
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private final String placeholderUrl =
@@ -64,18 +62,13 @@ public class OperatorController {
     private Webcam webcam;
     private ScheduledExecutorService executor;
     private VBox prevOrderView;
-    private Image takenImage;
     private List<ImageView> imageViews;
     private List<String> angles = List.of("Front", "Back", "Left", "Right", "Top", "Additional");
+    private static final Logger logger = LoggerFactory.getLogger(OperatorController.class);
+
 
     private OperatorModel model;
 
-    private User loggedinUser;
-
-    @FXML
-    private void initialize() {
-        //loggedinUser = null;
-    }
 
     private void refreshOrders() {
         ordersPane.getChildren().clear();
@@ -95,8 +88,7 @@ public class OperatorController {
         {
             if(Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto) && i < imageViews.size() - 1)
             {
-                System.out.println("At least 5 image is required");
-                return;
+                throw new BelmanException("At least 5 image is required");
             }
             else if(Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto))
             {
@@ -105,12 +97,6 @@ public class OperatorController {
         }
         model.savePhotos(imageViews, angles, orderLabel.getText());
         borderPane.setCenter(rightBox);
-    }
-
-    private void cancelUpload() {
-        fileNames.clear();
-        orderNo = null;
-        cancel();
     }
 
     private void showSelectMethod(ImageView clickedImage) {
@@ -196,6 +182,7 @@ public class OperatorController {
                     );
                 }
             } catch (Exception _) {
+                throw new BelmanException("Error get image from the webcam");
             }
         }, 0, 100, TimeUnit.MILLISECONDS);
     }
@@ -214,7 +201,7 @@ public class OperatorController {
     @FXML
     private void confirmImage()
     {
-        takenImage = cameraImage.getImage();
+        Image takenImage = cameraImage.getImage();
         borderPane.setCenter(prevOrderView);
         previousVBox.getChildren().remove(selectMethod);
         previousVBox.getChildren().add(previousImageView);
@@ -226,7 +213,7 @@ public class OperatorController {
     }
 
     private void openOrder(Order order, Boolean isOpenable) {
-        if(isOpenable)
+        if(Boolean.TRUE.equals(isOpenable))
         {
             try {
                 FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/orderOperator.fxml"));
@@ -238,8 +225,6 @@ public class OperatorController {
                 FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/selectMethod.fxml"));
                 fxmlLoader.setController(this);
                 selectMethod = fxmlLoader.load();
-
-                this.orderNo = order.getOrderNumber();
 
                 imageViews = List.of(
                         frontImage,
@@ -254,12 +239,12 @@ public class OperatorController {
                     imageView.setOnMouseClicked(_ -> showSelectMethod(imageView));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("I/O exception in Operator controller, LN 242: {0}", e);
             }
         }
         else
         {
-            System.out.println("Order already sent for signing");
+            logger.warn("Order already sent for signing");
         }
     }
 
@@ -267,10 +252,11 @@ public class OperatorController {
         ImageView iv = new ImageView();
         Label state = new Label();
         Boolean isOpenable;
+        String statusPreText = "Status: ";
 
         if (order.getPhotos().isEmpty()) {
             iv.setImage(new Image(placeholderUrl));
-            state.setText("Status: " + states[0]);
+            state.setText(statusPreText + states[0]);
             isOpenable = true;
         } else {
             String raw = order.getPhotos().getFirst().getImagePath();
@@ -278,9 +264,9 @@ public class OperatorController {
             iv.setImage(f.exists()
                     ? new Image(f.toURI().toString())
                     : new Image(placeholderUrl));
-            state.setText(order.getIsSigned()
-                    ? "Status: " + states[2]
-                    : "Status: " + states[1]);
+            state.setText(Boolean.TRUE.equals(order.getIsSigned())
+                    ? statusPreText + states[2]
+                    : statusPreText + states[1]);
             isOpenable = false;
         }
 
@@ -330,7 +316,7 @@ public class OperatorController {
             stage.setScene(scene);
             stage.show();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
         }
     }
 }

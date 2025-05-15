@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 
-<BorderPane minHeight="400" minWidth="600" prefHeight="400" prefWidth="600" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.PL.PhotoPreviewController">
+<BorderPane minHeight="400" minWidth="600" prefHeight="400" prefWidth="600" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.pl.PhotoPreviewController">
 
     <top>
         <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-padding: 10;" BorderPane.alignment="CENTER">

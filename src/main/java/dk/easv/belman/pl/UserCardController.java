@@ -1,7 +1,7 @@
-package dk.easv.belman.PL;
+package dk.easv.belman.pl;
 
 import dk.easv.belman.be.User;
-import dk.easv.belman.PL.model.AdminModel;
+import dk.easv.belman.pl.model.AdminModel;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;

@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -53,19 +54,8 @@ public class GenerateReport {
             return;
         }
         List<BufferedImage> bufferedImages = new ArrayList<>();
-        for (String imagePath : imagePaths) {
-            File file = new File(imagePath);
-            if (file.exists()) {
-                try {
-                    BufferedImage image = javax.imageio.ImageIO.read(file);
-                    bufferedImages.add(image);
-                } catch (IOException e) {
-                    logger.error("Error reading image file: {}", e.getMessage());
-                }
-            } else {
-                logger.error("Image file does not exist: {}", imagePath);
-            }
-        }
+        bufferedImages.addAll(loadBufferedImages(imagePaths));
+
 
         // Create a new PDF document
 
@@ -194,9 +184,8 @@ public class GenerateReport {
             if (!targetDir.exists()) {
                 targetDir.mkdirs();
             }
-            Thread.sleep(2000);
+            sleepForFileCreation(filePath + "/" + FILE_NAME);
             document.save(filePath + "/" + FILE_NAME);
-            document.close();
             openDocument(productNo);
 
         } catch (IOException e) {
@@ -205,8 +194,38 @@ public class GenerateReport {
             logger.error("Illegal state encountered while generating PDF: {}", e.getMessage());
         } catch (SecurityException e) {
             logger.error("Security exception while accessing file system: {}", e.getMessage());
-            } catch (Exception e) {
-            throw new BelmanException(e.getMessage());
+            } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Thread was interrupted while creating the file: {}", e.getMessage());
+        }
+    }
+
+    private Collection<? extends BufferedImage> loadBufferedImages(ArrayList<String> imagePaths) {
+        Collection<BufferedImage> bufferedImages = new ArrayList<>();
+        if (imagePaths == null || imagePaths.isEmpty()) {
+            logger.error("No image paths provided.");
+            return bufferedImages;
+        }
+        for (String imagePath : imagePaths) {
+            File file = new File(imagePath);
+            if (file.exists()) {
+                try {
+                    BufferedImage image = javax.imageio.ImageIO.read(file);
+                    bufferedImages.add(image);
+                } catch (IOException e) {
+                    logger.error("Error reading image file: {}", e.getMessage());
+                }
+            } else {
+                logger.error("Image file does not exist: {}", imagePath);
+            }
+        }
+        return bufferedImages;
+    }
+
+    private void sleepForFileCreation (String filepath) throws InterruptedException {
+        File file = new File(filepath);
+        while (!file.exists()) {
+            Thread.sleep(1000);
         }
     }
 

@@ -1,8 +1,9 @@
-package dk.easv.belman.PL;
+package dk.easv.belman.pl;
 
 import dk.easv.belman.Main;
 import dk.easv.belman.be.User;
-import dk.easv.belman.PL.model.LoginModel;
+import dk.easv.belman.exceptions.BelmanException;
+import dk.easv.belman.pl.model.LoginModel;
 import io.github.palexdev.materialfx.controls.MFXPasswordField;
 import io.github.palexdev.materialfx.controls.MFXTextField;
 import javafx.application.Platform;
@@ -32,8 +33,6 @@ public class LoginController {
 
     private LoginModel model;
 
-    private Webcam webcam;
-    private ScheduledExecutorService executor;
 
     @FXML
     public void initialize() {
@@ -97,6 +96,8 @@ public class LoginController {
 
     @FXML
     private void cameraLogin() {
+        ScheduledExecutorService executor;
+        Webcam webcam;
         Stage stage = (Stage) confirm.getScene().getWindow();
         stage.setOnCloseRequest(_ -> {
             if (webcam != null)  webcam.close();
@@ -127,13 +128,13 @@ public class LoginController {
                     webcam.close();
                     Platform.runLater(() -> {
                         cameraView.setVisible(false);
-                        // assume QR text == username, empty password
                         model.login(result.getText(), "");
                     });
                 }
             } catch (NotFoundException e) {
+                throw new BelmanException("QR code not found" + e);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new BelmanException("Error decoding QR code: " + e);
             }
         }, 0, 100, TimeUnit.MILLISECONDS);
     }

@@ -33,8 +33,7 @@ public class BLLManager {
     }
 
     public User login(String username, String password) {
-        User user = dalManager.login(username, hashPass(username, password));
-        return user;
+        return dalManager.login(username, hashPass(username, password));
     }
 
     public void logout(User user) {

@@ -1,6 +1,6 @@
-package dk.easv.belman.PL;
+package dk.easv.belman.pl;
 
-import dk.easv.belman.PL.model.PhotoPreviewModel;
+import dk.easv.belman.pl.model.PhotoPreviewModel;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -12,7 +12,8 @@ import java.util.List;
 public class PhotoPreviewController {
 
     @FXML private ImageView imageView;
-    @FXML private Button btnNext, btnPrev;
+    @FXML private Button btnNext;
+    @FXML private Button btnPrev;
 
     private final PhotoPreviewModel model = new PhotoPreviewModel();
     private QualityController parentController;

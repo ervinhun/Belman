@@ -1,10 +1,9 @@
-package dk.easv.belman.PL;
+package dk.easv.belman.pl;
 
-import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
-import dk.easv.belman.PL.model.QualityModel;
+import dk.easv.belman.pl.model.QualityModel;
 import dk.easv.belman.dal.FilePaths;
 import dk.easv.belman.dal.OpenFile;
 import javafx.fxml.FXML;
@@ -28,12 +27,6 @@ public class QualityController extends AbstractOrderController {
     @FXML
     private FlowPane ordersPane;
     @FXML
-    private BorderPane borderPane;
-    @FXML
-    private VBox rightBox;
-    @FXML
-    private Label orderLabel;
-    @FXML
     private TextField search;
     @FXML
     Button btnSign;
@@ -42,17 +35,7 @@ public class QualityController extends AbstractOrderController {
     @FXML
     private CheckBox cbSendingEmail;
 
-    // ImageViews for different angles
-    @FXML private ImageView topImage;
-    @FXML private ImageView leftImage;
-    @FXML private ImageView rightImage;
-    @FXML private ImageView frontImage;
-    @FXML private ImageView backImage;
-    @FXML private ImageView additionalImage;
-
     private ImageView selectedImageView;
-
-    @FXML private ChoiceBox<String> user;
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
     private final String placeholderUrl =
@@ -61,7 +44,8 @@ public class QualityController extends AbstractOrderController {
 
     private QualityModel model;
     private String orderNumberToSign;
-    private final static String reportFileName = "/report.pdf";
+    private static final String REPORT_PDF = "/report.pdf";
+    private static final String OPEN_DOCUMENT = "Open\nDocument";
     private User loggedInUserQc;
 
     @FXML
@@ -117,6 +101,7 @@ public class QualityController extends AbstractOrderController {
         }
     }
 
+    @Override
     @FXML
     public void cancel() {
         borderPane.setCenter(rightBox);
@@ -183,19 +168,18 @@ public class QualityController extends AbstractOrderController {
     @FXML
     private void signOrder() {
 
-        System.out.println("Sign Order clicked");
         // Check if order number is valid
         if (orderNumberToSign == null || orderNumberToSign.isEmpty()) {
 
             return;
         }
         if (model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc)) {
-            btnSign.setText("Open\nDocument");
+            btnSign.setText(OPEN_DOCUMENT);
             btnSign.setOnAction(e -> {
                 if (cbSendingEmail.isSelected())
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName, true, txtemail.getText());
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + REPORT_PDF, true, txtemail.getText());
                 else
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName);
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + REPORT_PDF);
             });
 
             cancel(); // This resets the view to the previous screen
@@ -205,19 +189,20 @@ public class QualityController extends AbstractOrderController {
     private VBox createCard (Order order){
         ImageView iv = new ImageView();
         Label state = new Label();
+        String statusPreText = "Status: ";
 
         if (order.getPhotos().isEmpty()) {
             iv.setImage(new Image(placeholderUrl));
-            state.setText("Status: " + states[0]);
+            state.setText(statusPreText + states[0]);
         } else {
             String path = order.getPhotos().getFirst().getImagePath();
             File f = new File(path);
             iv.setImage(f.exists()
                     ? new Image(f.toURI().toString())
                     : new Image(placeholderUrl));
-            state.setText(order.getIsSigned()
-                    ? "Status: " + states[2]
-                    : "Status: " + states[1]);
+            state.setText(Boolean.TRUE.equals(order.getIsSigned())
+                    ? statusPreText + states[2]
+                    : statusPreText + states[1]);
         }
 
         iv.setFitWidth(100);
@@ -243,16 +228,13 @@ public class QualityController extends AbstractOrderController {
     @FXML
     private void cbSendingEmailClicked() {
         txtemail.setVisible(!txtemail.isVisible());
-        /**if (cbSendingEmail.isSelected())
-            new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName, true, txtemail.getText());
-        else
-            new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName);*/
-        if (btnSign.getText().equals("Open\nDocument")) {
+
+        if (btnSign.getText().equals(OPEN_DOCUMENT)) {
             btnSign.setOnAction(e -> {
                 if (cbSendingEmail.isSelected())
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName, true, txtemail.getText());
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + REPORT_PDF, true, txtemail.getText());
                 else
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName);
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + REPORT_PDF);
             });
         }
         else {
@@ -275,10 +257,15 @@ public class QualityController extends AbstractOrderController {
     protected void onDetailLoaded(String orderNumber) {
         this.orderNumberToSign = orderNumber;//
         if (model.isDocumentExists(orderNumber)) {
-            btnSign.setText("Open\nDocument");
-            btnSign.setOnAction(e ->
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumber + "/report.pdf")
-            );
+            btnSign.setText(OPEN_DOCUMENT);
+            btnSign.setOnAction(e -> {
+                if (cbSendingEmail.isSelected()) {
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumber + REPORT_PDF, true, txtemail.getText());
+                } else {
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumber + REPORT_PDF);
+                }
+            });
+
         } else {
             btnSign.setText("Sign\nOrder");
             btnSign.setOnAction(e -> signOrder());

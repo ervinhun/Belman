@@ -19,6 +19,22 @@ public class DALManager {
 
     private final ConnectionManager connectionManager;
     private static final Logger logger = LoggerFactory.getLogger(DALManager.class);
+    
+    private static final String USER_LAST_LOGIN_TIME = "last_login_time";
+    private static final String ID =  "id";
+    private static final String PHOTOS_IMAGE_PATH = "image_path";
+    private static final String USER_FULL_NAME =  "full_name";
+    private static final String USER_USERNAME =  "username";
+    private static final String USER_PASSWORD =  "password";
+    private static final String USER_TAG_ID =  "tag_id";
+    private static final String USER_ROLE_ID =  "role_id";
+    private static final String USER_IS_ACTIVE =   "is_active";
+    private static final String USER_CREATED_AT =   "created_at";
+    private static final String PHOTOS_ANGLE =   "angle";
+    private static final String IS_DELETED =    "is_deleted";
+    private static final String DELETED_BY =    "deleted_by";
+    private static final String DELETED_AT =    "deleted_at";
+    private static final String UPLOADED_BY =  "uploaded_by";
 
 
     public DALManager() throws BelmanException {
@@ -47,21 +63,23 @@ public class DALManager {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                UUID id = rs.getObject("id", UUID.class);
-                String fullName = rs.getString("full_name");
-                String username = rs.getString("username");
-                String password = rs.getString("password");
-                String tagId = rs.getString("tag_id");
-                int roleId = rs.getInt("role_id");
+                UUID id = rs.getObject( ID, UUID.class);
+                String fullName = rs.getString( USER_FULL_NAME);
+                String username = rs.getString( USER_USERNAME);
+                String password = rs.getString( USER_PASSWORD);
+                String tagId = rs.getString( USER_TAG_ID);
+                int roleId = rs.getInt( USER_ROLE_ID);
                 String roleName = rs.getString("role");
 
-                LocalDateTime created = rs.getTimestamp("created_at").toLocalDateTime();
-                Timestamp lastTS = rs.getTimestamp("last_login_time");
+                LocalDateTime created = rs.getTimestamp( USER_CREATED_AT).toLocalDateTime();
+                Timestamp lastTS = rs.getTimestamp(USER_LAST_LOGIN_TIME);
                 LocalDateTime lastLogin = lastTS != null ? lastTS.toLocalDateTime() : null;
 
-                boolean active = rs.getBoolean("is_active");
+                boolean active = rs.getBoolean( USER_IS_ACTIVE);
 
-                User u = new User(id, fullName, username, password, tagId, roleId, created, lastLogin, active);
+                User u = new User(id, fullName, username, password, tagId, roleId, active);
+                u.setLastLoginTime(lastLogin);
+                u.setCreatedAt(created);
                 u.setRole(roleName);
                 list.add(u);
             }
@@ -69,7 +87,7 @@ public class DALManager {
         } catch (SQLException ex) {
             logger.error("Error fetching users from DB", ex);
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public UUID insertUser(User u) {
@@ -154,7 +172,7 @@ public class DALManager {
             ps.setObject(1, id);
             ps.executeUpdate();
         } catch (SQLException ex) {
-            throw new RuntimeException("Error deleting user", ex);
+            throw new BelmanException("Error deleting user " + ex);
         }
     }
 
@@ -256,9 +274,9 @@ public class DALManager {
         }
         else
         {
-            selectSql = "SELECT Products.* \n" +
-                    "FROM Products \n" +
-                    "JOIN Users ON Products.operator_id = Users.id \n" +
+            selectSql = "SELECT Products.*  " +
+                    "FROM Products  " +
+                    "JOIN Users ON Products.operator_id = Users.id  " +
                     "WHERE Users.username = ?;";
         }
 
@@ -273,10 +291,10 @@ public class DALManager {
 
             while(rs.next())
             {
-                Long id = rs.getLong("id");
+                Long id = rs.getLong( ID);
                 String orderNumber = rs.getString("product_number");
-                LocalDateTime createdAt = rs.getTimestamp("created_at").toLocalDateTime();
-                Boolean isDeleted = rs.getBoolean("is_deleted");
+                LocalDateTime createdAt = rs.getTimestamp( USER_CREATED_AT).toLocalDateTime();
+                Boolean isDeleted = rs.getBoolean( IS_DELETED);
                 Boolean isSigned = rs.getBoolean("is_signed");
                 List<Photo> photos = getPhotos(id);
 
@@ -290,7 +308,7 @@ public class DALManager {
         {
             logger.error("Error fetching the orders: {}", e.getMessage());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private List<Photo> getPhotos(Long orderId)
@@ -306,17 +324,21 @@ public class DALManager {
 
             while(rs.next())
             {
-                Long id = rs.getLong("id");
-                UUID uploadedBy = rs.getObject("uploaded_by", UUID.class);
-                String imagePath = rs.getString("image_path");
-                String angle = rs.getString("angle");
-                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();
-                Boolean isDeleted = rs.getBoolean("is_deleted");
-                UUID deletedBy = rs.getObject("deleted_by", UUID.class);
-                Timestamp deletedAtTS = rs.getTimestamp("deleted_at");
+                Long id = rs.getLong( ID);
+                UUID uploadedBy = rs.getObject( UPLOADED_BY, UUID.class);
+                String imagePath = rs.getString(PHOTOS_IMAGE_PATH);
+                String angle = rs.getString( PHOTOS_ANGLE);
+                LocalDateTime uploadedAt = rs.getTimestamp( USER_CREATED_AT).toLocalDateTime();
+                Boolean isDeleted = rs.getBoolean( IS_DELETED);
+                UUID deletedBy = rs.getObject( DELETED_BY, UUID.class);
+                Timestamp deletedAtTS = rs.getTimestamp( DELETED_AT);
                 LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
 
-                Photo p = new Photo(id, uploadedBy, imagePath, angle, uploadedAt, isDeleted, deletedBy, deletedAt);
+                Photo p = new Photo(id, uploadedBy, imagePath, angle, uploadedAt, isDeleted);
+                if (Boolean.TRUE.equals(isDeleted)) {
+                    p.setDeletedBy(deletedBy);
+                    p.setDeletedAt(deletedAt);
+                }
                 photos.add(p);
             }
 
@@ -324,7 +346,7 @@ public class DALManager {
         }
         catch (SQLException e)
         {
-            throw new RuntimeException("Error fetching photos: "+e.getMessage());
+            throw new BelmanException("Error fetching photos: " + e.getMessage());
         }
     }
 
@@ -341,15 +363,17 @@ public class DALManager {
 
             while (rs.next()) {
                 Photo p = new Photo(
-                        rs.getLong("id"),
-                        rs.getObject("uploaded_by", UUID.class),
-                        rs.getString("image_path"),
-                        rs.getString("angle"),
+                        rs.getLong( ID),
+                        rs.getObject( UPLOADED_BY, UUID.class),
+                        rs.getString(PHOTOS_IMAGE_PATH),
+                        rs.getString( PHOTOS_ANGLE),
                         rs.getTimestamp("uploaded_at").toLocalDateTime(),
-                        rs.getBoolean("is_deleted"),
-                        rs.getObject("deleted_by", UUID.class),
-                        rs.getTimestamp("deleted_at") != null ? rs.getTimestamp("deleted_at").toLocalDateTime() : null
+                        rs.getBoolean( IS_DELETED)
                 );
+                if (Boolean.TRUE.equals(rs.getBoolean( IS_DELETED))) {
+                    p.setDeletedBy(rs.getObject( DELETED_BY, UUID.class));
+                    p.setDeletedAt(rs.getTimestamp( DELETED_AT) != null ? rs.getTimestamp( DELETED_AT).toLocalDateTime() : null);
+                }
                 photos.add(p);
             }
         } catch (SQLException e) {
@@ -373,17 +397,21 @@ public class DALManager {
 
             while(rs.next())
             {
-                Long id = rs.getLong("id");
-                UUID uploadedBy = rs.getObject("uploaded_by", UUID.class);
-                String imagePath = rs.getString("image_path");
-                String angle = rs.getString("angle");
-                LocalDateTime uploadedAt = rs.getTimestamp("created_at").toLocalDateTime();
-                Boolean isDeleted = rs.getBoolean("is_deleted");
-                UUID deletedBy = rs.getObject("deleted_by", UUID.class);
-                Timestamp deletedAtTS = rs.getTimestamp("deleted_at");
+                Long id = rs.getLong( ID);
+                UUID uploadedBy = rs.getObject( UPLOADED_BY, UUID.class);
+                String imagePath = rs.getString(PHOTOS_IMAGE_PATH);
+                String angle = rs.getString( PHOTOS_ANGLE);
+                LocalDateTime uploadedAt = rs.getTimestamp( USER_CREATED_AT).toLocalDateTime();
+                Boolean isDeleted = rs.getBoolean( IS_DELETED);
+                UUID deletedBy = rs.getObject( DELETED_BY, UUID.class);
+                Timestamp deletedAtTS = rs.getTimestamp( DELETED_AT);
                 LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
 
-                Photo p = new Photo(id, uploadedBy, imagePath, angle, uploadedAt, isDeleted, deletedBy, deletedAt);
+                Photo p = new Photo(id, uploadedBy, imagePath, angle, uploadedAt, isDeleted);
+                if (Boolean.TRUE.equals(isDeleted)) {
+                    p.setDeletedBy(deletedBy);
+                    p.setDeletedAt(deletedAt);
+                }
                 photoPaths.add(p.getImagePath());
             }
 
@@ -409,7 +437,7 @@ public class DALManager {
             ResultSet rs = psSelect.executeQuery();
             while(rs.next())
             {
-                photoPaths.add(rs.getString("image_path"));
+                photoPaths.add(rs.getString(PHOTOS_IMAGE_PATH));
             }
             return photoPaths;
         }
@@ -429,14 +457,15 @@ public class DALManager {
             if (productId == -1) {
                 throw new BelmanException("Product not found");
             }
+            Timestamp uploadedAt = Timestamp.valueOf(photos.get(0).getUploadedAt());
+            ps.setLong(1, productId);
+            ps.setObject(5, uploadedAt);
+            
             c.setAutoCommit(false);
             for (Photo photo : photos) {
-                Timestamp uploadedAt = Timestamp.valueOf(photo.getUploadedAt());
-                ps.setLong(1, productId);
                 ps.setString(2, photo.getImagePath());
                 ps.setString(3, photo.getAngle());
                 ps.setObject(4, photo.getUploadedBy());
-                ps.setObject(5, uploadedAt);
                 ps.addBatch();
             }
             ps.executeBatch();
@@ -479,18 +508,18 @@ public class DALManager {
                         con.rollback();
                         return null;
                     }
-                    id = UUID.fromString(rs.getString("id"));
+                    id = UUID.fromString(rs.getString( ID));
                     user = new User(
                             id,
-                            rs.getString("full_name"),
-                            rs.getString("username"),
-                            rs.getString("password"),
-                            rs.getString("tag_id"),
-                            rs.getInt("role_id"),
-                            rs.getTimestamp("created_at").toLocalDateTime(),
-                            null,
-                            rs.getBoolean("is_active")
+                            rs.getString( USER_FULL_NAME),
+                            rs.getString( USER_USERNAME),
+                            rs.getString( USER_PASSWORD),
+                            rs.getString( USER_TAG_ID),
+                            rs.getInt( USER_ROLE_ID),
+                            rs.getBoolean( USER_IS_ACTIVE)
                     );
+                    user.setLastLoginTime(null);
+                    user.setCreatedAt(rs.getTimestamp( USER_CREATED_AT).toLocalDateTime());
                 }
             }
 
@@ -507,7 +536,7 @@ public class DALManager {
             return user;
 
         } catch (SQLException ex) {
-            throw new RuntimeException("Error logging in user", ex);
+            throw new BelmanException("Error logging in user " + ex);
         }
     }
 
@@ -515,7 +544,7 @@ public class DALManager {
         try (Connection con = connectionManager.getConnection()) {
             insertLoginLog(con, userId, "logout");
         } catch (SQLException ex) {
-            throw new RuntimeException("Error logging out user", ex);
+            throw new BelmanException("Error logging out user " + ex);
         }
     }
 
@@ -544,17 +573,18 @@ public class DALManager {
             ps.setObject(1, userId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return new User(
-                        rs.getObject("id", UUID.class),
-                        rs.getString("full_name"),
-                        rs.getString("username"),
-                        rs.getString("password"),
-                        rs.getString("tag_id"),
-                        rs.getInt("role_id"),
-                        rs.getTimestamp("created_at").toLocalDateTime(),
-                        null,
-                        rs.getBoolean("is_active")
+                User user = new User(
+                        rs.getObject( ID, UUID.class),
+                        rs.getString( USER_FULL_NAME),
+                        rs.getString( USER_USERNAME),
+                        rs.getString( USER_PASSWORD),
+                        rs.getString( USER_TAG_ID),
+                        rs.getInt( USER_ROLE_ID),
+                        rs.getBoolean( USER_IS_ACTIVE)
                 );
+                user.setCreatedAt(rs.getTimestamp( USER_CREATED_AT).toLocalDateTime());
+                user.setLastLoginTime(rs.getTimestamp(USER_LAST_LOGIN_TIME) != null ? rs.getTimestamp(USER_LAST_LOGIN_TIME).toLocalDateTime() : null);
+                return user;
             }
         } catch (SQLException e) {
             logger.error("Error fetching user by ID: {}", e.getMessage());

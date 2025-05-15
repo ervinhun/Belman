@@ -1,7 +1,8 @@
-package dk.easv.belman.PL;
+package dk.easv.belman.pl;
 
 import dk.easv.belman.Main;
 import dk.easv.belman.be.Photo;
+import dk.easv.belman.exceptions.BelmanException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -19,13 +20,16 @@ public abstract class AbstractOrderController extends BaseController {
     @FXML protected BorderPane borderPane;
     @FXML protected VBox       rightBox;
     @FXML protected Label      orderLabel;
-    @FXML protected ImageView  topImage, leftImage, rightImage,
-            frontImage, backImage, additionalImage;
+    @FXML protected ImageView topImage;
+    @FXML protected ImageView leftImage;
+    @FXML protected ImageView rightImage;
+    @FXML protected ImageView frontImage;
+    @FXML protected ImageView backImage;
+    @FXML protected ImageView additionalImage;
 
     private final String   placeholderUrl =
             getClass().getResource("/dk/easv/belman/Images/belman.png")
                     .toExternalForm();
-    private final String[] states       = {"Images Needed","Pending","Signed ✅"};
 
     protected void openOrderDetail(String fxmlPath, String orderNumber) {
         try {
@@ -68,6 +72,7 @@ public abstract class AbstractOrderController extends BaseController {
                 case "FRONT"       -> assign(frontImage, f, img);
                 case "BACK"     -> assign(backImage, f, img);
                 case "ADDITIONAL" -> assign(additionalImage, f, img);
+                default           -> throw new BelmanException("Unknown angle: " + p.getAngle());
             }
         }
     }

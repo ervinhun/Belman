@@ -1,18 +1,22 @@
-package dk.easv.belman.PL;
+package dk.easv.belman.pl;
 
 import dk.easv.belman.Main;
 import dk.easv.belman.be.User;
+import dk.easv.belman.dal.GenerateReport;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public abstract class BaseController {
     @FXML protected ChoiceBox<String> user;
     protected User loggedInUser;
+
 
     public void setLoggedinUser(User u) {
         user.getItems().setAll(

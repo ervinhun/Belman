@@ -1,24 +1,44 @@
-package dk.easv.belman.PL.model;
+package dk.easv.belman.pl.model;
 
+import dk.easv.belman.config.ConfigCrypto;
+import dk.easv.belman.config.ConfigReader;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
+import dk.easv.belman.exceptions.BelmanException;
 import javafx.beans.property.*;
+
+import java.util.Properties;
 
 public class UserModel {
     private final BLLManager bllManager = new BLLManager();
 
     private final StringProperty fullName = new SimpleStringProperty("");
     private final StringProperty username = new SimpleStringProperty("");
-    private final StringProperty tagId    = new SimpleStringProperty("");
-    private final IntegerProperty roleId  = new SimpleIntegerProperty(0);
-
-    private final String defaultPassword = "belman123";
+    private final StringProperty tagId = new SimpleStringProperty("");
+    private final IntegerProperty roleId = new SimpleIntegerProperty(0);
+    Properties props;
     private User editingUser;
 
-    private final StringProperty errorMessage   = new SimpleStringProperty();
+    private final StringProperty errorMessage = new SimpleStringProperty();
     private final StringProperty successMessage = new SimpleStringProperty();
 
     public void saveUser() {
+        props = new Properties();
+        String defaultPassword = "";
+
+        //Opening the config properties file to get the default password
+        try {
+            props.load(ConfigReader.class.getResourceAsStream("/config.properties"));
+        } catch (Exception e) {
+            throw new BelmanException("Error loading config properties: " + e);
+        }
+
+        //Trying to decyorpt the default password
+        try {
+            defaultPassword = ConfigCrypto.decrypt(props.getProperty("user.defaultPassword"));
+        } catch (Exception e) {
+            throw new BelmanException("Error decrypting the default password: " + e);
+        }
         errorMessage.set("");
         successMessage.set("");
 
@@ -43,7 +63,7 @@ public class UserModel {
 
             boolean ok = bllManager.updateUser(editingUser);
             if (ok) successMessage.set("User updated.");
-            else         errorMessage.set("Update failed.");
+            else errorMessage.set("Update failed.");
             editingUser = null;
             return;
         }
@@ -65,6 +85,7 @@ public class UserModel {
             errorMessage.set("Error creating user: " + ex.getMessage());
         }
     }
+
     public void setEditingUser(User u) {
         this.editingUser = u;
         fullName.set(u.getFullName());
@@ -82,10 +103,27 @@ public class UserModel {
     }
 
     // ─── Properties for binding ───────────────────────────────────────────────
-    public StringProperty fullNameProperty()    { return fullName;    }
-    public StringProperty usernameProperty()    { return username;    }
-    public StringProperty tagIdProperty()       { return tagId;       }
-    public IntegerProperty roleIdProperty()     { return roleId;      }
-    public StringProperty errorMessageProperty()   { return errorMessage;   }
-    public StringProperty successMessageProperty() { return successMessage; }
+    public StringProperty fullNameProperty() {
+        return fullName;
+    }
+
+    public StringProperty usernameProperty() {
+        return username;
+    }
+
+    public StringProperty tagIdProperty() {
+        return tagId;
+    }
+
+    public IntegerProperty roleIdProperty() {
+        return roleId;
+    }
+
+    public StringProperty errorMessageProperty() {
+        return errorMessage;
+    }
+
+    public StringProperty successMessageProperty() {
+        return successMessage;
+    }
 }

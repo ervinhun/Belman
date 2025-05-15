@@ -2,7 +2,6 @@ package dk.easv.belman.be;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 public class Order {
     private Long id;
