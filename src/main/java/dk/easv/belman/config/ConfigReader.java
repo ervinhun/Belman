@@ -9,10 +9,6 @@ public class ConfigReader {
         try (FileInputStream in = new FileInputStream("config.properties")) {
             props.load(in);
         }
-
-        String dbUrl = ConfigCrypto.decrypt(props.getProperty("db.url"));
-        String dbUser = ConfigCrypto.decrypt(props.getProperty("db.user"));
-        String dbPassword = ConfigCrypto.decrypt(props.getProperty("db.password"));
     }
 }
 
