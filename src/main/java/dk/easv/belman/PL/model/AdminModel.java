@@ -91,4 +91,8 @@ public class AdminModel {
     public List<Photo> getPhotosForOrder(String orderNumber) {
         return bllManager.getPhotosForOrder(orderNumber);
     }
+
+    public User getUserById(UUID id) {
+        return bllManager.getUserById(id);
+    }
 }
