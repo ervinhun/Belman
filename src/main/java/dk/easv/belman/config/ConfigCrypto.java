@@ -37,7 +37,7 @@ public class ConfigCrypto {
         throw new IllegalStateException("Utility class");
     }
 
-    public static String encrypt(String input) throws Exception {
+    public static String encrypt(String input) throws BelmanException {
         Objects.requireNonNull(input, "Input cannot be null");
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(StandardCharsets.UTF_8), ALGORITHM);
@@ -46,7 +46,7 @@ public class ConfigCrypto {
         return Base64.getEncoder().encodeToString(encrypted);
     }
 
-    public static String decrypt(String encrypted) throws Exception {
+    public static String decrypt(String encrypted) throws BelmanException {
         Objects.requireNonNull(encrypted, "Encrypted input cannot be null");
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         SecretKeySpec keySpec = new SecretKeySpec(SECRET_KEY.getBytes(StandardCharsets.UTF_8), ALGORITHM);
