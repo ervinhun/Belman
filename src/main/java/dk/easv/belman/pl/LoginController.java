@@ -33,6 +33,8 @@ public class LoginController {
 
     private LoginModel model;
 
+    private Webcam webcam;
+    private ScheduledExecutorService executor;
 
     @FXML
     public void initialize() {
@@ -96,8 +98,6 @@ public class LoginController {
 
     @FXML
     private void cameraLogin() {
-        ScheduledExecutorService executor;
-        Webcam webcam;
         Stage stage = (Stage) confirm.getScene().getWindow();
         stage.setOnCloseRequest(_ -> {
             if (webcam != null)  webcam.close();
