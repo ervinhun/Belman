@@ -44,7 +44,7 @@ public abstract class AbstractOrderController extends BaseController {
             onDetailLoaded(orderNumber);
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            throw new BelmanException("Failed to load FXML: " + fxmlPath + " " + ex);
         }
     }
 

@@ -3,6 +3,7 @@ package dk.easv.belman.pl;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
+import dk.easv.belman.exceptions.BelmanException;
 import dk.easv.belman.pl.model.QualityModel;
 import dk.easv.belman.dal.FilePaths;
 import dk.easv.belman.dal.OpenFile;
@@ -133,7 +134,7 @@ public class QualityController extends AbstractOrderController {
             borderPane.setCenter(previewRoot);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new BelmanException("Failed to load FXML: photoPreview.fxml " + e);
         }
     }
 

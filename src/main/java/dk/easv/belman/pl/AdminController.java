@@ -4,6 +4,7 @@ import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
+import dk.easv.belman.dal.GenerateReport;
 import dk.easv.belman.pl.model.AdminModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +15,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +51,7 @@ public class AdminController extends AbstractOrderController{
             new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/ordersDef.png")));
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
+    private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
 
     @FXML private Label uploadedByText;
     @FXML private Label uploadedAtText;
@@ -214,7 +218,7 @@ public class AdminController extends AbstractOrderController{
 
             return card;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load user card", e);
             return new HBox();
         }
     }

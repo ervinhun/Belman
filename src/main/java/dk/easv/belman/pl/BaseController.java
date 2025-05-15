@@ -2,6 +2,7 @@ package dk.easv.belman.pl;
 
 import dk.easv.belman.Main;
 import dk.easv.belman.be.User;
+import dk.easv.belman.exceptions.BelmanException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -37,7 +38,7 @@ public abstract class BaseController {
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new BelmanException("Failed to load FXML: login.fxml " + e);
         }
     }
 

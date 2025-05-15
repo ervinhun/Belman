@@ -151,7 +151,7 @@ public class OperatorController {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            throw new BelmanException("Failed to load FXML: takeImage.fxml " + e);
         }
     }
 

@@ -92,7 +92,7 @@ public class LoginController {
             stage.show();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new BelmanException("Failed to load FXML: " + e);
         }
     }
 

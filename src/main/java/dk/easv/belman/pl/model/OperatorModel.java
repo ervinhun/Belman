@@ -4,6 +4,7 @@ import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
+import dk.easv.belman.exceptions.BelmanException;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -66,7 +67,7 @@ public class OperatorModel {
                     File file = new File(imagePath);
                     ImageIO.write(bufferedImage, "png", file);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new BelmanException("Failed to save image: " + e.getMessage());
                 }
 
                 photos.add(new Photo(null, user.getId(), imagePath, angles.get(i), LocalDateTime.now(), false));
