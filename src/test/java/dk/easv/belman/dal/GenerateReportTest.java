@@ -23,7 +23,7 @@ class GenerateReportTest {
     @Test
     void GenerateReport() {
         final String[] generatedFilePath = {""};
-        User user = new User(UUID.randomUUID(), "Test Albert", "test", "Test", "001", 2, null, null, true);
+        User user = new User(UUID.randomUUID(), "Test Albert", "test", "Test", "001", 2,  true);
 
         Assertions.assertDoesNotThrow(() -> {
             GenerateReport generateReport = new GenerateReport(productNoString, user, true, "nyeres@gmail.com");
