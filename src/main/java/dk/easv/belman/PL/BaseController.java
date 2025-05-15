@@ -12,6 +12,7 @@ import java.io.IOException;
 
 public abstract class BaseController {
     @FXML protected ChoiceBox<String> user;
+    protected User loggedInUser;
 
     public void setLoggedinUser(User u) {
         user.getItems().setAll(
@@ -24,6 +25,7 @@ public abstract class BaseController {
                 loggedOut();
             }
         });
+        this.loggedInUser = u;
     }
 
     protected void loggedOut() {
@@ -39,4 +41,8 @@ public abstract class BaseController {
     }
 
     protected abstract void onUserLogout();
+
+    public User getLoggedInUserFromBaseController() {
+        return this.loggedInUser;
+    }
 }

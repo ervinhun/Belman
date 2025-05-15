@@ -42,7 +42,7 @@ public class OpenFile {
             }
             try {
                 if (email != null && !email.isEmpty()) {
-                    gmailService.sendEmailWithAttachment("me", "nyeres@gmail.com",
+                    gmailService.sendEmailWithAttachment("me", email,
                             "Quality Check Report", "Please find the attached report.", fileToOpen.getAbsoluteFile());
                 } else {
                     throw new BelmanException("Email address is null or empty.");

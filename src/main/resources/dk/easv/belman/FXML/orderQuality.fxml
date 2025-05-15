@@ -40,7 +40,7 @@
                         <Font name="System Bold" size="16.0" />
                      </font>
                   </Label>
-                  <CheckBox mnemonicParsing="false" onAction="#cbSendingEmailClicked" text="Sending e-mail?" />
+                  <CheckBox fx:id="cbSendingEmail" mnemonicParsing="false" onAction="#cbSendingEmailClicked" text="Sending e-mail?" />
                   <TextField fx:id="txtemail" promptText="email address" visible="false" />
                </children>
             </HBox>

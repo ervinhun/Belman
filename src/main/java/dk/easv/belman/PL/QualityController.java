@@ -62,12 +62,14 @@ public class QualityController extends AbstractOrderController {
     private QualityModel model;
     private String orderNumberToSign;
     private final static String reportFileName = "/report.pdf";
+    private User loggedInUserQc;
 
     @FXML
     private void initialize() {
         if (model == null)
             model = new QualityModel();
         refreshContent();
+        this.loggedInUserQc = getLoggedInUserFromBaseController();
 
         search.textProperty().addListener((obs, old, txt) -> {
             model.setSearchQuery(txt);
@@ -187,7 +189,7 @@ public class QualityController extends AbstractOrderController {
 
             return;
         }
-        if (model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())) {
+        if (model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc)) {
             btnSign.setText("Open\nDocument");
             btnSign.setOnAction(e -> {
                 if (cbSendingEmail.isSelected())
@@ -241,10 +243,21 @@ public class QualityController extends AbstractOrderController {
     @FXML
     private void cbSendingEmailClicked() {
         txtemail.setVisible(!txtemail.isVisible());
-        if (cbSendingEmail.isSelected())
+        /**if (cbSendingEmail.isSelected())
             new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName, true, txtemail.getText());
         else
-            new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName);
+            new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName);*/
+        if (btnSign.getText().equals("Open\nDocument")) {
+            btnSign.setOnAction(e -> {
+                if (cbSendingEmail.isSelected())
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName, true, txtemail.getText());
+                else
+                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + reportFileName);
+            });
+        }
+        else {
+            btnSign.setOnAction(e -> signOrder());
+        }
 
     }
 
