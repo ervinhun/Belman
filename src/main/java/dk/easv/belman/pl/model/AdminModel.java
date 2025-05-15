@@ -4,7 +4,6 @@ import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
-import dk.easv.belman.exceptions.BelmanException;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

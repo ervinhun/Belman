@@ -51,7 +51,7 @@ public class AdminController extends AbstractOrderController{
             new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/ordersDef.png")));
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
-    private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     @FXML private Label uploadedByText;
     @FXML private Label uploadedAtText;
