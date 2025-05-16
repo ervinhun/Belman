@@ -169,42 +169,17 @@ public class AdminController extends AbstractOrderController{
 
 
     private VBox createOrderCard(Order order) {
-        ImageView imageView = new ImageView();
-        Label status = new Label();
-        String statusPreText = "Status: ";
-        if (order.getPhotos().isEmpty()) {
-            imageView.setImage(new Image(placeholderUrl));
-            status.setText(statusPreText + states[0]);
-        } else {
-            String rawPath = order.getPhotos().getFirst().getImagePath();
-            File imgFile   = new File(rawPath);
-            if (imgFile.exists()) {
-                imageView.setImage(new Image(imgFile.toURI().toString()));
-            } else {
-                imageView.setImage(new Image(placeholderUrl));
-            }
-            status.setText(Boolean.TRUE.equals(order.getIsSigned())
-                    ? statusPreText + states[2]
-                    : statusPreText + states[1]);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/dk/easv/belman/FXML/OrderCard.fxml"));
+            VBox card = loader.load();
+            OrderCardController controller = loader.getController();
+            controller.setOrder(order);
+            card.setOnMouseClicked(e -> openOrderDetail("FXML/orderAdmin.fxml", order.getOrderNumber()));
+            return card;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new VBox(); // fallback
         }
-
-        imageView.setFitWidth(100);
-        imageView.setFitHeight(100);
-        Rectangle clip = new Rectangle(100, 100);
-        clip.setArcWidth(20);
-        clip.setArcHeight(20);
-        imageView.setClip(clip);
-
-        Label orderLabel = new Label("Order: " + order.getOrderNumber());
-
-        VBox card = new VBox(10, imageView, orderLabel, status);
-        card.setAlignment(Pos.CENTER);
-        card.setId("orderCard");
-        card.getProperties().put("orderNum", order.getOrderNumber());
-        card.setOnMouseClicked(e ->
-                openOrderDetail("FXML/orderAdmin.fxml", order.getOrderNumber())
-        );
-        return card;
     }
 
     private HBox loadUserCard(User u) {

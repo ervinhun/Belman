@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+
+<VBox fx:id="orderCard"
+      alignment="CENTER"
+      spacing="8"
+      stylesheets="@../CSS/homeStyle.css"
+      xmlns="http://javafx.com/javafx/22"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="dk.easv.belman.pl.OrderCardController">
+
+    <StackPane prefHeight="100" prefWidth="100">
+        <ImageView fx:id="orderImage"
+                   fitHeight="100"
+                   fitWidth="100"
+                   preserveRatio="false">
+            <clip>
+                <Rectangle width="100" height="100" arcWidth="15" arcHeight="15"/>
+            </clip>
+        </ImageView>
+    </StackPane>
+
+    <Label fx:id="lblOrderNumber"
+           maxWidth="120"
+           text="Order: ---"
+           wrapText="true">
+        <VBox.margin>
+            <Insets bottom="5.0"/>
+        </VBox.margin>
+    </Label>
+
+    <Label fx:id="lblStatus"
+           maxWidth="120"
+           text="Status: ---"
+           wrapText="true">
+        <VBox.margin>
+            <Insets bottom="5.0"/>
+        </VBox.margin>
+    </Label>
+</VBox>
