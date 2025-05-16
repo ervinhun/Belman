@@ -1,26 +1,28 @@
-package dk.easv.belman.PL;
+package dk.easv.belman.pl;
 
 import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
-import dk.easv.belman.PL.model.AdminModel;
+import dk.easv.belman.dal.GenerateReport;
+import dk.easv.belman.pl.model.AdminModel;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 
 public class AdminController extends AbstractOrderController{
     @FXML private FlowPane  contentPane;
@@ -30,34 +32,39 @@ public class AdminController extends AbstractOrderController{
     @FXML private Button    sideBtnNotSelected;
     @FXML private ImageView usersImage;
     @FXML private ImageView ordersImage;
-    @FXML private BorderPane borderPane;
     @FXML private TextField search;
-    @FXML private ChoiceBox<String> user;
 
     private VBox newUserWindow;
     private UserController userController;
 
     private final String placeholderUrl =
-            getClass().getResource("/dk/easv/belman/Images/belman.png")
+            Objects.requireNonNull(getClass().getResource("/dk/easv/belman/Images/belman.png"))
                     .toExternalForm();
 
     private final Image userSel     =
-            new Image(getClass().getResourceAsStream("/dk/easv/belman/Images/user.png"));
+            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/user.png")));
     private final Image userDefault =
-            new Image(getClass().getResourceAsStream("/dk/easv/belman/Images/userDef.png"));
+            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/userDef.png")));
     private final Image ordersSel   =
-            new Image(getClass().getResourceAsStream("/dk/easv/belman/Images/orders.png"));
+            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/orders.png")));
     private final Image ordersDefault =
-            new Image(getClass().getResourceAsStream("/dk/easv/belman/Images/ordersDef.png"));
+            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/ordersDef.png")));
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
+    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
-    @FXML private Label uploadedByText,  uploadedAtText;
-    @FXML private Label uploadedByText1, uploadedAtText1;
-    @FXML private Label uploadedByText2, uploadedAtText2;
-    @FXML private Label uploadedByText3, uploadedAtText3;
-    @FXML private Label uploadedByText4, uploadedAtText4;
-    @FXML private Label uploadedByText5, uploadedAtText5;
+    @FXML private Label uploadedByText;
+    @FXML private Label uploadedAtText;
+    @FXML private Label uploadedByText1;
+    @FXML private Label uploadedAtText1;
+    @FXML private Label uploadedByText2;
+    @FXML private Label uploadedAtText2;
+    @FXML private Label uploadedByText3;
+    @FXML private Label uploadedAtText3;
+    @FXML private Label uploadedByText4;
+    @FXML private Label uploadedAtText4;
+    @FXML private Label uploadedByText5;
+    @FXML private Label uploadedAtText5;
 
     private final DateTimeFormatter dtf =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -164,10 +171,10 @@ public class AdminController extends AbstractOrderController{
     private VBox createOrderCard(Order order) {
         ImageView imageView = new ImageView();
         Label status = new Label();
-
+        String statusPreText = "Status: ";
         if (order.getPhotos().isEmpty()) {
             imageView.setImage(new Image(placeholderUrl));
-            status.setText("Status: " + states[0]);
+            status.setText(statusPreText + states[0]);
         } else {
             String rawPath = order.getPhotos().getFirst().getImagePath();
             File imgFile   = new File(rawPath);
@@ -176,9 +183,9 @@ public class AdminController extends AbstractOrderController{
             } else {
                 imageView.setImage(new Image(placeholderUrl));
             }
-            status.setText(order.getIsSigned()
-                    ? "Status: " + states[2]
-                    : "Status: " + states[1]);
+            status.setText(Boolean.TRUE.equals(order.getIsSigned())
+                    ? statusPreText + states[2]
+                    : statusPreText + states[1]);
         }
 
         imageView.setFitWidth(100);
@@ -211,7 +218,7 @@ public class AdminController extends AbstractOrderController{
 
             return card;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load user card", e);
             return new HBox();
         }
     }
@@ -276,6 +283,10 @@ public class AdminController extends AbstractOrderController{
                 case "ADDITIONAL"  -> {
                     uploadedByText5.setText(id);
                     uploadedAtText5.setText(when);
+                }
+                default           -> {
+                    uploadedByText.setText("Unknown angle: " + angle);
+                    uploadedAtText.setText("");
                 }
             }
         }

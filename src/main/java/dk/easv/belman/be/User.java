@@ -18,16 +18,13 @@ public class User {
     public User() {}
 
     public User(UUID id, String fullName, String username, String password,
-                String tagId, int roleId, LocalDateTime createdAt,
-                LocalDateTime lastLoginTime, boolean active) {
+                String tagId, int roleId, boolean active) {
         this.id = id;
         this.fullName = fullName;
         this.username = username;
         this.password = password;
         this.tagId = tagId;
         this.roleId = roleId;
-        this.createdAt = createdAt;
-        this.lastLoginTime = lastLoginTime;
         this.active = active;
     }
 

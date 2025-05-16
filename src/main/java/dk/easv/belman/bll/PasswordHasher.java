@@ -38,14 +38,4 @@ public class PasswordHasher {
         // Convert salt to bytes
         return result.toString().getBytes();
     }
-
-    public void main(String[] args) throws Exception {
-        String password = "yourSecurePassword";
-        String salt = "myCustomSalt";
-
-        String hashedPassword = hashPassword(password, salt);
-
-        System.out.println("Salt: " + salt + " - " + generateSalt(salt).toString());
-        System.out.println("Hashed Password: " + hashedPassword);
-    }
 }

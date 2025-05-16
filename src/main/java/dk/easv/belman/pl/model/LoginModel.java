@@ -1,4 +1,4 @@
-package dk.easv.belman.PL.model;
+package dk.easv.belman.pl.model;
 
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;

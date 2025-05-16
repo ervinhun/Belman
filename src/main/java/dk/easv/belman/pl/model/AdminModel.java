@@ -1,4 +1,4 @@
-package dk.easv.belman.PL.model;
+package dk.easv.belman.pl.model;
 
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
@@ -8,10 +8,8 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.fxml.FXML;
 
 import java.util.List;
-import java.util.UUID;
 
 public class AdminModel {
     private final BLLManager bllManager = new BLLManager();
@@ -73,7 +71,6 @@ public class AdminModel {
 
     public void setLoggedInUser(User u) {
         loggedInUser.set(u);
-        System.out.println("Logged in user: " + u.getUsername());
     }
 
     public void logout() {

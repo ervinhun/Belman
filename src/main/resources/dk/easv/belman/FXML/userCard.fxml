@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<HBox fx:id="userCard" alignment="CENTER_LEFT" prefHeight="83.0" prefWidth="300.0" spacing="20.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.PL.UserCardController">
+<HBox fx:id="userCard" alignment="CENTER_LEFT" prefHeight="83.0" prefWidth="300.0" spacing="20.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.pl.UserCardController">
 
     <padding>
         <Insets bottom="10" left="10" right="10" top="10" />

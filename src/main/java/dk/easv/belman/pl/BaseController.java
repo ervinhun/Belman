@@ -1,7 +1,8 @@
-package dk.easv.belman.PL;
+package dk.easv.belman.pl;
 
 import dk.easv.belman.Main;
 import dk.easv.belman.be.User;
+import dk.easv.belman.exceptions.BelmanException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,6 +14,7 @@ import java.io.IOException;
 public abstract class BaseController {
     @FXML protected ChoiceBox<String> user;
     protected User loggedInUser;
+
 
     public void setLoggedinUser(User u) {
         user.getItems().setAll(
@@ -36,7 +38,7 @@ public abstract class BaseController {
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new BelmanException("Failed to load FXML: login.fxml " + e);
         }
     }
 

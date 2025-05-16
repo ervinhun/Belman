@@ -1,9 +1,10 @@
-package dk.easv.belman.PL.model;
+package dk.easv.belman.pl.model;
 
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
+import dk.easv.belman.exceptions.BelmanException;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -41,7 +42,6 @@ public class OperatorModel {
 
     public void setLoggedInUser(User u) {
         loggedInUser.set(u);
-        System.out.println("Logged in user: " + u.getUsername());
     }
 
     public void logout() {
@@ -65,14 +65,12 @@ public class OperatorModel {
 
                 try {
                     File file = new File(imagePath);
-                    System.out.println(file.getParentFile().mkdirs());
                     ImageIO.write(bufferedImage, "png", file);
-                    System.out.println("Image saved to: " + imagePath);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new BelmanException("Failed to save image: " + e.getMessage());
                 }
 
-                photos.add(new Photo(null, user.getId(), imagePath, angles.get(i), LocalDateTime.now(), false, null, null));
+                photos.add(new Photo(null, user.getId(), imagePath, angles.get(i), LocalDateTime.now(), false));
             }
         }
 

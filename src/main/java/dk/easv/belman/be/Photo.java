@@ -15,7 +15,7 @@ public class Photo {
     private LocalDateTime deletedAt;
     private String angle;
 
-    public Photo(Long id, UUID uploadedBy, String imagePath, String angle, LocalDateTime uploadedAt, Boolean isDeleted, UUID deletedBy, LocalDateTime deletedAt)
+    public Photo(Long id, UUID uploadedBy, String imagePath, String angle, LocalDateTime uploadedAt, Boolean isDeleted)
     {
         this.id = id;
         this.uploadedBy = uploadedBy;
@@ -23,8 +23,6 @@ public class Photo {
         this.angle = angle;
         this.uploadedAt = uploadedAt;
         this.isDeleted = isDeleted;
-        this.deletedBy = deletedBy;
-        this.deletedAt = deletedAt;
     }
 
     public Long getId()
@@ -63,4 +61,36 @@ public class Photo {
     }
 
     public String getAngle() { return angle; }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setUploadedBy(UUID uploadedBy) {
+        this.uploadedBy = uploadedBy;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public void setUploadedAt(LocalDateTime uploadedAt) {
+        this.uploadedAt = uploadedAt;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    public void setDeletedBy(UUID deletedBy) {
+        this.deletedBy = deletedBy;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public void setAngle(String angle) {
+        this.angle = angle;
+    }
 }
