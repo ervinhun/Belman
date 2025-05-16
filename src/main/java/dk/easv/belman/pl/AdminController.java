@@ -103,9 +103,7 @@ public class AdminController extends AbstractOrderController{
     @FXML private void newUserTab() {
         userController.getRightBox((VBox)borderPane.getCenter());
         borderPane.setCenter(newUserWindow);
-        model.currentPageProperty().set("Create user");
-        newUser.setVisible(false);
-        newUser.setDisable(true);
+        resizeWindow(newUserWindow);
     }
 
     private void updateTabStyles() {
@@ -174,7 +172,7 @@ public class AdminController extends AbstractOrderController{
             VBox card = loader.load();
             OrderCardController controller = loader.getController();
             controller.setOrder(order);
-            card.setOnMouseClicked(e -> openOrderDetail("FXML/orderAdmin.fxml", order.getOrderNumber()));
+            card.setOnMouseClicked(_ -> openOrderDetail("FXML/orderAdmin.fxml", order.getOrderNumber(), Boolean.FALSE));
             return card;
         } catch (IOException e) {
             e.printStackTrace();

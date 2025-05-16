@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="439.0" prefWidth="600.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1">
+<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="439.0" prefWidth="600.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox prefHeight="74.0" prefWidth="600.0">
          <children>
@@ -151,7 +151,7 @@
             <HBox alignment="BOTTOM_LEFT" minWidth="300.0" prefHeight="88.0" prefWidth="426.0" spacing="30.0" HBox.hgrow="ALWAYS">
                <children>
                   <Button id="btn" layoutX="10.0" layoutY="18.0" mnemonicParsing="false" onAction="#cancel" prefHeight="60.0" prefWidth="88.0" text="Cancel" textAlignment="CENTER" wrapText="true" />
-                  <Button id="btn" mnemonicParsing="false" onAction="#openImage" prefHeight="60.0" prefWidth="88.0" text="Open Image" />
+                  <Button id="btn" mnemonicParsing="false" onAction="#openImage" prefHeight="60.0" prefWidth="91.0" text="Open Image" />
                   <Button id="btn" mnemonicParsing="false" onAction="#deleteImage" prefHeight="60.0" prefWidth="88.0" text="Delete Image" textAlignment="CENTER" wrapText="true" />
                </children>
                <padding>

@@ -24,7 +24,7 @@
 }
 #btn
 {
-    -fx-background-color: #019ee3;
+    -fx-background-color: #004b88;
     -fx-font-weight: bold;
     -fx-text-fill: white;
     -fx-cursor: hand;
@@ -35,8 +35,9 @@
 }
 #link
 {
-    -fx-font-size: 12px;
-    -fx-text-fill: #019ee3;
+    -fx-font-size: 14px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #004b88;
     -fx-cursor: hand;
 }
 #searchBox
@@ -62,8 +63,8 @@
 }
 #sideBtnSelected
 {
-    -fx-background-color: rgba(1, 158, 227, 0.05);
-    -fx-text-fill: #019ee3;
+    -fx-background-color: rgba(127, 168, 197, 0.3);
+    -fx-text-fill: #004b88;
 }
 #sideBtnNotSelected
 {
@@ -73,8 +74,8 @@
 }
 #sideBtnNotSelected:hover
 {
-    -fx-background-color: rgba(1, 158, 227, 0.05);
-    -fx-text-fill: #019ee3;
+    -fx-background-color: rgba(127, 168, 197, 0.3);
+    -fx-text-fill: #004b88;
 }
 #cameraButton {
     -fx-background-color: radial-gradient(center 50% 50%, radius 60%, #ffffff, #cccccc);
@@ -94,7 +95,7 @@
 }
 #newUser
 {
-    -fx-background-color: #019ee3;
+    -fx-background-color: #004b88;
     -fx-text-fill: white;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
@@ -116,20 +117,11 @@
     -fx-background-radius: 4px;
     -fx-border-radius: 4px;
 }
-#addNewEvent
-{
-    -fx-background-color: #019ee3;
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-padding: 10px 20px;
-    -fx-background-radius: 8px;
-    -fx-pref-width: 100px;
-    -fx-cursor: hand;
-}
+
 #orderCard
 {
     -fx-padding: 10;
-    -fx-border-color: black;
+    -fx-border-color: #004b88;
     -fx-border-radius: 15;
     -fx-background-radius: 15;
     -fx-cursor: hand;
@@ -142,7 +134,7 @@
 #userCard
 {
     -fx-background-color: #E8E8E8;
-    -fx-border-color: #019ee3;
+    -fx-border-color: #004b88;
 
 }.popup_background {
      -fx-background-color: #FFFFFF;
@@ -216,7 +208,7 @@
     -fx-min-width: 30px;
 }
 .newUserBtn {
-    -fx-background-color: #019ee3;
+    -fx-background-color: #004b88;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-background-radius: 6px;
@@ -232,6 +224,6 @@
 }
 
 .image-selected {
-    -fx-effect: dropshadow(gaussian, #019ee3, 10, 0.5, 0, 0);
+    -fx-effect: dropshadow(gaussian, #7fa8c5, 10, 0.5, 0, 0);
 }
 

@@ -195,7 +195,7 @@ public class QualityController extends AbstractOrderController {
             controller.setOrder(order);
 
             card.setOnMouseClicked(e ->
-                    openOrderDetail("FXML/orderQuality.fxml", order.getOrderNumber())
+                    openOrderDetail("FXML/orderQuality.fxml", order.getOrderNumber(), Boolean.FALSE)
             );
 
             return card;
@@ -234,7 +234,7 @@ public class QualityController extends AbstractOrderController {
 
     @Override
     protected void onDetailLoaded(String orderNumber) {
-        this.orderNumberToSign = orderNumber;//
+        this.orderNumberToSign = orderNumber;
         if (model.isDocumentExists(orderNumber)) {
             btnSign.setText(OPEN_DOCUMENT);
             btnSign.setOnAction(e -> {

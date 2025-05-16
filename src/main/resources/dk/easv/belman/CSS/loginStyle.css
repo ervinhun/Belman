@@ -1,28 +1,28 @@
 
 .button {
-    -fx-background-color: #019ee3;
+    -fx-background-color: #004b88;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-font-size: 14px;
     -fx-background-radius: 10px;
     -fx-border-radius: 10px;
-    -fx-border-color: #00A8F3;
+    -fx-border-color: #004b88;
     -fx-border-width: 2px;
     -fx-padding: 5px 15px;
 }
 
 .button:hover {
-    -fx-background-color: #00C8FF;
+    -fx-background-color: #004b88;
     -fx-cursor: hand;
 }
 
 .button:pressed {
-    -fx-background-color: #00A0E3;
+    -fx-background-color: #004b88;
     -fx-scale-x: 0.97;
     -fx-scale-y: 0.97;
 }
 .mfx-text-field, .mfx-password-field {
-    -fx-border-color: #00A8F3;
+    -fx-border-color: #004b88;
     -fx-border-width: 2px;
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
@@ -30,12 +30,12 @@
 }
 
 .mfx-text-field:hover, .mfx-password-field:hover {
-    -fx-border-color: #00C8FF;
+    -fx-border-color: #004b88;
 }
 
 .mfx-text-field:focused, .mfx-password-field:focused {
-    -fx-border-color: #019ee3;
+    -fx-border-color: #004b88;
     -fx-background-color: white;
-    -fx-effect: dropshadow(gaussian, rgba(0, 168, 243, 0.6), 5, 0.5, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(127, 168, 197), 5, 0.5, 0, 0);
 }
 

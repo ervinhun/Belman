@@ -3,6 +3,7 @@ package dk.easv.belman.pl;
 import com.github.sarxos.webcam.Webcam;
 import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
+import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
 import dk.easv.belman.pl.model.OperatorModel;
@@ -35,7 +36,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class OperatorController {
+public class OperatorController extends AbstractOrderController {
     @FXML private BorderPane borderPane;
     @FXML private VBox rightBox;
     @FXML private FlowPane ordersPane;
@@ -69,6 +70,15 @@ public class OperatorController {
 
     private OperatorModel model;
 
+    @FXML
+    public void initialize()
+    {
+        if(model == null)
+        {
+            model = new OperatorModel();
+        }
+        refreshOrders();
+    }
 
     private void refreshOrders() {
         ordersPane.getChildren().clear();
@@ -77,9 +87,11 @@ public class OperatorController {
         }
     }
 
+    @Override
     @FXML
-    private void cancel() {
+    public void cancel() {
         borderPane.setCenter(rightBox);
+        resizeWindow(rightBox);
     }
 
     @FXML
@@ -88,7 +100,7 @@ public class OperatorController {
         {
             if(Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto) && i < imageViews.size() - 1)
             {
-                throw new BelmanException("At least 5 image is required");
+                logger.warn("At least 5 images are required");
             }
             else if(Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto))
             {
@@ -97,6 +109,7 @@ public class OperatorController {
         }
         model.savePhotos(imageViews, angles, orderLabel.getText());
         borderPane.setCenter(rightBox);
+        resizeWindow(rightBox);
     }
 
     private void showSelectMethod(ImageView clickedImage) {
@@ -146,6 +159,7 @@ public class OperatorController {
                 loader.setController(this);
                 Parent root = loader.load();
                 borderPane.setCenter(root);
+                resizeWindow(root);
 
                 showCameraImage();
         }
@@ -203,6 +217,7 @@ public class OperatorController {
     {
         Image takenImage = cameraImage.getImage();
         borderPane.setCenter(prevOrderView);
+        resizeWindow(prevOrderView);
         previousVBox.getChildren().remove(selectMethod);
         previousVBox.getChildren().add(previousImageView);
         previousImageView.setImage(takenImage);
@@ -212,39 +227,26 @@ public class OperatorController {
         previousImageView = null;
     }
 
-    private void openOrder(Order order, Boolean isOpenable) {
-        if(Boolean.TRUE.equals(isOpenable))
-        {
-            try {
-                FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/orderOperator.fxml"));
-                loader.setController(this);
-                Parent root = loader.load();
-                borderPane.setCenter(root);
-                orderLabel.setText(order.getOrderNumber());
+    private void openOrder() {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/selectMethod.fxml"));
+            fxmlLoader.setController(this);
+            selectMethod = fxmlLoader.load();
 
-                FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/selectMethod.fxml"));
-                fxmlLoader.setController(this);
-                selectMethod = fxmlLoader.load();
+            imageViews = List.of(
+                    frontImage,
+                    backImage,
+                    leftImage,
+                    rightImage,
+                    topImage,
+                    additionalImage
+            );
 
-                imageViews = List.of(
-                        frontImage,
-                        backImage,
-                        leftImage,
-                        rightImage,
-                        topImage,
-                        additionalImage
-                );
-
-                for (ImageView imageView : imageViews) {
-                    imageView.setOnMouseClicked(_ -> showSelectMethod(imageView));
-                }
-            } catch (IOException e) {
-                logger.error("I/O exception in Operator controller, LN 242: {}", e);
+            for (ImageView imageView : imageViews) {
+                imageView.setOnMouseClicked(_ -> showSelectMethod(imageView));
             }
-        }
-        else
-        {
-            logger.warn("Order already sent for signing");
+        } catch (IOException e) {
+            logger.error("I/O exception in Operator controller, LN 242: {}", e);
         }
     }
 
@@ -255,9 +257,13 @@ public class OperatorController {
             OrderCardController controller = loader.getController();
             controller.setOrder(order);
 
-            boolean isOpenable = order.getPhotos().isEmpty() || !order.getIsSigned();
+            boolean isOpenable = order.getPhotos().isEmpty();
             if (isOpenable) {
-                card.setOnMouseClicked(e -> openOrder(order, true));
+                card.setOnMouseClicked(_ -> openOrderDetail("FXML/orderOperator.fxml", order.getOrderNumber(), Boolean.TRUE));
+            }
+            else
+            {
+                card.setOnMouseClicked(_ -> logger.warn("Order already sent for signing"));
             }
 
             return card;
@@ -267,35 +273,16 @@ public class OperatorController {
         }
     }
 
-    public void setLoggedinUser(User u) {
-        if(model == null)
-        {
-            model = new OperatorModel();
-        }
-        model.setLoggedInUser(u);
-        refreshOrders();
-        user.getItems().setAll(
-                u.getFullName(),
-                "Logout"
-        );
-        user.getSelectionModel().selectFirst();
-        user.setOnAction(_ -> {
-            if ("Logout".equals(user.getValue())) {
-                model.logout();
-                loggedOut();
-            }
-        });
+    @Override
+    protected List<Photo> getPhotosForOrder(String orderNumber) {
+        return List.of();
     }
 
-    private void loggedOut() {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/login.fxml"));
-            Scene scene = new Scene(fxmlLoader.load());
-            Stage stage = (Stage) user.getScene().getWindow();
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
+    @Override
+    protected void onDetailLoaded(String orderNumber) { openOrder(); }
+
+    @Override
+    protected void onUserLogout() {
+        model.logout();
     }
 }
