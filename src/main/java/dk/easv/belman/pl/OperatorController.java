@@ -249,43 +249,22 @@ public class OperatorController {
     }
 
     private VBox createCard(Order order) {
-        ImageView iv = new ImageView();
-        Label state = new Label();
-        Boolean isOpenable;
-        String statusPreText = "Status: ";
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/dk/easv/belman/FXML/OrderCard.fxml"));
+            VBox card = loader.load();
+            OrderCardController controller = loader.getController();
+            controller.setOrder(order);
 
-        if (order.getPhotos().isEmpty()) {
-            iv.setImage(new Image(placeholderUrl));
-            state.setText(statusPreText + states[0]);
-            isOpenable = true;
-        } else {
-            String raw = order.getPhotos().getFirst().getImagePath();
-            File   f   = new File(raw);
-            iv.setImage(f.exists()
-                    ? new Image(f.toURI().toString())
-                    : new Image(placeholderUrl));
-            state.setText(Boolean.TRUE.equals(order.getIsSigned())
-                    ? statusPreText + states[2]
-                    : statusPreText + states[1]);
-            isOpenable = false;
+            boolean isOpenable = order.getPhotos().isEmpty() || !order.getIsSigned();
+            if (isOpenable) {
+                card.setOnMouseClicked(e -> openOrder(order, true));
+            }
+
+            return card;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new VBox();
         }
-
-        iv.setFitWidth(100);
-        iv.setFitHeight(100);
-        Rectangle clip = new Rectangle(100, 100);
-        clip.setArcWidth(20);
-        clip.setArcHeight(20);
-        iv.setClip(clip);
-
-        Label lbl = new Label("Order: " + order.getOrderNumber());
-
-        VBox card = new VBox(10, iv, lbl, state);
-        card.setAlignment(Pos.CENTER);
-        card.setId("orderCard");
-        card.setPrefHeight(160);
-        card.setOnMouseClicked(e -> openOrder(order, isOpenable));
-
-        return card;
     }
 
     public void setLoggedinUser(User u) {

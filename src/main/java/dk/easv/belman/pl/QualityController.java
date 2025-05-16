@@ -187,45 +187,23 @@ public class QualityController extends AbstractOrderController {
         }
     }
 
-    private VBox createCard (Order order){
-        ImageView iv = new ImageView();
-        Label state = new Label();
-        String statusPreText = "Status: ";
+    private VBox createCard(Order order) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/dk/easv/belman/FXML/OrderCard.fxml"));
+            VBox card = loader.load();
+            OrderCardController controller = loader.getController();
+            controller.setOrder(order);
 
-        if (order.getPhotos().isEmpty()) {
-            iv.setImage(new Image(placeholderUrl));
-            state.setText(statusPreText + states[0]);
-        } else {
-            String path = order.getPhotos().getFirst().getImagePath();
-            File f = new File(path);
-            iv.setImage(f.exists()
-                    ? new Image(f.toURI().toString())
-                    : new Image(placeholderUrl));
-            state.setText(Boolean.TRUE.equals(order.getIsSigned())
-                    ? statusPreText + states[2]
-                    : statusPreText + states[1]);
+            card.setOnMouseClicked(e ->
+                    openOrderDetail("FXML/orderQuality.fxml", order.getOrderNumber())
+            );
+
+            return card;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new VBox();
         }
-
-        iv.setFitWidth(100);
-        iv.setFitHeight(100);
-        Rectangle clip = new Rectangle(100, 100);
-        clip.setArcWidth(20);
-        clip.setArcHeight(20);
-        iv.setClip(clip);
-
-        Label lbl = new Label("Order: " + order.getOrderNumber());
-
-        VBox card = new VBox(10, iv, lbl, state);
-        card.setAlignment(Pos.CENTER);
-        card.setId("orderCard");
-        card.setPrefHeight(160);
-        card.getProperties().put("orderNum", order.getOrderNumber());
-        card.setOnMouseClicked(e ->
-                openOrderDetail("FXML/orderQuality.fxml", order.getOrderNumber())
-        );
-        return card;
     }
-
     @FXML
     private void cbSendingEmailClicked() {
         txtemail.setVisible(!txtemail.isVisible());
