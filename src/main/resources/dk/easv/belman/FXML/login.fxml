@@ -50,8 +50,8 @@
                   </MFXPasswordField>
                </children>
             </HBox>
-            <Button fx:id="confirm" mnemonicParsing="false" onAction="#login" prefHeight="26.0" prefWidth="151.0" text="Login" />
-            <Button mnemonicParsing="false" onAction="#cameraLogin" prefHeight="56.0" prefWidth="126.0" text="Camera Login" />
+            <Button fx:id="confirm" mnemonicParsing="false" onAction="#login" prefHeight="26.0" prefWidth="150.0" text="Login" />
+            <Button mnemonicParsing="false" onAction="#cameraLogin" prefHeight="56.0" prefWidth="150.0" text="Camera Login" />
          </children>
       </VBox>
       <ImageView fx:id="cameraView" disable="true" fitHeight="400.0" fitWidth="600.0" pickOnBounds="true" preserveRatio="true" visible="false" />

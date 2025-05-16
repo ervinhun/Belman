@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="borderPane" prefHeight="200.0" prefWidth="200.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.pl.AdminController">
+<BorderPane fx:id="borderPane" prefHeight="200.0" prefWidth="200.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.pl.AdminController">
    <left>
       <HBox prefHeight="400.0" prefWidth="126.0" BorderPane.alignment="CENTER">
          <children>
@@ -98,7 +98,7 @@
                   </VBox>
                   <VBox alignment="TOP_RIGHT" minWidth="80.0" prefHeight="85.0" prefWidth="129.0" HBox.hgrow="ALWAYS">
                      <children>
-                        <Button id="addNewEvent" fx:id="newUser" disable="true" maxHeight="32.0" maxWidth="95.0" minHeight="36.0" mnemonicParsing="false" onAction="#newUserTab" prefHeight="32.0" prefWidth="95.0" text="New User" visible="false" />
+                        <Button id="btn" fx:id="newUser" disable="true" maxHeight="32.0" maxWidth="95.0" minHeight="36.0" mnemonicParsing="false" onAction="#newUserTab" prefHeight="32.0" prefWidth="95.0" text="New User" visible="false" />
                      </children>
                      <padding>
                         <Insets right="20.0" top="35.0" />

@@ -97,5 +97,7 @@ public class UserController {
         model.clear();
         BorderPane bp = (BorderPane) rootVBox.getParent();
         bp.setCenter(rightBox);
+
+        adminController.resizeWindow(rightBox);
     }
 }

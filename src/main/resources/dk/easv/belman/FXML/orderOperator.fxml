@@ -13,13 +13,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="439.0" prefWidth="600.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="453.0" prefWidth="600.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox prefHeight="74.0" prefWidth="600.0">
          <children>
             <HBox alignment="TOP_RIGHT" prefHeight="40.0" prefWidth="580.0">
                <children>
-                  <ChoiceBox prefWidth="150.0" />
+                  <ChoiceBox id="user" prefWidth="150.0" />
                </children>
                <opaqueInsets>
                   <Insets />

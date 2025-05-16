@@ -5,12 +5,14 @@ import dk.easv.belman.be.Photo;
 import dk.easv.belman.exceptions.BelmanException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +33,7 @@ public abstract class AbstractOrderController extends BaseController {
             getClass().getResource("/dk/easv/belman/Images/belman.png")
                     .toExternalForm();
 
-    protected void openOrderDetail(String fxmlPath, String orderNumber) {
+    protected void openOrderDetail(String fxmlPath, String orderNumber, Boolean isOperator) {
         try {
             FXMLLoader loader = new FXMLLoader(Main.class.getResource(fxmlPath));
             loader.setController(this);
@@ -39,12 +41,30 @@ public abstract class AbstractOrderController extends BaseController {
 
             orderLabel.setText(orderNumber);
             borderPane.setCenter(root);
+            resizeWindow(root);
 
-            loadOrderImages(orderNumber);
+            if(!isOperator)
+            {
+                loadOrderImages(orderNumber);
+            }
             onDetailLoaded(orderNumber);
 
         } catch (IOException ex) {
             throw new BelmanException("Failed to load FXML: " + fxmlPath + " " + ex);
+        }
+    }
+
+    protected void resizeWindow(Node root)
+    {
+        Stage stage = (Stage) borderPane.getScene().getWindow();
+        double actualWidth = stage.getWidth() - borderPane.getLeft().getBoundsInParent().getWidth();
+        double prefWidth = root.prefWidth(-1);
+
+        double actualHeight = stage.getHeight();
+        double prefHeight = root.prefHeight(-1);
+
+        if (actualWidth < prefWidth || actualHeight < prefHeight) {
+            stage.sizeToScene();
         }
     }
 
@@ -84,6 +104,7 @@ public abstract class AbstractOrderController extends BaseController {
     @FXML
     protected void cancel() {
         borderPane.setCenter(rightBox);
+        resizeWindow(rightBox);
     }
 
     protected abstract List<Photo> getPhotosForOrder(String orderNumber);
