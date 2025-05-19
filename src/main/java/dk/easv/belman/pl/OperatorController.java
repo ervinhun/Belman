@@ -95,7 +95,7 @@ public class OperatorController extends AbstractOrderController {
     }
 
     @FXML
-    private void confirmImages() {
+    private void confirmImages() throws IOException {
         for (int i = 0; i < imageViews.size(); i++)
         {
             if(Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto) && i < imageViews.size() - 1)

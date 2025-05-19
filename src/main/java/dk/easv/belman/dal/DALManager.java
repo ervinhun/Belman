@@ -333,8 +333,9 @@ public class DALManager {
                 UUID deletedBy = rs.getObject( DELETED_BY, UUID.class);
                 Timestamp deletedAtTS = rs.getTimestamp( DELETED_AT);
                 LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
+                byte[] data = rs.getBytes("photo_file");
 
-                Photo p = new Photo(id, uploadedBy, imagePath, angle, uploadedAt, isDeleted);
+                Photo p = new Photo(id, uploadedBy, angle, uploadedAt, isDeleted, data);
                 if (Boolean.TRUE.equals(isDeleted)) {
                     p.setDeletedBy(deletedBy);
                     p.setDeletedAt(deletedAt);
@@ -365,10 +366,10 @@ public class DALManager {
                 Photo p = new Photo(
                         rs.getLong( ID),
                         rs.getObject( UPLOADED_BY, UUID.class),
-                        rs.getString(PHOTOS_IMAGE_PATH),
                         rs.getString( PHOTOS_ANGLE),
                         rs.getTimestamp("uploaded_at").toLocalDateTime(),
-                        rs.getBoolean( IS_DELETED)
+                        rs.getBoolean( IS_DELETED),
+                        rs.getBytes("photo_file")
                 );
                 if (Boolean.TRUE.equals(rs.getBoolean( IS_DELETED))) {
                     p.setDeletedBy(rs.getObject( DELETED_BY, UUID.class));
@@ -406,8 +407,9 @@ public class DALManager {
                 UUID deletedBy = rs.getObject( DELETED_BY, UUID.class);
                 Timestamp deletedAtTS = rs.getTimestamp( DELETED_AT);
                 LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
+                byte[] data = rs.getBytes("photo_file");
 
-                Photo p = new Photo(id, uploadedBy, imagePath, angle, uploadedAt, isDeleted);
+                Photo p = new Photo(id, uploadedBy, angle, uploadedAt, isDeleted, data);
                 if (Boolean.TRUE.equals(isDeleted)) {
                     p.setDeletedBy(deletedBy);
                     p.setDeletedAt(deletedAt);
@@ -591,4 +593,34 @@ public class DALManager {
         }
         return null;
     }
+
+    public void savePhotosBinary(List<Photo> photos, String orderNumber) {
+        String sql = """
+        INSERT INTO Photos
+          (product_id, angle, uploaded_by, uploaded_at, photo_file)
+        VALUES (?, ?, ?, ?, ?)
+        """;
+
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            long productId = getProductIdFromProductNumber(orderNumber);
+            if (productId <= 0) throw new BelmanException("Product not found");
+
+            c.setAutoCommit(false);
+            for (Photo p : photos) {
+                ps.setLong(1, productId);
+                ps.setString(2, p.getAngle());
+                ps.setObject(3, p.getUploadedBy());
+                ps.setTimestamp(4, Timestamp.valueOf(p.getUploadedAt()));
+                ps.setBytes(5, p.getPhotoFile());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            c.commit();
+        } catch (SQLException ex) {
+            throw new BelmanException("Error uploading photos " + ex);
+        }
+    }
+
 }

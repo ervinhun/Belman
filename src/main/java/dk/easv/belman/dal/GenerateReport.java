@@ -1,5 +1,6 @@
 package dk.easv.belman.dal;
 
+import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -22,9 +24,13 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.imageio.ImageIO;
 
 public class GenerateReport {
     private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
@@ -54,8 +60,25 @@ public class GenerateReport {
             logger.error("No images found for product number: {}", productNo);
             return;
         }
-        List<BufferedImage> bufferedImages = new ArrayList<>();
-        bufferedImages.addAll(loadBufferedImages(imagePaths));
+        List<Photo> photos = dalManager.getPhotosByONum(productNo);
+        if (photos.isEmpty()) {
+            logger.error("No images found for product number: {}", productNo);
+            return;
+        }
+
+        List<BufferedImage> bufferedImages = photos.stream()
+                .map(p -> {
+                    try {
+                        return ImageIO.read(
+                                new ByteArrayInputStream(p.getPhotoFile())   // or p.getData()
+                        );
+                    } catch (IOException e) {
+                        logger.error("Failed to decode image blob for angle {}: {}", p.getAngle(), e.getMessage());
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
 
         // Create a new PDF document
@@ -199,28 +222,6 @@ public class GenerateReport {
             Thread.currentThread().interrupt();
             logger.error("Thread was interrupted while creating the file: {}", e.getMessage());
         }
-    }
-
-    private Collection<? extends BufferedImage> loadBufferedImages(ArrayList<String> imagePaths) {
-        Collection<BufferedImage> bufferedImages = new ArrayList<>();
-        if (imagePaths == null || imagePaths.isEmpty()) {
-            logger.error("No image paths provided.");
-            return bufferedImages;
-        }
-        for (String imagePath : imagePaths) {
-            File file = new File(imagePath);
-            if (file.exists()) {
-                try {
-                    BufferedImage image = javax.imageio.ImageIO.read(file);
-                    bufferedImages.add(image);
-                } catch (IOException e) {
-                    logger.error("Error reading image file: {}", e.getMessage());
-                }
-            } else {
-                logger.error("Image file does not exist: {}", imagePath);
-            }
-        }
-        return bufferedImages;
     }
 
     private void sleepForFileCreation(String filepath) throws IOException, InterruptedException {

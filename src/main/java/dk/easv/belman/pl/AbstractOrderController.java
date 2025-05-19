@@ -14,6 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -81,24 +82,28 @@ public abstract class AbstractOrderController extends BaseController {
 
         List<Photo> photos = getPhotosForOrder(orderNumber);
         for (Photo p : photos) {
-            File f = new File(p.getImagePath());
-            Image img = f.exists()
-                    ? new Image(f.toURI().toString())
-                    : placeholder;
+            Image img;
+            byte[] data = p.getPhotoFile();
+            if (data != null && data.length > 0) {
+                img = new Image(new ByteArrayInputStream(data));
+            } else {
+                img = placeholder;
+            }
             switch (p.getAngle().toUpperCase()) {
-                case "TOP"        -> assign(topImage, f, img);
-                case "LEFT"       -> assign(leftImage, f, img);
-                case "RIGHT"      -> assign(rightImage, f, img);
-                case "FRONT"       -> assign(frontImage, f, img);
-                case "BACK"     -> assign(backImage, f, img);
-                case "ADDITIONAL" -> assign(additionalImage, f, img);
+                case "TOP"        -> assign(topImage, p, img);
+                case "LEFT"       -> assign(leftImage, p, img);
+                case "RIGHT"      -> assign(rightImage, p, img);
+                case "FRONT"       -> assign(frontImage, p, img);
+                case "BACK"     -> assign(backImage, p, img);
+                case "ADDITIONAL" -> assign(additionalImage, p, img);
                 default           -> throw new BelmanException("Unknown angle: " + p.getAngle());
             }
         }
     }
-    private void assign(ImageView iv, File f, Image img) {
+
+    private void assign(ImageView iv,Photo p, Image img) {
         iv.setImage(img);
-        iv.setUserData(f);
+        iv.setUserData(p);
     }
 
     @FXML

@@ -83,4 +83,12 @@ public class BLLManager {
     }
 
     public void savePhotos(List<Photo> photos, String orderNumber) { dalManager.savePhotos(photos, orderNumber); }
+
+    public void savePhotosBinary(List<Photo> photos, String orderNumber) {
+        dalManager.savePhotosBinary(photos, orderNumber);
+    }
+
+    public User getUserById(UUID id) {
+        return dalManager.getUserById(id);
+    }
 }

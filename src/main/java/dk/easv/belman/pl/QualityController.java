@@ -114,30 +114,26 @@ public class QualityController extends AbstractOrderController {
         if (selectedImageView == null) return;
 
         List<Photo> photos = model.getPhotosForOrder(orderNumberToSign);
-        List<File> files = photos.stream()
-                .map(p -> new File(p.getImagePath()))
-                .filter(File::exists)
-                .toList();
+        if (photos.isEmpty()) return;
 
-        if (files.isEmpty()) return;
-
-        File selected = (File) selectedImageView.getUserData();
-        int selectedIndex = files.indexOf(selected);
-        if (selectedIndex == -1) selectedIndex = 0;
+        Photo sel = (Photo) selectedImageView.getUserData();
+        int idx = photos.indexOf(sel);
+        if (idx < 0) idx = 0;
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/dk/easv/belman/FXML/photoPreview.fxml"));
-            Parent previewRoot = loader.load();
-            PhotoPreviewController controller = loader.getController();
-            controller.setPhotos(files, selectedIndex, this);
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/dk/easv/belman/FXML/photoPreview.fxml")
+            );
+            Parent root = loader.load();
 
-            borderPane.setCenter(previewRoot);
+            PhotoPreviewController ctrl = loader.getController();
+            ctrl.setPhotos(photos, idx, this);
 
+            borderPane.setCenter(root);
         } catch (IOException e) {
-            throw new BelmanException("Failed to load FXML: photoPreview.fxml " + e);
+            throw new BelmanException("Failed to load photoPreview.fxml " + e);
         }
     }
-
 
     @FXML
     private void deleteImage() { /* move logic to model and call from here */ }
