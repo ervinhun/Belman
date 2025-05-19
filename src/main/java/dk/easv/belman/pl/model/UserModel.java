@@ -28,8 +28,6 @@ public class UserModel {
         Properties props = new Properties();
         String defaultPassword = "";
 
-        System.out.println("Current working directory: " + System.getProperty("user.dir"));
-
         try (FileInputStream fileInputStream = new FileInputStream(CONFIG_PATH)) {
             props.load(fileInputStream);
             System.out.println("Config file loaded successfully.");
@@ -40,7 +38,6 @@ public class UserModel {
 
         try {
             defaultPassword = ConfigCrypto.decrypt(props.getProperty("user.defaultPassword"));
-            System.out.println("Decrypted password: " + defaultPassword);
         } catch (Exception e) {
             throw new BelmanException("Error decrypting the default password: " + e.getMessage());
         }
