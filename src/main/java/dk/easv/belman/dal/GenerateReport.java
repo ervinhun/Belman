@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.security.GeneralSecurityException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +45,9 @@ public class GenerateReport {
         this.productNo = productNumber;
         this.isSendingEmail = isSendingEmail;
         this.email = email;
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String formattedDate = currentDate.format(formatter);
         String filePath = FilePaths.REPORT_DIRECTORY + productNo;
         float currentYPosition = 0;
         float margin = 40;
@@ -161,7 +166,7 @@ public class GenerateReport {
             currentYPosition -= scaledHeight + 20; // spacing between images
         }
             // Add footer
-            float footerHeight = 35; // font size 10 * 2 (because it's two lines) plus 15 for spacing
+            float footerHeight = 60; // font size 10 * 3 (because it's three lines) plus 2*15 for spacing
             if (currentYPosition - footerHeight < margin) {
                 contentStream.close();
                 page = new PDPage(PDRectangle.A4);
@@ -177,6 +182,8 @@ public class GenerateReport {
             contentStream.showText(signedBy);
             contentStream.newLineAtOffset(50, -15);
             contentStream.showText(loggedInUser.getFullName());
+            contentStream.newLineAtOffset(0, -15);
+            contentStream.showText("Date: " + formattedDate);
             contentStream.endText();
 
             contentStream.close();
