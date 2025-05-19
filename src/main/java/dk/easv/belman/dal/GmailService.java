@@ -5,7 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
@@ -27,25 +27,25 @@ import java.util.Properties;
 
 public class GmailService {
     private static final String APPLICATION_NAME = "GmailFXSender";
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final JsonFactory GSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Collections.singletonList("https://www.googleapis.com/auth/gmail.send");
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
     private final Gmail service;
 
     public GmailService() throws BelmanException, GeneralSecurityException, IOException {
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         InputStream in = getClass().getResourceAsStream("/credential.json");
         if (in == null) {
             throw new FileNotFoundException("credential.json not found");
         }
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(GSON_FACTORY, new InputStreamReader(in));
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                httpTransport, GSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("offline")
                 .build();
-        service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY,
+        service = new Gmail.Builder(httpTransport, GSON_FACTORY,
                 new com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp(
                         flow, new com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver()).authorize("user"))
                 .setApplicationName(APPLICATION_NAME)
@@ -77,7 +77,6 @@ public class GmailService {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         email.writeTo(buffer);
         byte[] rawMessageBytes = buffer.toByteArray();
-        //String encodedEmail = com.google.api.client.util.Base64.encodeBase64URLSafeString(rawMessageBytes);
         String encodedEmail = Base64.getUrlEncoder().encodeToString(rawMessageBytes);
 
         Message message = new Message();

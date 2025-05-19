@@ -1,6 +1,7 @@
 package dk.easv.belman.dal;
 
 import dk.easv.belman.be.Photo;
+import dk.easv.belman.be.PhotoDataForReport;
 import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -19,10 +20,10 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
 import java.security.GeneralSecurityException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -34,15 +35,20 @@ import javax.imageio.ImageIO;
 
 public class GenerateReport {
     private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
+
     static {
         new DALManager();
     }
+
     private final String productNo;
     private static final String FILE_NAME = "report.pdf";
     private boolean isSendingEmail;
     private String email;
-
-
+    private static final float LINE_SPACING = 15f;
+    private static final float IMAGE_SPACING = 20f;
+    private static final float ANGLE_LABEL_X_OFFSET = 50f;
+    private static final float ANGLE_LABEL_Y_OFFSET = 10f;
+    private static final String DATE_FORMAT_PATTERN = "dd/MM/yyyy";
 
 
     public GenerateReport(String productNumber, User loggedInUser, boolean isSendingEmail, String email) {
@@ -66,12 +72,16 @@ public class GenerateReport {
             return;
         }
 
-        List<BufferedImage> bufferedImages = photos.stream()
+        List<PhotoDataForReport> bufferedImages = photos.stream()
                 .map(p -> {
                     try {
-                        return ImageIO.read(
-                                new ByteArrayInputStream(p.getPhotoFile())   // or p.getData()
-                        );
+                                BufferedImage img = ImageIO.read(new ByteArrayInputStream(p.getPhotoFile()));
+                                if (img != null)
+                                    return new PhotoDataForReport(img, p.getAngle());
+                                else {
+                                    logger.error("Image is null for angle: {}", p.getAngle());
+                                    return null;
+                                }
                     } catch (IOException e) {
                         logger.error("Failed to decode image blob for angle {}: {}", p.getAngle(), e.getMessage());
                         return null;
@@ -106,7 +116,7 @@ public class GenerateReport {
             float bodyTextFontSize = 12;
             float headerFontSize = 10;
             PDType1Font titleFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
-
+            PDType1Font imageAngle = new PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE);
             PDType1Font dynamicFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
             // Set header
             contentStream.beginText();
@@ -114,7 +124,7 @@ public class GenerateReport {
             contentStream.newLineAtOffset(480, 810);
             for (String headTextLine : headText) {
                 contentStream.showText(headTextLine);
-                contentStream.newLineAtOffset(0, -15);
+                contentStream.newLineAtOffset(0, -LINE_SPACING);
             }
             contentStream.endText();
             // Calculate width of the title
@@ -134,14 +144,14 @@ public class GenerateReport {
             contentStream.setFont(titleFont, titleFontSize);
             contentStream.newLineAtOffset(centerXTitle, 720);
             contentStream.showText(title);
-            currentYPosition = 720 - titleFontSize - 20;
+            currentYPosition = 720 - titleFontSize - IMAGE_SPACING;
 
             // Set font and add order number line
-            contentStream.newLineAtOffset(centerXDynamic - centerXTitle, -20);
+            contentStream.newLineAtOffset(centerXDynamic - centerXTitle, -IMAGE_SPACING);
             contentStream.setFont(dynamicFont, productNoFontSize);
             contentStream.showText(dynamicText);
             contentStream.endText();
-            currentYPosition -= productNoFontSize + 20;
+            currentYPosition -= productNoFontSize + IMAGE_SPACING;
 
 
             // Add body text
@@ -150,41 +160,56 @@ public class GenerateReport {
             contentStream.newLineAtOffset(100, currentYPosition);
             for (String bodyTextLine : bodyText) {
                 contentStream.showText(bodyTextLine);
-                contentStream.newLineAtOffset(0, -15);
-                currentYPosition -= bodyTextFontSize + 15;
+                contentStream.newLineAtOffset(0, -LINE_SPACING);
+                currentYPosition -= bodyTextFontSize + LINE_SPACING;
             }
             contentStream.endText();
 
             currentYPosition -= 10;
 
             // Add image
-            for (BufferedImage bImage : bufferedImages) {
-
+            for (PhotoDataForReport photoData : bufferedImages) {
                 // Create PDImageXObject from BufferedImage
-            PDImageXObject pdImage = LosslessFactory.createFromImage(document, bImage);
-            float originalWidth = pdImage.getWidth();
-            float originalHeight = pdImage.getHeight();
+                PDImageXObject pdImage = LosslessFactory.createFromImage(document, photoData.getImage());
+                float originalWidth = pdImage.getWidth();
+                float originalHeight = pdImage.getHeight();
 
-            // Scale to fit available width
-            float scale = availableWidth / originalWidth;
-            float scaledWidth = originalWidth * scale;
-            float scaledHeight = originalHeight * scale;
+                // Scale to fit available width
+                float scale = availableWidth / originalWidth;
+                float scaledWidth = originalWidth * scale;
+                float scaledHeight = originalHeight * scale;
 
-            // Add new page if not enough space
-            if (currentYPosition - scaledHeight < minY) {
-                contentStream.close();
-                page = new PDPage(PDRectangle.A4);
-                document.addPage(page);
-                contentStream = new PDPageContentStream(document, page);
-                currentYPosition = page.getMediaBox().getHeight() - margin;
+                // Add new page if not enough space
+                if (currentYPosition - scaledHeight < minY) {
+                    contentStream.close();
+                    page = new PDPage(PDRectangle.A4);
+                    document.addPage(page);
+                    contentStream = new PDPageContentStream(document, page);
+                    currentYPosition = page.getMediaBox().getHeight() - margin;
+                }
+
+                // Draw the scaled image
+                contentStream.drawImage(pdImage, margin, currentYPosition - scaledHeight, scaledWidth, scaledHeight);
+                // Add image angle
+                String angleText = "Angle: " + photoData.getAngle();
+                contentStream.beginText();
+                contentStream.setFont(imageAngle, 10);
+                contentStream.newLineAtOffset(margin + scaledWidth - ANGLE_LABEL_X_OFFSET,
+                        currentYPosition - scaledHeight - ANGLE_LABEL_Y_OFFSET);
+                contentStream.showText(angleText);
+                contentStream.endText();
+                // Update current Y position
+
+
+                currentYPosition -= scaledHeight + IMAGE_SPACING + 20; // spacing between images 10 for font size and 10 more for spacing between the image and the angle
             }
-
-            // Draw the scaled image
-            contentStream.drawImage(pdImage, margin, currentYPosition - scaledHeight, scaledWidth, scaledHeight);
-            currentYPosition -= scaledHeight + 20; // spacing between images
-        }
             // Add footer
-            float footerHeight = 35; // font size 10 * 2 (because it's two lines) plus 15 for spacing
+            final float FONT_SIZE = 10;
+            final int NUM_LINES = 3;
+            float footerHeight = (FONT_SIZE * NUM_LINES) + (2 * LINE_SPACING);
+            LocalDateTime dateTime = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
+            String formattedDate = dateTime.format(formatter);
             if (currentYPosition - footerHeight < margin) {
                 contentStream.close();
                 page = new PDPage(PDRectangle.A4);
@@ -198,8 +223,10 @@ public class GenerateReport {
             contentStream.setFont(dynamicFont, 10);
             contentStream.newLineAtOffset(400, footerY);
             contentStream.showText(signedBy);
-            contentStream.newLineAtOffset(50, -15);
+            contentStream.newLineAtOffset(50, -LINE_SPACING);
             contentStream.showText(loggedInUser.getFullName());
+            contentStream.newLineAtOffset(0, -LINE_SPACING);
+            contentStream.showText("Date: " + formattedDate);
             contentStream.endText();
 
             contentStream.close();
@@ -208,8 +235,8 @@ public class GenerateReport {
             if (!targetDir.exists()) {
                 targetDir.mkdirs();
             }
-            sleepForFileCreation(filePath + "/" + FILE_NAME);
-            document.save(filePath + "/" + FILE_NAME);
+            PDDocument documentToSave = addPageNumber(document);
+            documentToSave.save(filePath + "/" + FILE_NAME);
             openDocument(productNo);
 
         } catch (IOException e) {
@@ -218,34 +245,9 @@ public class GenerateReport {
             logger.error("Illegal state encountered while generating PDF: {}", e.getMessage());
         } catch (SecurityException e) {
             logger.error("Security exception while accessing file system: {}", e.getMessage());
-            } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.error("Thread was interrupted while creating the file: {}", e.getMessage());
         }
     }
 
-    private void sleepForFileCreation(String filepath) throws IOException, InterruptedException {
-        File file = new File(filepath);
-        if (file.exists()) {
-            return;
-        }
-        Path directory = file.getParentFile().toPath();
-        try (WatchService watchService = directory.getFileSystem().newWatchService()) {
-            directory.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
-            while (true) {
-                WatchKey key = watchService.take();
-                for (WatchEvent<?> event : key.pollEvents()) {
-                    Path createdFile = directory.resolve((Path) event.context());
-                    if (createdFile.toFile().equals(file)) {
-                        return;
-                    }
-                }
-                if (!key.reset()) {
-                    break;
-                }
-            }
-        }
-    }
 
     public String getFilePath() {
         return FilePaths.REPORT_DIRECTORY + productNo + "/" + FILE_NAME;
@@ -253,7 +255,7 @@ public class GenerateReport {
 
     public void openDocument(String productNumber) {
         File pdfFile = new File(FilePaths.BASE_PATH + "report/" + productNumber + "/report.pdf");
-        if (Desktop.isDesktopSupported() && pdfFile.exists()) {
+        if (Desktop.isDesktopSupported() && pdfFile.exists() && !GraphicsEnvironment.isHeadless()) {
             try {
                 Desktop.getDesktop().open(pdfFile);
             } catch (IOException e) {
@@ -280,5 +282,33 @@ public class GenerateReport {
                 logger.error("Error while trying to send an e-mail: {}", e.getMessage());
             }
         }
+    }
+
+
+    private PDDocument addPageNumber(PDDocument document) {
+        PDType1Font pageNumberFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
+        int pageCount = document.getNumberOfPages();
+
+        for (int i = 0; i < pageCount; i++) {
+            PDPage currentPage = document.getPage(i);
+            String pageNumberText = "Page " + (i + 1) + " of " + pageCount;
+            float fontSize = 10;
+            try {
+                PDPageContentStream pageContentStream = new PDPageContentStream(document, currentPage, PDPageContentStream.AppendMode.APPEND, true, true);
+                float stringWidth = pageNumberFont.getStringWidth(pageNumberText) / 1000 * fontSize;
+                float pageWidth = currentPage.getMediaBox().getWidth();
+                float x = (pageWidth - stringWidth) / 2;
+                float y = 20; // 20 units from the bottom
+                pageContentStream.beginText();
+                pageContentStream.setFont(pageNumberFont, fontSize);
+                pageContentStream.newLineAtOffset(x, y);
+                pageContentStream.showText(pageNumberText);
+                pageContentStream.endText();
+                pageContentStream.close();
+            } catch (IOException e) {
+                logger.error("Error drawing the font for page number: {}", e.getMessage());
+            }
+        }
+        return document;
     }
 }
