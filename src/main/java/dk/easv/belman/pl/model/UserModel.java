@@ -1,12 +1,13 @@
 package dk.easv.belman.pl.model;
 
 import dk.easv.belman.config.ConfigCrypto;
-import dk.easv.belman.config.ConfigReader;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import dk.easv.belman.exceptions.BelmanException;
 import javafx.beans.property.*;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 public class UserModel {
@@ -16,29 +17,34 @@ public class UserModel {
     private final StringProperty username = new SimpleStringProperty("");
     private final StringProperty tagId = new SimpleStringProperty("");
     private final IntegerProperty roleId = new SimpleIntegerProperty(0);
-    Properties props;
     private User editingUser;
 
     private final StringProperty errorMessage = new SimpleStringProperty();
     private final StringProperty successMessage = new SimpleStringProperty();
 
+    private static final String CONFIG_PATH = "config.properties";
+
     public void saveUser() {
-        props = new Properties();
+        Properties props = new Properties();
         String defaultPassword = "";
 
-        //Opening the config properties file to get the default password
-        try {
-            props.load(ConfigReader.class.getResourceAsStream("/config.properties"));
-        } catch (Exception e) {
-            throw new BelmanException("Error loading config properties: " + e);
+        System.out.println("Current working directory: " + System.getProperty("user.dir"));
+
+        try (FileInputStream fileInputStream = new FileInputStream(CONFIG_PATH)) {
+            props.load(fileInputStream);
+            System.out.println("Config file loaded successfully.");
+        } catch (IOException e) {
+            throw new BelmanException("Error loading config properties: " + e.getMessage());
         }
 
-        //Trying to decyorpt the default password
+
         try {
             defaultPassword = ConfigCrypto.decrypt(props.getProperty("user.defaultPassword"));
+            System.out.println("Decrypted password: " + defaultPassword);
         } catch (Exception e) {
-            throw new BelmanException("Error decrypting the default password: " + e);
+            throw new BelmanException("Error decrypting the default password: " + e.getMessage());
         }
+
         errorMessage.set("");
         successMessage.set("");
 
@@ -55,6 +61,7 @@ public class UserModel {
             errorMessage.set("Error hashing password: " + e.getMessage());
             return;
         }
+
         if (editingUser != null) {
             editingUser.setFullName(fullName.get());
             editingUser.setTagId(tagId.get());
@@ -62,11 +69,15 @@ public class UserModel {
             editingUser.setPassword(bllManager.hashPass(editingUser.getUsername(), defaultPassword));
 
             boolean ok = bllManager.updateUser(editingUser);
-            if (ok) successMessage.set("User updated.");
-            else errorMessage.set("Update failed.");
+            if (ok) {
+                successMessage.set("User updated.");
+            } else {
+                errorMessage.set("Update failed.");
+            }
             editingUser = null;
             return;
         }
+
         User u = new User();
         u.setFullName(fullName.get());
         u.setUsername(username.get());
@@ -93,7 +104,6 @@ public class UserModel {
         tagId.set(u.getTagId());
         roleId.set(u.getRoleId());
     }
-
 
     public void clear() {
         fullName.set("");
