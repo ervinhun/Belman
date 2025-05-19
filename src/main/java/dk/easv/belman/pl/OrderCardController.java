@@ -1,13 +1,16 @@
 package dk.easv.belman.pl;
 
 import dk.easv.belman.be.Order;
+import dk.easv.belman.be.Photo;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.List;
 
 public class OrderCardController {
 
@@ -29,24 +32,20 @@ public class OrderCardController {
             .toExternalForm();
 
     public void setOrder(Order order) {
-        this.order = order;
+        List<Photo> photos = order.getPhotos();
+        Image img;
+        String status;
 
-        if (order.getPhotos().isEmpty()) {
-            orderImage.setImage(new Image(placeholderUrl));
-            lblStatus.setText("Status: " + states[0]); // "Images Needed"
+        if (photos.isEmpty() || photos.get(0).getPhotoFile() == null) {
+            img = new Image(placeholderUrl);
+            status = states[0];
         } else {
-            File imgFile = new File(order.getPhotos().getFirst().getImagePath());
-            Image image = imgFile.exists()
-                    ? new Image(imgFile.toURI().toString())
-                    : new Image(placeholderUrl);
-            orderImage.setImage(image);
-
-            lblStatus.setText(order.getIsSigned()
-                    ? "Status: " + states[2]
-                    : "Status: " + states[1]
-            );
+            Photo p = photos.get(0);
+            img = new Image(new ByteArrayInputStream(p.getPhotoFile()));
+            status = order.getIsSigned() ? states[2] : states[1];
         }
 
+        orderImage.setImage(img);
         orderImage.setFitWidth(100);
         orderImage.setFitHeight(100);
         orderImage.setPreserveRatio(false);
@@ -56,6 +55,7 @@ public class OrderCardController {
         clip.setArcHeight(20);
         orderImage.setClip(clip);
 
+        lblStatus.setText("Status: " + status);
         lblOrderNumber.setText("Order: " + order.getOrderNumber());
     }
 

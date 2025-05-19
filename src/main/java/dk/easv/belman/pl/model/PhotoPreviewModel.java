@@ -1,18 +1,19 @@
 package dk.easv.belman.pl.model;
 
-import java.io.File;
+import dk.easv.belman.be.Photo;
+
 import java.util.List;
 
 public class PhotoPreviewModel {
-    private List<File> photoFiles;
+    private List<Photo> photoFiles;
     private int currentIndex;
 
-    public void setPhotos(List<File> photos, int selectedIndex) {
+    public void setPhotos(List<Photo> photos, int selectedIndex) {
         this.photoFiles = photos;
         this.currentIndex = Math.max(0, Math.min(selectedIndex, photos.size() - 1));
     }
 
-    public File getCurrentPhoto() {
+    public Photo getCurrentPhoto() {
         return photoFiles != null && !photoFiles.isEmpty() ? photoFiles.get(currentIndex) : null;
     }
 
@@ -36,7 +37,7 @@ public class PhotoPreviewModel {
         return currentIndex;
     }
 
-    public List<File> getPhotoFiles() {
+    public List<Photo> getPhotoFiles() {
         return photoFiles;
     }
 }

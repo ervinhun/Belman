@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class AdminController extends AbstractOrderController{
     @FXML private FlowPane  contentPane;
@@ -214,7 +215,6 @@ public class AdminController extends AbstractOrderController{
 
     @Override
     protected void onDetailLoaded(String orderNumber) {
-        // clear any old text
         for (Label lbl : List.of(
                 uploadedByText, uploadedAtText,
                 uploadedByText1, uploadedAtText1,
@@ -229,32 +229,34 @@ public class AdminController extends AbstractOrderController{
         List<Photo> photos = model.getPhotosForOrder(orderNumber);
         for (Photo p : photos) {
             String angle = p.getAngle().toUpperCase();
-            String id  = p.getUploadedBy().toString();
+            UUID id  = p.getUploadedBy();
+            User user = model.getUserById(id);
+            String fullName = user.getFullName();
             String when  = dtf.format(p.getUploadedAt());
 
             switch (angle) {
                 case "LEFT"        -> {
-                    uploadedByText.setText(id);
+                    uploadedByText.setText(fullName);
                     uploadedAtText.setText(when);
                 }
                 case "TOP"         -> {
-                    uploadedByText1.setText(id);
+                    uploadedByText1.setText(fullName);
                     uploadedAtText1.setText(when);
                 }
                 case "RIGHT"       -> {
-                    uploadedByText2.setText(id);
+                    uploadedByText2.setText(fullName);
                     uploadedAtText2.setText(when);
                 }
                 case "BACK"        -> {
-                    uploadedByText3.setText(id);
+                    uploadedByText3.setText(fullName);
                     uploadedAtText3.setText(when);
                 }
                 case "FULL", "FRONT" -> {
-                    uploadedByText4.setText(id);
+                    uploadedByText4.setText(fullName);
                     uploadedAtText4.setText(when);
                 }
                 case "ADDITIONAL"  -> {
-                    uploadedByText5.setText(id);
+                    uploadedByText5.setText(fullName);
                     uploadedAtText5.setText(when);
                 }
                 default           -> {

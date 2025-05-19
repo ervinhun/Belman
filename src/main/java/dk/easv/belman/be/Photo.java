@@ -14,7 +14,9 @@ public class Photo {
     private UUID deletedBy;
     private LocalDateTime deletedAt;
     private String angle;
+    private byte[] photoFile;
 
+/*
     public Photo(Long id, UUID uploadedBy, String imagePath, String angle, LocalDateTime uploadedAt, Boolean isDeleted)
     {
         this.id = id;
@@ -23,6 +25,21 @@ public class Photo {
         this.angle = angle;
         this.uploadedAt = uploadedAt;
         this.isDeleted = isDeleted;
+    }
+*/
+
+    public Photo(Long id,
+                 UUID uploadedBy,
+                 String angle,
+                 LocalDateTime uploadedAt,
+                 Boolean isDeleted,
+                 byte[] photoFile) {
+        this.id          = id;
+        this.uploadedBy  = uploadedBy;
+        this.angle       = angle;
+        this.uploadedAt  = uploadedAt;
+        this.isDeleted = isDeleted;
+        this.photoFile   = photoFile;
     }
 
     public Long getId()
@@ -92,5 +109,13 @@ public class Photo {
 
     public void setAngle(String angle) {
         this.angle = angle;
+    }
+
+    public byte[] getPhotoFile() {
+        return photoFile;
+    }
+
+    public void setPhotoFile(byte[] photoFile) {
+        this.photoFile = photoFile;
     }
 }

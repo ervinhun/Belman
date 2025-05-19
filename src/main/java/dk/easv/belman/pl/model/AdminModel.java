@@ -10,6 +10,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 
 import java.util.List;
+import java.util.UUID;
 
 public class AdminModel {
     private final BLLManager bllManager = new BLLManager();
@@ -87,5 +88,9 @@ public class AdminModel {
 
     public List<Photo> getPhotosForOrder(String orderNumber) {
         return bllManager.getPhotosForOrder(orderNumber);
+    }
+
+    public User getUserById(UUID id) {
+        return bllManager.getUserById(id);
     }
 }

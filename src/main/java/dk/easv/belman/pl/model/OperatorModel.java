@@ -16,11 +16,13 @@ import javafx.scene.image.ImageView;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class OperatorModel {
     private final BLLManager bllManager = new BLLManager();
@@ -52,7 +54,7 @@ public class OperatorModel {
         loggedInUser.set(null);
     }
 
-    public void savePhotos(List<ImageView> imageViews, List<String> angles, String orderNumber)
+    /*public void savePhotos(List<ImageView> imageViews, List<String> angles, String orderNumber)
     {
         List<Photo> photos = new ArrayList<>();
         User user = operatorController.getUser();
@@ -84,6 +86,30 @@ public class OperatorModel {
         }
 
         bllManager.savePhotos(photos, orderNumber);
+    }*/
+
+    public void savePhotos(List<ImageView> imageViews,
+                           List<String> angles,
+                           String orderNumber) throws IOException {
+        List<Photo> photos = new ArrayList<>();
+        UUID userId = operatorController.getUser().getId();
+
+        for (int i = 0; i < imageViews.size(); i++) {
+            javafx.scene.image.Image fxImg = imageViews.get(i).getImage();
+            if (fxImg == null) continue;
+
+            // turn FX Image → raw PNG bytes
+            BufferedImage buf = SwingFXUtils.fromFXImage(fxImg, null);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(buf, "png", baos);
+            byte[] data = baos.toByteArray();
+
+            photos.add(new Photo(
+                    null, userId, angles.get(i), LocalDateTime.now(), false, data
+            ));
+        }
+
+        bllManager.savePhotosBinary(photos, orderNumber);
     }
 
 }
