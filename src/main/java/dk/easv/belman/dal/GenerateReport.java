@@ -1,6 +1,7 @@
 package dk.easv.belman.dal;
 
 import dk.easv.belman.be.Photo;
+import dk.easv.belman.be.PhotoDataForReport;
 import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -34,19 +35,20 @@ import javax.imageio.ImageIO;
 
 public class GenerateReport {
     private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
+
     static {
         new DALManager();
     }
+
     private final String productNo;
     private static final String FILE_NAME = "report.pdf";
     private boolean isSendingEmail;
     private String email;
     private static final float LINE_SPACING = 15f;
     private static final float IMAGE_SPACING = 20f;
+    private static final float ANGLE_LABEL_X_OFFSET = 50f;
+    private static final float ANGLE_LABEL_Y_OFFSET = 10f;
     private static final String DATE_FORMAT_PATTERN = "dd/MM/yyyy";
-
-
-
 
 
     public GenerateReport(String productNumber, User loggedInUser, boolean isSendingEmail, String email) {
@@ -70,12 +72,16 @@ public class GenerateReport {
             return;
         }
 
-        List<BufferedImage> bufferedImages = photos.stream()
+        List<PhotoDataForReport> bufferedImages = photos.stream()
                 .map(p -> {
                     try {
-                        return ImageIO.read(
-                                new ByteArrayInputStream(p.getPhotoFile())   // or p.getData()
-                        );
+                                BufferedImage img = ImageIO.read(new ByteArrayInputStream(p.getPhotoFile()));
+                                if (img != null)
+                                    return new PhotoDataForReport(img, p.getAngle());
+                                else {
+                                    logger.error("Image is null for angle: {}", p.getAngle());
+                                    return null;
+                                }
                     } catch (IOException e) {
                         logger.error("Failed to decode image blob for angle {}: {}", p.getAngle(), e.getMessage());
                         return null;
@@ -162,41 +168,41 @@ public class GenerateReport {
             currentYPosition -= 10;
 
             // Add image
-            for (BufferedImage bImage : bufferedImages) {
-
+            for (PhotoDataForReport photoData : bufferedImages) {
                 // Create PDImageXObject from BufferedImage
-            PDImageXObject pdImage = LosslessFactory.createFromImage(document, bImage);
-            float originalWidth = pdImage.getWidth();
-            float originalHeight = pdImage.getHeight();
+                PDImageXObject pdImage = LosslessFactory.createFromImage(document, photoData.getImage());
+                float originalWidth = pdImage.getWidth();
+                float originalHeight = pdImage.getHeight();
 
-            // Scale to fit available width
-            float scale = availableWidth / originalWidth;
-            float scaledWidth = originalWidth * scale;
-            float scaledHeight = originalHeight * scale;
+                // Scale to fit available width
+                float scale = availableWidth / originalWidth;
+                float scaledWidth = originalWidth * scale;
+                float scaledHeight = originalHeight * scale;
 
-            // Add new page if not enough space
-            if (currentYPosition - scaledHeight < minY) {
-                contentStream.close();
-                page = new PDPage(PDRectangle.A4);
-                document.addPage(page);
-                contentStream = new PDPageContentStream(document, page);
-                currentYPosition = page.getMediaBox().getHeight() - margin;
+                // Add new page if not enough space
+                if (currentYPosition - scaledHeight < minY) {
+                    contentStream.close();
+                    page = new PDPage(PDRectangle.A4);
+                    document.addPage(page);
+                    contentStream = new PDPageContentStream(document, page);
+                    currentYPosition = page.getMediaBox().getHeight() - margin;
+                }
+
+                // Draw the scaled image
+                contentStream.drawImage(pdImage, margin, currentYPosition - scaledHeight, scaledWidth, scaledHeight);
+                // Add image angle
+                String angleText = "Angle: " + photoData.getAngle();
+                contentStream.beginText();
+                contentStream.setFont(imageAngle, 10);
+                contentStream.newLineAtOffset(margin + scaledWidth - ANGLE_LABEL_X_OFFSET,
+                        currentYPosition - scaledHeight - ANGLE_LABEL_Y_OFFSET);
+                contentStream.showText(angleText);
+                contentStream.endText();
+                // Update current Y position
+
+
+                currentYPosition -= scaledHeight + IMAGE_SPACING + 20; // spacing between images 10 for font size and 10 more for spacing between the image and the angle
             }
-
-            // Draw the scaled image
-            contentStream.drawImage(pdImage, margin, currentYPosition - scaledHeight, scaledWidth, scaledHeight);
-            // Add image angle
-            String angleText = "Angle: " + photos.get(bufferedImages.indexOf(bImage)).getAngle();
-            contentStream.beginText();
-            contentStream.setFont(imageAngle, 10);
-            contentStream.newLineAtOffset(margin + scaledWidth - 50, currentYPosition - scaledHeight - 10);
-            contentStream.showText(angleText);
-            contentStream.endText();
-            // Update current Y position
-
-
-            currentYPosition -= scaledHeight + IMAGE_SPACING + 20; // spacing between images 10 for font size and 10 more for spacing between the image and the angle
-        }
             // Add footer
             final float FONT_SIZE = 10;
             final int NUM_LINES = 3;
@@ -279,7 +285,7 @@ public class GenerateReport {
     }
 
 
-    private PDDocument addPageNumber (PDDocument document) {
+    private PDDocument addPageNumber(PDDocument document) {
         PDType1Font pageNumberFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
         int pageCount = document.getNumberOfPages();
 
@@ -301,7 +307,6 @@ public class GenerateReport {
                 pageContentStream.close();
             } catch (IOException e) {
                 logger.error("Error drawing the font for page number: {}", e.getMessage());
-                throw new BelmanException("Error drawing the font for page number. " + e);
             }
         }
         return document;
