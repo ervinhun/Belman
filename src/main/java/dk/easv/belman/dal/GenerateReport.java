@@ -46,7 +46,7 @@ public class GenerateReport {
         this.isSendingEmail = isSendingEmail;
         this.email = email;
         LocalDate currentDate = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
         String formattedDate = currentDate.format(formatter);
         String filePath = FilePaths.REPORT_DIRECTORY + productNo;
         float currentYPosition = 0;
