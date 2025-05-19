@@ -75,7 +75,7 @@ public class OperatorController extends AbstractOrderController {
     {
         if(model == null)
         {
-            model = new OperatorModel();
+            model = new OperatorModel(this);
         }
         refreshOrders();
     }
@@ -271,6 +271,11 @@ public class OperatorController extends AbstractOrderController {
             e.printStackTrace();
             return new VBox();
         }
+    }
+
+    public User getUser()
+    {
+        return loggedInUser;
     }
 
     @Override
