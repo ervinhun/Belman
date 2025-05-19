@@ -166,7 +166,10 @@ public class GenerateReport {
             currentYPosition -= scaledHeight + 20; // spacing between images
         }
             // Add footer
-            float footerHeight = 60; // font size 10 * 3 (because it's three lines) plus 2*15 for spacing
+            final float FONT_SIZE = 10;
+            final int NUM_LINES = 3;
+            final float LINE_SPACING = 15;
+            float footerHeight = (FONT_SIZE * NUM_LINES) + (2 * LINE_SPACING);
             if (currentYPosition - footerHeight < margin) {
                 contentStream.close();
                 page = new PDPage(PDRectangle.A4);
