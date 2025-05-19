@@ -5,6 +5,7 @@ import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import dk.easv.belman.exceptions.BelmanException;
+import dk.easv.belman.pl.OperatorController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -24,10 +25,12 @@ import java.util.List;
 public class OperatorModel {
     private final BLLManager bllManager = new BLLManager();
     private final ObservableList<Order> orders = FXCollections.observableArrayList();
+    private OperatorController operatorController;
 
     private final ObjectProperty<User> loggedInUser = new SimpleObjectProperty<>();
 
-    public OperatorModel() {
+    public OperatorModel(OperatorController operatorController) {
+        this.operatorController = operatorController;
         loadOrders();
     }
 
@@ -52,7 +55,7 @@ public class OperatorModel {
     public void savePhotos(List<ImageView> imageViews, List<String> angles, String orderNumber)
     {
         List<Photo> photos = new ArrayList<>();
-        User user = loggedInUser.get();
+        User user = operatorController.getUser();
 
         for(int i = 0; i < imageViews.size(); i++)
         {
@@ -65,6 +68,12 @@ public class OperatorModel {
 
                 try {
                     File file = new File(imagePath);
+                    if (!file.exists())
+                    {
+                        if (!file.mkdirs()) {
+                            throw new BelmanException("Failed to create folder");
+                        }
+                    }
                     ImageIO.write(bufferedImage, "png", file);
                 } catch (IOException e) {
                     throw new BelmanException("Failed to save image: " + e.getMessage());
