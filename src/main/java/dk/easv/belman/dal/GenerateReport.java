@@ -180,9 +180,9 @@ public class GenerateReport {
             contentStream.setFont(dynamicFont, 10);
             contentStream.newLineAtOffset(400, footerY);
             contentStream.showText(signedBy);
-            contentStream.newLineAtOffset(50, -15);
+            contentStream.newLineAtOffset(50, FOOTER_LINE_SPACING);
             contentStream.showText(loggedInUser.getFullName());
-            contentStream.newLineAtOffset(0, -15);
+            contentStream.newLineAtOffset(0, FOOTER_LINE_SPACING);
             contentStream.showText("Date: " + formattedDate);
             contentStream.endText();
 
