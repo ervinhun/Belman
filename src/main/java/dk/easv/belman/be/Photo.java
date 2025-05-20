@@ -5,12 +5,10 @@ import java.util.UUID;
 
 public class Photo {
     private Long id;
-    // SWITCH TO USER
     private UUID uploadedBy;
     private String imagePath;
     private LocalDateTime uploadedAt;
     private Boolean isDeleted;
-    // SWITCH TO USER
     private UUID deletedBy;
     private LocalDateTime deletedAt;
     private String angle;

@@ -6,6 +6,7 @@ import dk.easv.belman.pl.QualityController;
 import dk.easv.belman.pl.model.PhotoPreviewModel;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -17,6 +18,7 @@ public class PhotoPreviewController {
     @FXML private ImageView imageView;
     @FXML private Button    btnNext;
     @FXML private Button    btnPrev;
+    @FXML private Label     angleLabel;
 
     private final PhotoPreviewModel model = new PhotoPreviewModel();
     private QualityController parentController;
@@ -33,6 +35,7 @@ public class PhotoPreviewController {
             imageView.setImage(
                     new Image(new ByteArrayInputStream(p.getPhotoFile()))
             );
+            angleLabel.setText(p.getAngle());
         }
         btnPrev.setDisable(!model.hasPrevious());
         btnNext.setDisable(!model.hasNext());
@@ -52,6 +55,6 @@ public class PhotoPreviewController {
 
     @FXML
     private void goBack() {
-        parentController.cancel();
+        parentController.returnToOrder();
     }
 }

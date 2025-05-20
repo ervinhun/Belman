@@ -20,6 +20,8 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -48,6 +50,7 @@ public class QualityController extends AbstractOrderController {
     private static final String REPORT_PDF = "/report.pdf";
     private static final String OPEN_DOCUMENT = "Open\nDocument";
     private User loggedInUserQc;
+    private VBox openedOrder;
 
     @FXML
     private void initialize() {
@@ -112,12 +115,22 @@ public class QualityController extends AbstractOrderController {
     @FXML
     private void openImage() {
         if (selectedImageView == null) return;
+        openedOrder = (VBox) borderPane.getCenter();
+        List<ImageView> views = List.of(topImage, leftImage, rightImage, frontImage, backImage, additionalImage);
+        String[] angles = {"Top", "Left", "Right", "Front", "Back", "Additional"};
 
         List<Photo> photos = model.getPhotosForOrder(orderNumberToSign);
         if (photos.isEmpty()) return;
 
-        Photo sel = (Photo) selectedImageView.getUserData();
-        int idx = photos.indexOf(sel);
+        String angle = angles[views.indexOf(selectedImageView)];
+        int idx = -1;
+        for(int i = 0; i < photos.size(); i++)
+        {
+            if(angle.equals(photos.get(i).getAngle()))
+            {
+                idx = i;
+            }
+        }
         if (idx < 0) idx = 0;
 
         try {
@@ -138,27 +151,13 @@ public class QualityController extends AbstractOrderController {
     @FXML
     private void deleteImage() { /* move logic to model and call from here */ }
 
-    private void openFullImage(File file) {
-        Image image = model.getFullImage(file);
-        if (image == null) {
-            return;
-        }
-
-        ImageView imageView = new ImageView(image);
-        imageView.setPreserveRatio(true);
-        imageView.setFitWidth(800);
-
-        VBox container = new VBox(imageView);
-        container.setPadding(new Insets(10));
-
-        Stage stage = new Stage();
-        stage.setTitle("Image Preview");
-        stage.setScene(new Scene(container));
-        stage.show();
-    }
-
     private void setPlaceholder(ImageView iv) {
         iv.setImage(new Image(placeholderUrl));
+    }
+
+    public void returnToOrder()
+    {
+        borderPane.setCenter(openedOrder);
     }
 
 
@@ -190,9 +189,7 @@ public class QualityController extends AbstractOrderController {
             OrderCardController controller = loader.getController();
             controller.setOrder(order);
 
-            card.setOnMouseClicked(e ->
-                    openOrderDetail("FXML/orderQuality.fxml", order.getOrderNumber(), Boolean.FALSE)
-            );
+            card.setOnMouseClicked(_ -> openOrderDetail("FXML/orderQuality.fxml", order.getOrderNumber(), Boolean.FALSE));
 
             return card;
         } catch (IOException e) {
