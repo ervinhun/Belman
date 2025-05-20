@@ -91,4 +91,8 @@ public class BLLManager {
     public User getUserById(UUID id) {
         return dalManager.getUserById(id);
     }
+
+    public void sendBackToOperator(String orderNumber) {
+        dalManager.sendBackToOperator(orderNumber);
+    }
 }

@@ -86,4 +86,8 @@ public class QualityModel {
         return bllManager.getPhotosForOrder(orderNumber);
     }
 
+    public void sendBackToOperator(String orderNumber) {
+        bllManager.sendBackToOperator(orderNumber);
+    }
+
 }

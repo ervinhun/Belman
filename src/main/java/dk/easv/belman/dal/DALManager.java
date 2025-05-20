@@ -623,4 +623,19 @@ public class DALManager {
         }
     }
 
+    public void sendBackToOperator(String orderNumber) {
+        long productId = getProductIdFromProductNumber(orderNumber);
+        String sql = "DELETE FROM Photos WHERE product_id = ?";
+
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            logger.error("Error deleting images", ex);
+        }
+    }
+
 }
