@@ -577,7 +577,7 @@ public class DALManager {
     public void savePdfToDb(String productNo, ByteArrayOutputStream outputStream, UUID userId) {
         Long productId = getProductIdFromProductNumber(productNo);
         String sql = "INSERT INTO dbo.QualityCheckDoc (generated_by, product_id, generated_at, document) " +
-                "VALUES (?, ?, GETDATE(), ?)";
+                "VALUES (?, ?, CURRENT_TIMESTAMP, ?)";
         try (Connection c = connectionManager.getConnection();
                 PreparedStatement ps = c.prepareStatement(sql)) {
 
