@@ -14,23 +14,12 @@ public class Photo {
     private String angle;
     private byte[] photoFile;
 
-/*
-    public Photo(Long id, UUID uploadedBy, String imagePath, String angle, LocalDateTime uploadedAt, Boolean isDeleted)
-    {
-        this.id = id;
-        this.uploadedBy = uploadedBy;
-        this.imagePath = imagePath;
-        this.angle = angle;
-        this.uploadedAt = uploadedAt;
-        this.isDeleted = isDeleted;
-    }
-*/
 
     public Photo(Long id,
                  UUID uploadedBy,
                  String angle,
                  LocalDateTime uploadedAt,
-                 Boolean isDeleted,
+                 boolean isDeleted,
                  byte[] photoFile) {
         this.id          = id;
         this.uploadedBy  = uploadedBy;

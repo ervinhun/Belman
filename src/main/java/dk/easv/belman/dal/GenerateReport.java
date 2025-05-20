@@ -36,7 +36,7 @@ import javax.imageio.ImageIO;
 public class GenerateReport {
     private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
 
-    private static final DALManager dalManager = new DALManager();
+    private static DALManager dalManager;
 
 
     private final String productNo;
@@ -49,11 +49,22 @@ public class GenerateReport {
     private static final String DATE_FORMAT_PATTERN = "dd/MM/yyyy";
 
 
+    private static DALManager getDalManager() {
+        if (dalManager == null) {
+            try {
+                dalManager = new DALManager();
+            } catch (BelmanException e) {
+                logger.error("Failed to initialize DALManager: {}", e.getMessage());
+            }
+        }
+        return dalManager;
+    }
     public GenerateReport(String productNumber, User loggedInUser, boolean isSendingEmail, String email) {
         this.productNo = productNumber;
         this.isSendingEmail = isSendingEmail;
         this.email = email;
-        float currentYPosition;
+        float currentYPosition = 0;
+        getDalManager();
         float margin = 40;
         float availableWidth;
         float minY = 100;
