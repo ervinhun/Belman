@@ -67,9 +67,8 @@ public class BLLManager {
         if (productId == -1) return false;
         QualityDocument qcDoc = new QualityDocument(userId, productId);
         User user = dalManager.getUserById(userId);
-        GenerateReport report = new GenerateReport(orderNumber, user, isSendingEmail, email);
-        String filePath = report.getFilePath();
-        qcDoc.setQcDocPath(filePath);
+        new GenerateReport(orderNumber, user, isSendingEmail, email);
+        qcDoc.setQcDocPath(null);
         qcDoc.setGeneratedBy(userId);
         return dalManager.signQualityDocument(qcDoc);
     }

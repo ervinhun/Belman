@@ -4,6 +4,7 @@ import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.PhotoDataForReport;
 import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -18,15 +19,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +36,12 @@ import javax.imageio.ImageIO;
 public class GenerateReport {
     private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
 
-    static {
-        new DALManager();
-    }
+    private static final DALManager dalManager = new DALManager();
+
 
     private final String productNo;
-    private static final String FILE_NAME = "report.pdf";
-    private boolean isSendingEmail;
-    private String email;
+    private final boolean isSendingEmail;
+    private final String email;
     private static final float LINE_SPACING = 15f;
     private static final float IMAGE_SPACING = 20f;
     private static final float ANGLE_LABEL_X_OFFSET = 50f;
@@ -55,17 +53,10 @@ public class GenerateReport {
         this.productNo = productNumber;
         this.isSendingEmail = isSendingEmail;
         this.email = email;
-        String filePath = FilePaths.REPORT_DIRECTORY + productNo;
-        float currentYPosition = 0;
+        float currentYPosition;
         float margin = 40;
         float availableWidth;
         float minY = 100;
-        DALManager dalManager = new DALManager();
-        ArrayList<String> imagePaths = new ArrayList<>(dalManager.getPhotoPathsForReport(productNo));
-        if (imagePaths.isEmpty()) {
-            logger.error("No images found for product number: {}", productNo);
-            return;
-        }
         List<Photo> photos = dalManager.getPhotosByONum(productNo);
         if (photos.isEmpty()) {
             logger.error("No images found for product number: {}", productNo);
@@ -88,7 +79,7 @@ public class GenerateReport {
                     }
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
 
         // Create a new PDF document
@@ -231,12 +222,10 @@ public class GenerateReport {
 
             contentStream.close();
             // Save the document
-            File targetDir = new File(filePath);
-            if (!targetDir.exists()) {
-                targetDir.mkdirs();
-            }
             PDDocument documentToSave = addPageNumber(document);
-            documentToSave.save(filePath + "/" + FILE_NAME);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            documentToSave.save(outputStream);
+            dalManager.savePdfToDb(productNo, outputStream, loggedInUser.getId());
             openDocument(productNo);
 
         } catch (IOException e) {
@@ -249,23 +238,22 @@ public class GenerateReport {
     }
 
 
-    public String getFilePath() {
-        return FilePaths.REPORT_DIRECTORY + productNo + "/" + FILE_NAME;
-    }
-
     public void openDocument(String productNumber) {
-        File pdfFile = new File(FilePaths.BASE_PATH + "report/" + productNumber + "/report.pdf");
-        if (Desktop.isDesktopSupported() && pdfFile.exists() && !GraphicsEnvironment.isHeadless()) {
-            try {
-                Desktop.getDesktop().open(pdfFile);
-            } catch (IOException e) {
-                logger.error("Error opening PDF: {}", e.getMessage());
-            }
-        } else {
-            logger.error("Desktop is not supported on this system.");
+
+        //Loading the byteArray from the database
+        PDDocument document;
+        try {
+            document = Loader.loadPDF(dalManager.getPdfFromDb(productNumber));
+        } catch (IOException e) {
+            throw new BelmanException("Error while opening the pdf from db: " + e);
         }
-        if (isSendingEmail && pdfFile.exists()) {
-            GmailService gmailService = null;
+
+        // Save the document to a file and open it in a window
+        File pdfFile = convertToFile(document);
+
+        // Send email with the PDF attachment
+        if (isSendingEmail && pdfFile != null && pdfFile.exists()) {
+            GmailService gmailService;
             try {
                 gmailService = new GmailService();
             } catch (GeneralSecurityException | IOException e) {
@@ -282,6 +270,30 @@ public class GenerateReport {
                 logger.error("Error while trying to send an e-mail: {}", e.getMessage());
             }
         }
+    }
+
+    public File convertToFile(PDDocument document) {
+        // Convert the document to a file
+        File pdfFile = null;
+        try {
+            pdfFile = File.createTempFile("report", ".pdf");
+            document.save(pdfFile);
+            document.close();
+        } catch (IOException e) {
+            logger.error("Error while saving the PDF to a file: {}", e.getMessage());
+        }
+
+        //Opening the pdf file
+        if (Desktop.isDesktopSupported() && pdfFile != null && pdfFile.exists() && !GraphicsEnvironment.isHeadless()) {
+            try {
+                Desktop.getDesktop().open(pdfFile);
+            } catch (IOException e) {
+                logger.error("Error opening PDF: {}", e.getMessage());
+            }
+        } else {
+            logger.error("Desktop is not supported on this system.");
+        }
+        return pdfFile;
     }
 
 

@@ -8,6 +8,7 @@ import dk.easv.belman.be.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,6 +40,23 @@ public class DALManager {
 
     public DALManager() throws BelmanException {
         connectionManager = new ConnectionManager();
+    }
+
+    public byte[] getPdfFromDb(String productNumber) {
+        long productId = getProductIdFromProductNumber(productNumber);
+        String sql = "SELECT document FROM dbo.QualityCheckDoc WHERE product_id = ?";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getBytes("document");
+            }
+        } catch (SQLException e) {
+            logger.error("Error fetching PDF from DB: {}", e.getMessage());
+        }
+        return new byte[0];
     }
 
     public List<User> getAllUsers() {
@@ -326,7 +344,6 @@ public class DALManager {
             {
                 Long id = rs.getLong( ID);
                 UUID uploadedBy = rs.getObject( UPLOADED_BY, UUID.class);
-                String imagePath = rs.getString(PHOTOS_IMAGE_PATH);
                 String angle = rs.getString( PHOTOS_ANGLE);
                 LocalDateTime uploadedAt = rs.getTimestamp( USER_CREATED_AT).toLocalDateTime();
                 Boolean isDeleted = rs.getBoolean( IS_DELETED);
@@ -336,7 +353,7 @@ public class DALManager {
                 byte[] data = rs.getBytes("photo_file");
 
                 Photo p = new Photo(id, uploadedBy, angle, uploadedAt, isDeleted, data);
-                if (Boolean.TRUE.equals(isDeleted)) {
+                if (isDeleted != null && isDeleted) {
                     p.setDeletedBy(deletedBy);
                     p.setDeletedAt(deletedAt);
                 }
@@ -371,7 +388,7 @@ public class DALManager {
                         rs.getBoolean( IS_DELETED),
                         rs.getBytes("photo_file")
                 );
-                if (Boolean.TRUE.equals(rs.getBoolean( IS_DELETED))) {
+                if (rs.getBoolean(IS_DELETED)) {
                     p.setDeletedBy(rs.getObject( DELETED_BY, UUID.class));
                     p.setDeletedAt(rs.getTimestamp( DELETED_AT) != null ? rs.getTimestamp( DELETED_AT).toLocalDateTime() : null);
                 }
@@ -400,7 +417,6 @@ public class DALManager {
             {
                 Long id = rs.getLong( ID);
                 UUID uploadedBy = rs.getObject( UPLOADED_BY, UUID.class);
-                String imagePath = rs.getString(PHOTOS_IMAGE_PATH);
                 String angle = rs.getString( PHOTOS_ANGLE);
                 LocalDateTime uploadedAt = rs.getTimestamp( USER_CREATED_AT).toLocalDateTime();
                 Boolean isDeleted = rs.getBoolean( IS_DELETED);
@@ -623,4 +639,20 @@ public class DALManager {
         }
     }
 
+    public void savePdfToDb(String productNo, ByteArrayOutputStream outputStream, UUID userId) {
+        Long productId = getProductIdFromProductNumber(productNo);
+        String sql = "INSERT INTO dbo.QualityCheckDoc (generated_by, product_id, generated_at, document) " +
+                "VALUES (?, ?, GETDATE(), ?)";
+        try (Connection c = connectionManager.getConnection();
+                PreparedStatement ps = c.prepareStatement(sql)) {
+
+                ps.setObject(1, userId);
+                ps.setLong(2, productId);
+                ps.setBytes(3, outputStream.toByteArray());
+
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                logger.error("Error saving PDF to DB: {}", e.getMessage());
+            }
+    }
 }
