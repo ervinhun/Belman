@@ -314,7 +314,7 @@ public class DALManager {
     private List<Photo> getPhotos(Long orderId)
     {
         List<Photo> photos = new ArrayList<>();
-        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ?";
+        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ? AND Photos.is_deleted = 0";
 
         try(Connection con = connectionManager.getConnection();
             PreparedStatement psSelect = con.prepareStatement(selectSql))
@@ -355,7 +355,7 @@ public class DALManager {
     public List<Photo> getPhotosByONum(String orderNumber) {
         long productId = getProductIdFromProductNumber(orderNumber);
         List<Photo> photos = new ArrayList<>();
-        final String selectSql = "SELECT * FROM Photos WHERE product_id = ?";
+        final String selectSql = "SELECT * FROM Photos WHERE product_id = ? AND is_deleted = 0";
 
         try (Connection con = connectionManager.getConnection();
              PreparedStatement ps = con.prepareStatement(selectSql)) {
@@ -623,19 +623,22 @@ public class DALManager {
         }
     }
 
-    public void sendBackToOperator(String orderNumber) {
+    public void sendBackToOperator(String orderNumber, UUID userId) {
         long productId = getProductIdFromProductNumber(orderNumber);
-        String sql = "DELETE FROM Photos WHERE product_id = ?";
-
+        String sql = """
+        UPDATE dbo.Photos
+        SET is_deleted   = 1,
+            deleted_by   = ?,
+            deleted_at   = CURRENT_TIMESTAMP
+        WHERE product_id = ?
+        """;
         try (Connection c = connectionManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setLong(1, productId);
-
+            ps.setObject(1, userId);
+            ps.setLong(  2, productId);
             ps.executeUpdate();
         } catch (SQLException ex) {
-            logger.error("Error deleting images", ex);
+            throw new BelmanException("Error soft-deleting photos " + ex);
         }
-    }
-
+}
 }

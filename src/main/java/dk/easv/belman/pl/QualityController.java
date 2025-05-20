@@ -150,7 +150,8 @@ public class QualityController extends AbstractOrderController {
 
     @FXML
     private void sendBackToOperator() {
-        model.sendBackToOperator(orderNumberToSign);
+        System.out.println(loggedInUserQc.getId());
+        model.sendBackToOperator(orderNumberToSign, loggedInUserQc.getId());
         cancel();
         refreshContent();
     }

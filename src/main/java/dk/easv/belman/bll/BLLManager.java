@@ -92,7 +92,7 @@ public class BLLManager {
         return dalManager.getUserById(id);
     }
 
-    public void sendBackToOperator(String orderNumber) {
-        dalManager.sendBackToOperator(orderNumber);
+    public void sendBackToOperator(String orderNumber, UUID userId) {
+        dalManager.sendBackToOperator(orderNumber, userId);
     }
 }
