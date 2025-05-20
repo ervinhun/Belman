@@ -19,7 +19,7 @@ class GenerateReportTest {
     GenerateReportTest() {
     }
 
-    //@Disabled("Disabled for GHA tests")
+    @Disabled("Disabled for GHA tests")
     @Test
     void GenerateReport() {
         final String[] generatedFilePath = {""};
