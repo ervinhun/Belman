@@ -21,7 +21,7 @@
          <children>
             <HBox alignment="TOP_RIGHT" prefHeight="40.0" prefWidth="580.0">
                <children>
-                  <ChoiceBox prefWidth="150.0" />
+                  <ChoiceBox fx:id="user" prefWidth="150.0" />
                </children>
                <opaqueInsets>
                   <Insets />
