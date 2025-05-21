@@ -24,6 +24,8 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LoginController {
     @FXML private MFXTextField     username;
@@ -37,6 +39,7 @@ public class LoginController {
 
     private Webcam webcam;
     private ScheduledExecutorService executor;
+    private Pattern pattern = Pattern.compile("username:\\s*(\\S+).*password:\\s*(\\S+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @FXML
     public void initialize() {
@@ -53,7 +56,8 @@ public class LoginController {
     private void login() {
         model.login(
                 username.getText().trim(),
-                password.getText().trim()
+                password.getText().trim(),
+                false
         );
     }
 
@@ -132,12 +136,19 @@ public class LoginController {
                     try {
                         Result result = new MultiFormatReader().decode(bitmap);
 
-                        // QR code found, shut everything down
+                        // QR code found, shut down cam and exec
                         executor.shutdown();
                         webcam.close();
                         Platform.runLater(() -> {
-                            cameraView.setVisible(false);
-                            model.login(result.getText(), "");
+                            Matcher matcher = pattern.matcher(result.getText());
+
+                            if (matcher.find()) {
+                                String username = matcher.group(1);
+                                String password = matcher.group(2);
+                                System.out.println("Username: " + username);
+                                System.out.println("Password: " + password);
+                                model.login(username, password, true);
+                            }
                         });
 
                     } catch (NotFoundException e) {

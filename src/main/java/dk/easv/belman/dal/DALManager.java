@@ -640,5 +640,5 @@ public class DALManager {
         } catch (SQLException ex) {
             throw new BelmanException("Error soft-deleting photos " + ex);
         }
-}
+    }
 }
