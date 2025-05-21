@@ -16,14 +16,14 @@ public class LoginModel {
         bllManager = new BLLManager();
     }
 
-    public void login(String username, String password) {
+    public void login(String username, String password, Boolean isCameraLogin) {
         errorMessage.set("");
         if (username.isEmpty() || password.isEmpty()) {
             errorMessage.set("Please fill in username and password!");
             return;
         }
 
-        User found = bllManager.login(username, password);
+        User found = bllManager.login(username, password, isCameraLogin);
         if (found == null) {
             errorMessage.set("Invalid username or password!");
         } else {

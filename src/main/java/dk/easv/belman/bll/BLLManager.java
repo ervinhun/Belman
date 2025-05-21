@@ -32,8 +32,8 @@ public class BLLManager {
         return hashedPass;
     }
 
-    public User login(String username, String password) {
-        return dalManager.login(username, hashPass(username, password));
+    public User login(String username, String password, Boolean isHashed) {
+        return dalManager.login(username, isHashed ? password : hashPass(username, password));
     }
 
     public void logout(User user) {
