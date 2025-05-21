@@ -30,6 +30,8 @@ public class LoginController {
     @FXML private MFXPasswordField password;
     @FXML private Button           confirm;
     @FXML private ImageView        cameraView;
+    @FXML private Button           cameraBtn;
+    @FXML private Button           backBtn;
 
     private LoginModel model;
 
@@ -105,6 +107,11 @@ public class LoginController {
         });
 
         cameraView.setVisible(true);
+        backBtn.setVisible(true);
+        backBtn.setDisable(false);
+        cameraBtn.setDisable(true);
+        confirm.setDisable(true);
+
         webcam = Webcam.getDefault();
         webcam.setViewSize(new Dimension(640, 480));
         webcam.open();
@@ -120,22 +127,39 @@ public class LoginController {
 
                     // try decoding a QR code
                     LuminanceSource source = new BufferedImageLuminanceSource(img);
-                    BinaryBitmap bitmap    = new BinaryBitmap(new HybridBinarizer(source));
-                    Result result          = new MultiFormatReader().decode(bitmap);
+                    BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
-                    // on success, shut down camera and invoke login
-                    executor.shutdown();
-                    webcam.close();
-                    Platform.runLater(() -> {
-                        cameraView.setVisible(false);
-                        model.login(result.getText(), "");
-                    });
+                    try {
+                        Result result = new MultiFormatReader().decode(bitmap);
+
+                        // QR code found, shut everything down
+                        executor.shutdown();
+                        webcam.close();
+                        Platform.runLater(() -> {
+                            cameraView.setVisible(false);
+                            model.login(result.getText(), "");
+                        });
+
+                    } catch (NotFoundException e) {
+                        // no QR code - take next image
+                    }
                 }
-            } catch (NotFoundException e) {
-                throw new BelmanException("QR code not found" + e);
             } catch (Exception e) {
-                throw new BelmanException("Error decoding QR code: " + e);
+                throw new BelmanException("Error during camera loop: " + e);
             }
         }, 0, 100, TimeUnit.MILLISECONDS);
+    }
+
+    @FXML
+    private void back()
+    {
+        if (webcam != null)  webcam.close();
+        if (executor != null) executor.shutdownNow();
+        cameraView.setVisible(false);
+        cameraView.setDisable(true);
+        backBtn.setVisible(false);
+        backBtn.setDisable(true);
+        cameraBtn.setDisable(false);
+        confirm.setDisable(false);
     }
 }
