@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Properties;
 
 public class GmailService {
-    private static final String APPLICATION_NAME = "GmailFXSender";
+    private static final String APPLICATION_NAME = "Belman A/S";
     private static final JsonFactory GSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Collections.singletonList("https://www.googleapis.com/auth/gmail.send");
     private static final String TOKENS_DIRECTORY_PATH = "tokens";

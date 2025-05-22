@@ -23,7 +23,6 @@ public class DALManager {
     
     private static final String USER_LAST_LOGIN_TIME = "last_login_time";
     private static final String ID =  "id";
-    private static final String PHOTOS_IMAGE_PATH = "image_path";
     private static final String USER_FULL_NAME =  "full_name";
     private static final String USER_USERNAME =  "username";
     private static final String USER_PASSWORD =  "password";
