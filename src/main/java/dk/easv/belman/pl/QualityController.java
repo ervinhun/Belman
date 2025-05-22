@@ -149,6 +149,14 @@ public class QualityController extends AbstractOrderController {
     }
 
     @FXML
+    private void sendBackToOperator() {
+        System.out.println(loggedInUserQc.getId());
+        model.sendBackToOperator(orderNumberToSign, loggedInUserQc.getId());
+        cancel();
+        refreshContent();
+    }
+
+    @FXML
     private void deleteImage() { /* move logic to model and call from here */ }
 
     private void setPlaceholder(ImageView iv) {

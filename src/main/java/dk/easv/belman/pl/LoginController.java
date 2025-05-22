@@ -24,17 +24,22 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LoginController {
     @FXML private MFXTextField     username;
     @FXML private MFXPasswordField password;
     @FXML private Button           confirm;
     @FXML private ImageView        cameraView;
+    @FXML private Button           cameraBtn;
+    @FXML private Button           backBtn;
 
     private LoginModel model;
 
     private Webcam webcam;
     private ScheduledExecutorService executor;
+    private Pattern pattern = Pattern.compile("username:\\s*(\\S+).*password:\\s*(\\S+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @FXML
     public void initialize() {
@@ -51,7 +56,8 @@ public class LoginController {
     private void login() {
         model.login(
                 username.getText().trim(),
-                password.getText().trim()
+                password.getText().trim(),
+                false
         );
     }
 
@@ -105,6 +111,11 @@ public class LoginController {
         });
 
         cameraView.setVisible(true);
+        backBtn.setVisible(true);
+        backBtn.setDisable(false);
+        cameraBtn.setDisable(true);
+        confirm.setDisable(true);
+
         webcam = Webcam.getDefault();
         webcam.setViewSize(new Dimension(640, 480));
         webcam.open();
@@ -120,22 +131,46 @@ public class LoginController {
 
                     // try decoding a QR code
                     LuminanceSource source = new BufferedImageLuminanceSource(img);
-                    BinaryBitmap bitmap    = new BinaryBitmap(new HybridBinarizer(source));
-                    Result result          = new MultiFormatReader().decode(bitmap);
+                    BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
-                    // on success, shut down camera and invoke login
-                    executor.shutdown();
-                    webcam.close();
-                    Platform.runLater(() -> {
-                        cameraView.setVisible(false);
-                        model.login(result.getText(), "");
-                    });
+                    try {
+                        Result result = new MultiFormatReader().decode(bitmap);
+
+                        // QR code found, shut down cam and exec
+                        executor.shutdown();
+                        webcam.close();
+                        Platform.runLater(() -> {
+                            Matcher matcher = pattern.matcher(result.getText());
+
+                            if (matcher.find()) {
+                                String username = matcher.group(1);
+                                String password = matcher.group(2);
+                                System.out.println("Username: " + username);
+                                System.out.println("Password: " + password);
+                                model.login(username, password, true);
+                            }
+                        });
+
+                    } catch (NotFoundException e) {
+                        // no QR code - take next image
+                    }
                 }
-            } catch (NotFoundException e) {
-                throw new BelmanException("QR code not found" + e);
             } catch (Exception e) {
-                throw new BelmanException("Error decoding QR code: " + e);
+                throw new BelmanException("Error during camera loop: " + e);
             }
         }, 0, 100, TimeUnit.MILLISECONDS);
+    }
+
+    @FXML
+    private void back()
+    {
+        if (webcam != null)  webcam.close();
+        if (executor != null) executor.shutdownNow();
+        cameraView.setVisible(false);
+        cameraView.setDisable(true);
+        backBtn.setVisible(false);
+        backBtn.setDisable(true);
+        cameraBtn.setDisable(false);
+        confirm.setDisable(false);
     }
 }

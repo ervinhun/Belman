@@ -148,17 +148,18 @@
       </GridPane>
       <HBox prefHeight="100.0" prefWidth="200.0">
          <children>
-            <HBox alignment="BOTTOM_LEFT" minWidth="300.0" prefHeight="88.0" prefWidth="426.0" spacing="30.0" HBox.hgrow="ALWAYS">
+            <HBox alignment="BOTTOM_LEFT" minWidth="300.0" prefHeight="90.0" prefWidth="339.0" spacing="15.0" HBox.hgrow="ALWAYS">
                <children>
                   <Button id="btn" layoutX="10.0" layoutY="18.0" mnemonicParsing="false" onAction="#cancel" prefHeight="60.0" prefWidth="88.0" text="Cancel" textAlignment="CENTER" wrapText="true" />
                   <Button id="btn" mnemonicParsing="false" onAction="#openImage" prefHeight="60.0" prefWidth="91.0" text="Open Image" />
                   <Button id="btn" mnemonicParsing="false" onAction="#deleteImage" prefHeight="60.0" prefWidth="88.0" text="Delete Image" textAlignment="CENTER" wrapText="true" />
+                  <Button id="btn" layoutX="239.0" layoutY="19.0" mnemonicParsing="false" onAction="#sendBackToOperator" prefHeight="60.0" prefWidth="88.0" text="Send back to Operator" textAlignment="CENTER" wrapText="true" />
                </children>
                <padding>
                   <Insets bottom="20.0" />
                </padding>
             </HBox>
-            <HBox alignment="BOTTOM_RIGHT" minWidth="120.0" prefHeight="97.0" prefWidth="382.0" spacing="20.0" HBox.hgrow="ALWAYS">
+            <HBox alignment="BOTTOM_RIGHT" minWidth="91.0" prefHeight="90.0" prefWidth="91.0" spacing="20.0" HBox.hgrow="ALWAYS">
                <children>
                   <Button id="btn" fx:id="btnSign" layoutX="312.0" layoutY="27.0" mnemonicParsing="false" onAction="#signOrder" prefHeight="60.0" prefWidth="88.0" text="Sign" />
                </children>

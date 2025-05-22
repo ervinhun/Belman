@@ -15,6 +15,7 @@ import javafx.scene.image.Image;
 
 import java.io.File;
 import java.util.List;
+import java.util.UUID;
 
 public class QualityModel {
     private final BLLManager      bllManager   = new BLLManager();
@@ -84,6 +85,10 @@ public class QualityModel {
 
     public List<Photo> getPhotosForOrder(String orderNumber) {
         return bllManager.getPhotosForOrder(orderNumber);
+    }
+
+    public void sendBackToOperator(String orderNumber, UUID userId) {
+        bllManager.sendBackToOperator(orderNumber, userId);
     }
 
 }

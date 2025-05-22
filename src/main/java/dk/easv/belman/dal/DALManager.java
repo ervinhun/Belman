@@ -332,7 +332,7 @@ public class DALManager {
     private List<Photo> getPhotos(Long orderId)
     {
         List<Photo> photos = new ArrayList<>();
-        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ?";
+        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ? AND Photos.is_deleted = 0";
 
         try(Connection con = connectionManager.getConnection();
             PreparedStatement psSelect = con.prepareStatement(selectSql))
@@ -346,14 +346,14 @@ public class DALManager {
                 UUID uploadedBy = rs.getObject( UPLOADED_BY, UUID.class);
                 String angle = rs.getString( PHOTOS_ANGLE);
                 LocalDateTime uploadedAt = rs.getTimestamp( USER_CREATED_AT).toLocalDateTime();
-                Boolean isDeleted = rs.getBoolean( IS_DELETED);
+                boolean isDeleted = rs.getBoolean( IS_DELETED);
                 UUID deletedBy = rs.getObject( DELETED_BY, UUID.class);
                 Timestamp deletedAtTS = rs.getTimestamp( DELETED_AT);
                 LocalDateTime deletedAt = deletedAtTS != null ? deletedAtTS.toLocalDateTime() : null;
                 byte[] data = rs.getBytes("photo_file");
 
                 Photo p = new Photo(id, uploadedBy, angle, uploadedAt, isDeleted, data);
-                if (isDeleted != null && isDeleted) {
+                if (isDeleted) {
                     p.setDeletedBy(deletedBy);
                     p.setDeletedAt(deletedAt);
                 }
@@ -372,7 +372,7 @@ public class DALManager {
     public List<Photo> getPhotosByONum(String orderNumber) {
         long productId = getProductIdFromProductNumber(orderNumber);
         List<Photo> photos = new ArrayList<>();
-        final String selectSql = "SELECT * FROM Photos WHERE product_id = ?";
+        final String selectSql = "SELECT * FROM Photos WHERE product_id = ? AND is_deleted = 0";
 
         try (Connection con = connectionManager.getConnection();
              PreparedStatement ps = con.prepareStatement(selectSql)) {
@@ -589,5 +589,23 @@ public class DALManager {
             } catch (SQLException e) {
                 logger.error("Error saving PDF to DB: {}", e.getMessage());
             }
+    }
+    public void sendBackToOperator(String orderNumber, UUID userId) {
+        long productId = getProductIdFromProductNumber(orderNumber);
+        String sql = """
+        UPDATE dbo.Photos
+        SET is_deleted   = 1,
+            deleted_by   = ?,
+            deleted_at   = CURRENT_TIMESTAMP
+        WHERE product_id = ?
+        """;
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setObject(1, userId);
+            ps.setLong(  2, productId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new BelmanException("Error soft-deleting photos " + ex);
+        }
     }
 }
