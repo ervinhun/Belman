@@ -33,7 +33,7 @@ public class BLLManager {
     }
 
     public User login(String username, String password, Boolean isHashed) {
-        return dalManager.login(username, isHashed ? password : hashPass(username, password));
+        return dalManager.login(isHashed ? null : username, isHashed ? password : hashPass(username, password));
     }
 
     public void logout(User user) {

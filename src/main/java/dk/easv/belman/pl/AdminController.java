@@ -141,7 +141,7 @@ public class AdminController extends AbstractOrderController{
     }
 
 
-@FXML
+    @FXML
     private void applySearch(KeyEvent event) {
         model.searchQueryProperty().set(search.getText());
         model.applySearch();

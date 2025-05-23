@@ -39,7 +39,7 @@ public class LoginController {
 
     private Webcam webcam;
     private ScheduledExecutorService executor;
-    private Pattern pattern = Pattern.compile("username:\\s*(\\S+).*password:\\s*(\\S+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private Pattern pattern = Pattern.compile("hash:\\s*(.*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @FXML
     public void initialize() {
@@ -143,11 +143,9 @@ public class LoginController {
                             Matcher matcher = pattern.matcher(result.getText());
 
                             if (matcher.find()) {
-                                String username = matcher.group(1);
-                                String password = matcher.group(2);
-                                System.out.println("Username: " + username);
-                                System.out.println("Password: " + password);
-                                model.login(username, password, true);
+                                String hash = matcher.group(1);
+                                System.out.println("Hash: " + hash);
+                                model.login("user", hash, true);
                             }
                         });
 
