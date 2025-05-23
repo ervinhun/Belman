@@ -154,14 +154,14 @@ public class OperatorController extends AbstractOrderController {
     private void photoCamera() {
         try
         {
-                prevOrderView = (VBox) borderPane.getCenter();
-                FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/takeImage.fxml"));
-                loader.setController(this);
-                Parent root = loader.load();
-                borderPane.setCenter(root);
-                resizeWindow(root);
+            prevOrderView = (VBox) borderPane.getCenter();
+            FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/takeImage.fxml"));
+            loader.setController(this);
+            Parent root = loader.load();
+            borderPane.setCenter(root);
+            resizeWindow(root);
 
-                showCameraImage();
+            showCameraImage();
         }
         catch (IOException e)
         {
@@ -232,6 +232,7 @@ public class OperatorController extends AbstractOrderController {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/selectMethod.fxml"));
             fxmlLoader.setController(this);
             selectMethod = fxmlLoader.load();
+            configureUserChoiceBox();
 
             imageViews = List.of(
                     frontImage,
