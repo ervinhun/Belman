@@ -30,7 +30,6 @@ public class UserModel {
 
         try (FileInputStream fileInputStream = new FileInputStream(CONFIG_PATH)) {
             props.load(fileInputStream);
-            System.out.println("Config file loaded successfully.");
         } catch (IOException e) {
             throw new BelmanException("Error loading config properties: " + e.getMessage());
         }

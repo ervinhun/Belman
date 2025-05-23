@@ -4,14 +4,19 @@ import dk.easv.belman.pl.model.UserModel;
 import dk.easv.belman.be.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Toggle;
+
+import java.awt.*;
 
 public class UserController {
     @FXML private TextField    txtFullName;
     @FXML private TextField    txtUsername;
     @FXML private TextField    txtTagId;
+    @FXML private CheckBox     cbTagId;
     @FXML private RadioButton  chkAdmin;
     @FXML private RadioButton  chkQualityControl;
     @FXML private RadioButton  chkOperator;
@@ -76,6 +81,7 @@ public class UserController {
 
     @FXML
     private void btnSaveClick() {
+        txtTagId.setText(cbTagId.isSelected() ? "true" : "false");
         model.saveUser();
 
         String success = model.successMessageProperty().get();
@@ -87,6 +93,9 @@ public class UserController {
 
 
     public void setEditingUser(User u) {
+        cbTagId.setSelected(u.getTagId() != null);
+        u.setTagId(cbTagId.isSelected() ? "true" : "false");
+        txtTagId.setText(u.getTagId());
         model.setEditingUser(u);
         txtUsername.setDisable(true);
     }
