@@ -56,7 +56,6 @@ public class GmailService {
                                         String bodyText, File file) throws BelmanException, IOException, MessagingException {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
-
         MimeMessage email = new MimeMessage(session);
         email.setFrom(new InternetAddress(userId));
         email.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));

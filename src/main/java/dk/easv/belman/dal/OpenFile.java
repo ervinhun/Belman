@@ -6,7 +6,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.mail.MessagingException;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +24,7 @@ public class OpenFile {
         if (isSendingEmail && pdfFile != null && pdfFile.exists()) {
             sendEmail(email, pdfFile);
         }
+        else throw new BelmanException("PDF file is null or does not exist, cannot send email.");
     }
 
     private PDDocument openFileAndConvert(String productNumber) {

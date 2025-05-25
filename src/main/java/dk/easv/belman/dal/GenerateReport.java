@@ -4,7 +4,6 @@ import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.PhotoDataForReport;
 import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
-import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -16,13 +15,11 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;

@@ -74,7 +74,7 @@ public class BLLManager {
         User user = dalManager.getUserById(userId);
         new GenerateReport(orderNumber, user, isSendingEmail, email);
         qcDoc.setGeneratedBy(userId);
-        return dalManager.signQualityDocument(qcDoc);
+        return true; //TODO: Check properly if the document exists in the database
     }
 
     public boolean isDocumentExists(String orderNumber) {
