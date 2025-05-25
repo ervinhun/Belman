@@ -91,4 +91,7 @@ public class QualityModel {
         bllManager.sendBackToOperator(orderNumber, userId);
     }
 
+    public boolean isOrderReadyForSigning(String orderNumberToSign) {
+        return bllManager.getPhotosNumbersforOrder(orderNumberToSign) >= 5;
+    }
 }

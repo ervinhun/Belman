@@ -175,6 +175,15 @@
     -fx-background-color: #ffcccc; /* Lighter background on focus */
 }
 
+#error-label {
+    -fx-text-fill: red;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 5px;
+    -fx-opacity: 1;
+    -fx-alignment: center;
+}
+
 .coordinator_button {
     -fx-background-image: url("/dk/easv/ticketsys/Images/people.png");
     -fx-background-repeat: no-repeat;

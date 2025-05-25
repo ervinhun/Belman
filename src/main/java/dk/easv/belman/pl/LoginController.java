@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import com.github.sarxos.webcam.Webcam;
@@ -34,6 +35,7 @@ public class LoginController {
     @FXML private ImageView        cameraView;
     @FXML private Button           cameraBtn;
     @FXML private Button           backBtn;
+    @FXML private Label            errorLabel;
 
     private LoginModel model;
 
@@ -44,7 +46,8 @@ public class LoginController {
     @FXML
     public void initialize() {
         model = new LoginModel();
-
+        errorLabel.textProperty().bind(model.errorMessageProperty());
+        errorLabel.visibleProperty().bind(model.errorMessageProperty().isNotEmpty());
         model.loggedInUserProperty().addListener((obs, oldUser, newUser) -> {
             if (newUser != null) {
                 Platform.runLater(() -> openNextWindow(newUser));
@@ -62,6 +65,7 @@ public class LoginController {
     }
 
     private void openNextWindow(User user) {
+
         int role = user.getRoleId();
         try {
             FXMLLoader loader;
@@ -145,9 +149,10 @@ public class LoginController {
                             if (matcher.find()) {
                                 String username = matcher.group(1);
                                 String password = matcher.group(2);
-                                System.out.println("Username: " + username);
-                                System.out.println("Password: " + password);
                                 model.login(username, password, true);
+                            }
+                            else {
+                                showErrorLabel("Invalid QR code format. Please try again.");
                             }
                         });
 
@@ -172,5 +177,11 @@ public class LoginController {
         backBtn.setDisable(true);
         cameraBtn.setDisable(false);
         confirm.setDisable(false);
+    }
+
+    private void showErrorLabel(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+        errorLabel.setDisable(false);
     }
 }

@@ -39,3 +39,22 @@
     -fx-effect: dropshadow(gaussian, rgba(127, 168, 197), 5, 0.5, 0, 0);
 }
 
+#error-label {
+    -fx-text-fill: red;
+    -fx-font-size: 12px;
+    -fx-padding: 5px;
+    -fx-opacity: 1;
+}
+
+.error {
+    -fx-border-width: 2px;
+    -fx-border-color: red;
+    -fx-background-color: #ffe6e6;
+    -fx-transition: all 0.3s ease;
+}
+
+.error:focus {
+    -fx-border-color: darkred; /* Darker red on focus */
+    -fx-background-color: #ffcccc; /* Lighter background on focus */
+}
+
