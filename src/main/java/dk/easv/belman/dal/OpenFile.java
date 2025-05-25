@@ -68,14 +68,13 @@ public class OpenFile {
         } catch (IOException e) {
             logger.error("Error while saving the PDF to a file: {}", e.getMessage());
         } finally {
-            assert pdfFile != null;
-            if (pdfFile.exists()) {
+            if (pdfFile != null && pdfFile.exists()) {
                 pdfFile.deleteOnExit(); // Deletes the file when the JVM exits
             }
         }
 
         //Opening the pdf file
-        if (Desktop.isDesktopSupported() && pdfFile.exists() && !GraphicsEnvironment.isHeadless()) {
+        if (Desktop.isDesktopSupported() && pdfFile != null && pdfFile.exists() && !GraphicsEnvironment.isHeadless()) {
             try {
                 Desktop.getDesktop().open(pdfFile);
             } catch (IOException e) {
