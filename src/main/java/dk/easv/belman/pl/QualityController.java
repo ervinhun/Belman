@@ -47,7 +47,6 @@ public class QualityController extends AbstractOrderController {
 
     private QualityModel model;
     private String orderNumberToSign;
-    private static final String REPORT_PDF = "/report.pdf";
     private static final String OPEN_DOCUMENT = "Open\nDocument";
     private User loggedInUserQc;
     private VBox openedOrder;
@@ -150,7 +149,6 @@ public class QualityController extends AbstractOrderController {
 
     @FXML
     private void sendBackToOperator() {
-        System.out.println(loggedInUserQc.getId());
         model.sendBackToOperator(orderNumberToSign, loggedInUserQc.getId());
         cancel();
         refreshContent();
@@ -179,12 +177,9 @@ public class QualityController extends AbstractOrderController {
         }
         if (model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc)) {
             btnSign.setText(OPEN_DOCUMENT);
-            btnSign.setOnAction(e -> {
-                if (cbSendingEmail.isSelected())
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + REPORT_PDF, true, txtemail.getText());
-                else
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + REPORT_PDF);
-            });
+            btnSign.setOnAction(e ->
+                new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
+            );
 
             cancel(); // This resets the view to the previous screen
         }
@@ -210,12 +205,9 @@ public class QualityController extends AbstractOrderController {
         txtemail.setVisible(!txtemail.isVisible());
 
         if (btnSign.getText().equals(OPEN_DOCUMENT)) {
-            btnSign.setOnAction(e -> {
-                if (cbSendingEmail.isSelected())
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + REPORT_PDF, true, txtemail.getText());
-                else
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumberToSign + REPORT_PDF);
-            });
+            btnSign.setOnAction(e ->
+                new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
+            );
         }
         else {
             btnSign.setOnAction(e -> signOrder());
@@ -238,13 +230,9 @@ public class QualityController extends AbstractOrderController {
         this.orderNumberToSign = orderNumber;
         if (model.isDocumentExists(orderNumber)) {
             btnSign.setText(OPEN_DOCUMENT);
-            btnSign.setOnAction(e -> {
-                if (cbSendingEmail.isSelected()) {
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumber + REPORT_PDF, true, txtemail.getText());
-                } else {
-                    new OpenFile(FilePaths.REPORT_DIRECTORY + orderNumber + REPORT_PDF);
-                }
-            });
+            btnSign.setOnAction(e ->
+                new OpenFile(orderNumber, cbSendingEmail.isSelected(), txtemail.getText())
+            );
 
         } else {
             btnSign.setText("Sign\nOrder");

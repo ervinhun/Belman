@@ -72,11 +72,9 @@ public class BLLManager {
         if (productId == -1) return false;
         QualityDocument qcDoc = new QualityDocument(userId, productId);
         User user = dalManager.getUserById(userId);
-        GenerateReport report = new GenerateReport(orderNumber, user, isSendingEmail, email);
-        String filePath = report.getFilePath();
-        qcDoc.setQcDocPath(filePath);
+        new GenerateReport(orderNumber, user, isSendingEmail, email);
         qcDoc.setGeneratedBy(userId);
-        return dalManager.signQualityDocument(qcDoc);
+        return true; //TODO: Check properly if the document exists in the database
     }
 
     public boolean isDocumentExists(String orderNumber) {

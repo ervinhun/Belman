@@ -15,18 +15,15 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +33,12 @@ import javax.imageio.ImageIO;
 public class GenerateReport {
     private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
 
-    static {
-        new DALManager();
-    }
+    private static DALManager dalManager;
+
 
     private final String productNo;
-    private static final String FILE_NAME = "report.pdf";
-    private boolean isSendingEmail;
-    private String email;
+    private final boolean isSendingEmail;
+    private final String email;
     private static final float LINE_SPACING = 15f;
     private static final float IMAGE_SPACING = 20f;
     private static final float ANGLE_LABEL_X_OFFSET = 50f;
@@ -51,21 +46,25 @@ public class GenerateReport {
     private static final String DATE_FORMAT_PATTERN = "dd/MM/yyyy";
 
 
+    private static DALManager getDalManager() {
+        if (dalManager == null) {
+            try {
+                dalManager = new DALManager();
+            } catch (BelmanException e) {
+                logger.error("Failed to initialize DALManager: {}", e.getMessage());
+            }
+        }
+        return dalManager;
+    }
     public GenerateReport(String productNumber, User loggedInUser, boolean isSendingEmail, String email) {
         this.productNo = productNumber;
         this.isSendingEmail = isSendingEmail;
         this.email = email;
-        String filePath = FilePaths.REPORT_DIRECTORY + productNo;
         float currentYPosition = 0;
+        getDalManager();
         float margin = 40;
         float availableWidth;
         float minY = 100;
-        DALManager dalManager = new DALManager();
-        ArrayList<String> imagePaths = new ArrayList<>(dalManager.getPhotoPathsForReport(productNo));
-        if (imagePaths.isEmpty()) {
-            logger.error("No images found for product number: {}", productNo);
-            return;
-        }
         List<Photo> photos = dalManager.getPhotosByONum(productNo);
         if (photos.isEmpty()) {
             logger.error("No images found for product number: {}", productNo);
@@ -88,7 +87,7 @@ public class GenerateReport {
                     }
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
 
         // Create a new PDF document
@@ -231,12 +230,10 @@ public class GenerateReport {
 
             contentStream.close();
             // Save the document
-            File targetDir = new File(filePath);
-            if (!targetDir.exists()) {
-                targetDir.mkdirs();
-            }
             PDDocument documentToSave = addPageNumber(document);
-            documentToSave.save(filePath + "/" + FILE_NAME);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            documentToSave.save(outputStream);
+            dalManager.savePdfToDb(productNo, outputStream, loggedInUser.getId());
             openDocument(productNo);
 
         } catch (IOException e) {
@@ -249,40 +246,11 @@ public class GenerateReport {
     }
 
 
-    public String getFilePath() {
-        return FilePaths.REPORT_DIRECTORY + productNo + "/" + FILE_NAME;
+    public void openDocument(String productNumber) {
+        new OpenFile(productNumber, isSendingEmail, email);
     }
 
-    public void openDocument(String productNumber) {
-        File pdfFile = new File(FilePaths.BASE_PATH + "report/" + productNumber + "/report.pdf");
-        if (Desktop.isDesktopSupported() && pdfFile.exists() && !GraphicsEnvironment.isHeadless()) {
-            try {
-                Desktop.getDesktop().open(pdfFile);
-            } catch (IOException e) {
-                logger.error("Error opening PDF: {}", e.getMessage());
-            }
-        } else {
-            logger.error("Desktop is not supported on this system.");
-        }
-        if (isSendingEmail && pdfFile.exists()) {
-            GmailService gmailService = null;
-            try {
-                gmailService = new GmailService();
-            } catch (GeneralSecurityException | IOException e) {
-                throw new BelmanException(e.getMessage());
-            }
-            try {
-                if (email != null && !email.isEmpty()) {
-                    gmailService.sendEmailWithAttachment("me", email,
-                            "Quality Check Report", "Please find the attached report.", pdfFile);
-                } else {
-                    logger.error("Email address is null or empty.");
-                }
-            } catch (Exception e) {
-                logger.error("Error while trying to send an e-mail: {}", e.getMessage());
-            }
-        }
-    }
+
 
 
     private PDDocument addPageNumber(PDDocument document) {
