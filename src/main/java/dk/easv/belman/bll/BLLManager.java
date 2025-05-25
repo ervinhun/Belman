@@ -46,6 +46,11 @@ public class BLLManager {
     }
 
     public User addUser(User user) {
+        if (user.getTagId() != null && user.getTagId().equals("true")) {
+            user.setTagId(hashPass(user.getUsername(), ""));
+        }
+        else
+            user.setTagId(null);
         UUID id = dalManager.insertUser(user);
         if (id == null) return null;
         user.setId(id);
