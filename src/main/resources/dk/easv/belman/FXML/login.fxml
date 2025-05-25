@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.Label?>
 <StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="437.0" prefWidth="600.0" stylesheets="@../CSS/loginStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="dk.easv.belman.pl.LoginController">
    <children>
       <VBox fx:id="loginVBox" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="440.0" prefWidth="600.0" spacing="10.0" stylesheets="@../CSS/loginStyle.css">
@@ -22,6 +23,7 @@
                   <Insets right="10.0" top="20.0" />
                </VBox.margin>
             </ImageView>
+            <Label fx:id="errorLabel" id="error-label" visible="false" />
             <HBox alignment="CENTER" prefHeight="37.0" prefWidth="600.0" spacing="5.0">
                <children>
                   <ImageView fitHeight="26.0" fitWidth="27.0" pickOnBounds="true" preserveRatio="true">

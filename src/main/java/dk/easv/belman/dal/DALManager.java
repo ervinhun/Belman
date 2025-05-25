@@ -607,4 +607,20 @@ public class DALManager {
             throw new BelmanException("Error soft-deleting photos " + ex);
         }
     }
+
+    public int getPhotosNumbersforOrder(String orderNumberToSign) {
+        long productId = getProductIdFromProductNumber(orderNumberToSign);
+        String sql = "SELECT COUNT(*) FROM dbo.Photos WHERE product_id = ? AND is_deleted = 0";
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, productId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            logger.error("Error fetching photo count for order: {}", e.getMessage());
+        }
+        return 0;
+    }
 }

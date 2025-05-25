@@ -98,4 +98,9 @@ public class BLLManager {
     public void sendBackToOperator(String orderNumber, UUID userId) {
         dalManager.sendBackToOperator(orderNumber, userId);
     }
+
+
+    public int getPhotosNumbersforOrder(String orderNumberToSign) {
+        return dalManager.getPhotosNumbersforOrder(orderNumberToSign);
+    }
 }

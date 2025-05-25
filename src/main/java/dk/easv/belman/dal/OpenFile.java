@@ -24,7 +24,9 @@ public class OpenFile {
         if (isSendingEmail && pdfFile != null && pdfFile.exists()) {
             sendEmail(email, pdfFile);
         }
-        else throw new BelmanException("PDF file is null or does not exist, cannot send email.");
+        else if (pdfFile == null || !pdfFile.exists()) {
+            logger.error("PDF file is null or does not exist.");
+        }
     }
 
     private PDDocument openFileAndConvert(String productNumber) {
@@ -65,6 +67,10 @@ public class OpenFile {
             document.close();
         } catch (IOException e) {
             logger.error("Error while saving the PDF to a file: {}", e.getMessage());
+        } finally {
+            if (pdfFile != null && pdfFile.exists()) {
+                pdfFile.deleteOnExit(); // Deletes the file when the JVM exits
+            }
         }
 
         //Opening the pdf file

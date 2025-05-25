@@ -175,6 +175,11 @@ public class QualityController extends AbstractOrderController {
 
             return;
         }
+        if (!model.isOrderReadyForSigning(orderNumberToSign)) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Order is not ready for signing. Please ensure all images are uploaded and the order is complete.");
+            alert.showAndWait();
+            return;
+        }
         if (model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc)) {
             btnSign.setText(OPEN_DOCUMENT);
             btnSign.setOnAction(e ->
