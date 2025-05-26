@@ -43,6 +43,7 @@ public abstract class AbstractOrderController extends BaseController {
             orderLabel.setText(orderNumber);
             borderPane.setCenter(root);
             resizeWindow(root);
+            configureUserChoiceBox();
 
             if(!isOperator)
             {

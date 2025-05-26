@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class QualityModel {
+    private static final int MIN_PHOTOS_FOR_SIGNING = 5;
     private final BLLManager      bllManager   = new BLLManager();
     private final ObservableList<Order> orders    = FXCollections.observableArrayList();
     private final FilteredList<Order>   filtered   = new FilteredList<>(orders, o -> true);
@@ -91,4 +92,7 @@ public class QualityModel {
         bllManager.sendBackToOperator(orderNumber, userId);
     }
 
+    public boolean isOrderReadyForSigning(String orderNumberToSign) {
+        return bllManager.getPhotosNumbersforOrder(orderNumberToSign) >= MIN_PHOTOS_FOR_SIGNING;
+    }
 }

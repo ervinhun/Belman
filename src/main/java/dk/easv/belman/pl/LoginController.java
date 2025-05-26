@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import com.github.sarxos.webcam.Webcam;
@@ -34,6 +35,7 @@ public class LoginController {
     @FXML private ImageView        cameraView;
     @FXML private Button           cameraBtn;
     @FXML private Button           backBtn;
+    @FXML private Label            errorLabel;
 
     private LoginModel model;
 
@@ -44,7 +46,8 @@ public class LoginController {
     @FXML
     public void initialize() {
         model = new LoginModel();
-
+        errorLabel.textProperty().bind(model.errorMessageProperty());
+        errorLabel.visibleProperty().bind(model.errorMessageProperty().isNotEmpty());
         model.loggedInUserProperty().addListener((obs, oldUser, newUser) -> {
             if (newUser != null) {
                 Platform.runLater(() -> openNextWindow(newUser));

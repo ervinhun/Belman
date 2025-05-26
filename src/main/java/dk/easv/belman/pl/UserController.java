@@ -5,6 +5,7 @@ import dk.easv.belman.be.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -24,6 +25,7 @@ public class UserController {
     @FXML private Button       btnSave;
     @FXML private Button       btnCancel;
     @FXML private VBox         rootVBox;
+    @FXML private Label        lblError;
 
     private VBox      rightBox;
     private UserModel model;
@@ -42,7 +44,8 @@ public class UserController {
         chkAdmin       .setUserData(1);
         chkQualityControl.setUserData(2);
         chkOperator    .setUserData(3);
-
+        lblError.textProperty().bind(model.errorMessageProperty());
+        lblError.visibleProperty().bind(model.errorMessageProperty().isNotEmpty());
         tgRole.selectedToggleProperty().addListener((obs, oldT, newT) -> {
             if (newT != null) {
                 model.roleIdProperty().set((int)newT.getUserData());
@@ -59,11 +62,11 @@ public class UserController {
             }
         });
 
-        model.errorMessageProperty().addListener((obs, o, msg) -> {
+        /**model.errorMessageProperty().addListener((obs, o, msg) -> {
             if (msg != null && !msg.isEmpty()) {
                 new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK).showAndWait();
             }
-        });
+        });*/
         model.successMessageProperty().addListener((obs, o, msg) -> {
             if (msg != null && !msg.isEmpty()) {
                 new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK).showAndWait();

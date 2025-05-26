@@ -17,18 +17,10 @@ public abstract class BaseController {
 
 
     public void setLoggedinUser(User u) {
-        user.getItems().setAll(
-                u.getFullName(),
-                "Logout"
-        );
-        user.getSelectionModel().selectFirst();
-        user.setOnAction(evt -> {
-            if ("Logout".equals(user.getValue())) {
-                loggedOut();
-            }
-        });
         this.loggedInUser = u;
+        configureUserChoiceBox();
     }
+
 
     protected void loggedOut() {
         try {
@@ -40,6 +32,23 @@ public abstract class BaseController {
         } catch (IOException e) {
             throw new BelmanException("Failed to load FXML: login.fxml " + e);
         }
+    }
+
+    protected void configureUserChoiceBox() {
+        if (user == null) return;
+
+        user.getItems().setAll(
+                loggedInUser != null ? loggedInUser.getFullName() : "",
+                "Logout"
+        );
+        user.getSelectionModel().selectFirst();
+
+        user.setOnAction(null);
+        user.setOnAction(e -> {
+            if ("Logout".equals(user.getValue())) {
+                loggedOut();
+            }
+        });
     }
 
     protected abstract void onUserLogout();
