@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -54,39 +55,6 @@ public class OperatorModel {
         loggedInUser.set(null);
     }
 
-    /*public void savePhotos(List<ImageView> imageViews, List<String> angles, String orderNumber)
-    {
-        List<Photo> photos = new ArrayList<>();
-        User user = operatorController.getUser();
-
-        for(int i = 0; i < imageViews.size(); i++)
-        {
-            if(imageViews.get(i).getImage() != null)
-            {
-                Image image = imageViews.get(i).getImage();
-
-                BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
-                String imagePath = "src/main/resources/dk/easv/belman/SavedImages/" + orderNumber + "/" + angles.get(i) + ".png";
-
-                try {
-                    File file = new File(imagePath);
-                    if (!file.exists())
-                    {
-                        if (!file.mkdirs()) {
-                            throw new BelmanException("Failed to create folder");
-                        }
-                    }
-                    ImageIO.write(bufferedImage, "png", file);
-                } catch (IOException e) {
-                    throw new BelmanException("Failed to save image: " + e.getMessage());
-                }
-
-                photos.add(new Photo(null, user.getId(), imagePath, angles.get(i), LocalDateTime.now(), false));
-            }
-        }
-
-        bllManager.savePhotos(photos, orderNumber);
-    }*/
 
     public void savePhotos(List<ImageView> imageViews,
                            List<String> angles,
@@ -108,7 +76,9 @@ public class OperatorModel {
                     null, userId, angles.get(i), LocalDateTime.now(), false, data
             ));
         }
-
+        if (photos.size() < 5) {
+            throw new BelmanException("At least 5 images are required to confirm the order.");
+        }
         bllManager.savePhotosBinary(photos, orderNumber);
     }
 

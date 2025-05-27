@@ -4,6 +4,8 @@ import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
+import dk.easv.belman.exceptions.BelmanException;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -16,6 +18,9 @@ import javafx.scene.image.Image;
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class QualityModel {
     private static final int MIN_PHOTOS_FOR_SIGNING = 5;
@@ -76,8 +81,18 @@ public class QualityModel {
         return loggedInUser;
     }
 
-    public boolean signOrder(String orderNumber, boolean isSendingEmail, String email, User whoSignsIt) {
-        return bllManager.signOrder(orderNumber, whoSignsIt.getId(), isSendingEmail, email);
+    public void signOrder(String orderNumber, boolean isSendingEmail, String email, User whoSignsIt, Consumer<Boolean> onResult) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            boolean success = false;
+            try {
+                success = bllManager.signOrder(orderNumber, whoSignsIt.getId(), isSendingEmail, email);
+                onResult.accept(success);
+            } catch (Exception e) {
+                throw new BelmanException("Error signing order: " + orderNumber + " - " + e.getMessage());
+            }
+        });
+        executor.shutdownNow();
     }
 
     public boolean isDocumentExists(String orderNumber) {

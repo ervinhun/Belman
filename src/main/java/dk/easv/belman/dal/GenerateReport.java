@@ -24,6 +24,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -235,6 +237,13 @@ public class GenerateReport {
             documentToSave.save(outputStream);
             dalManager.savePdfToDb(productNo, outputStream, loggedInUser.getId());
             openDocument(productNo);
+
+            //Updating the rest of the tables on a different thread
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() ->
+                dalManager.signQualityDocument(productNo, loggedInUser.getId())
+            );
+            executor.shutdown();
 
         } catch (IOException e) {
             logger.error("I/O error while generating PDF: {}", e.getMessage());

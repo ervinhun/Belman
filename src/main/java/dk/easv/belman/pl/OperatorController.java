@@ -14,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -37,27 +38,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class OperatorController extends AbstractOrderController {
-    @FXML private BorderPane borderPane;
-    @FXML private VBox rightBox;
     @FXML private FlowPane ordersPane;
-    @FXML private Label orderLabel;
-    @FXML private ImageView frontImage;
-    @FXML private ImageView topImage;
-    @FXML private ImageView backImage;
-    @FXML private ImageView rightImage;
-    @FXML private ImageView leftImage;
-    @FXML private ImageView additionalImage;
     @FXML private GridPane gridPane;
-    @FXML private ChoiceBox<String> user;
     @FXML private ImageView cameraImage;
     @FXML private Button deleteBtn;
     @FXML private Button doneBtn;
     @FXML private VBox cameraVbox;
     private HBox selectMethod;
 
-    private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
-    private final String placeholderUrl =
-            getClass().getResource("/dk/easv/belman/Images/belman.png").toExternalForm();
+
     private final String addPhoto = getClass().getResource("/dk/easv/belman/Images/addPhoto.png").toExternalForm();
     private VBox previousVBox = null;
     private ImageView previousImageView = null;
@@ -97,15 +86,28 @@ public class OperatorController extends AbstractOrderController {
 
     @FXML
     private void confirmImages() throws IOException {
+        int validImageCount = 0;
         for (int i = 0; i < imageViews.size(); i++)
         {
-            if(Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto) && i < imageViews.size() - 1)
-            {
-                logger.warn("At least 5 images are required");
-            }
-            else if(Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto))
-            {
-                imageViews.get(i).setImage(null);
+                Image img = imageViews.get(i).getImage();
+                if (img != null && !Objects.equals(img.getUrl(), addPhoto)) {
+                    validImageCount++;
+                }
+        }
+        if (validImageCount < 5) {
+            logger.warn("At least 5 real images (not placeholders) are required.");
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Insufficient number of Images");
+            alert.setContentText("At least 5 images are required to confirm the order.");
+            alert.showAndWait();
+            return;
+        }
+        else {  //If the photo is the placeholder, then it sets it to null
+            for (int i = 0; i < imageViews.size(); i++) {
+                if (Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto)) {
+                    imageViews.get(i).setImage(null);
+                }
             }
         }
         model.savePhotos(imageViews, angles, orderLabel.getText());

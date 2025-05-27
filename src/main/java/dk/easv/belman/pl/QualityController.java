@@ -5,38 +5,28 @@ import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
 import dk.easv.belman.pl.model.QualityModel;
-import dk.easv.belman.dal.FilePaths;
 import dk.easv.belman.dal.OpenFile;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 
-import javax.imageio.ImageIO;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class QualityController extends AbstractOrderController {
-    @FXML
-    private FlowPane ordersPane;
-    @FXML
-    private TextField search;
-    @FXML
-    Button btnSign;
-    @FXML
-    private TextField txtemail;
-    @FXML
-    private CheckBox cbSendingEmail;
+    @FXML private FlowPane ordersPane;
+    @FXML private TextField search;
+    @FXML Button btnSign;
+    @FXML private TextField txtemail;
+    @FXML private CheckBox cbSendingEmail;
+    @FXML private Button btnSendBack;
+    @FXML private Button btnDeleteImage;
 
     private ImageView selectedImageView;
 
@@ -48,6 +38,7 @@ public class QualityController extends AbstractOrderController {
     private QualityModel model;
     private String orderNumberToSign;
     private static final String OPEN_DOCUMENT = "Open\nDocument";
+    private static final String SIGN_ORDER = "Sign\nOrder";
     private User loggedInUserQc;
     private VBox openedOrder;
 
@@ -180,14 +171,21 @@ public class QualityController extends AbstractOrderController {
             alert.showAndWait();
             return;
         }
-        if (model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc)) {
-            btnSign.setText(OPEN_DOCUMENT);
-            btnSign.setOnAction(e ->
-                new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
-            );
+        model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc, success -> {
+            if (success) {
+                Platform.runLater(() -> {
+                    disableButtonsForImages();
+                    cancel();
+                });
+            } else {
+                Platform.runLater(() -> {
+                    Logger logger = Logger.getLogger(QualityController.class.getName());
+                    logger.warning("Failed to sign order: " + orderNumberToSign);
+                });
+            }
+        });
+        //As there are 2 threads running the document generation and the update of other tables
 
-            cancel(); // This resets the view to the previous screen
-        }
     }
 
     private VBox createCard(Order order) {
@@ -210,9 +208,7 @@ public class QualityController extends AbstractOrderController {
         txtemail.setVisible(!txtemail.isVisible());
 
         if (btnSign.getText().equals(OPEN_DOCUMENT)) {
-            btnSign.setOnAction(_ ->
-                new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
-            );
+            disableButtonsForImages();
         }
         else {
             btnSign.setOnAction(e -> signOrder());
@@ -235,14 +231,19 @@ public class QualityController extends AbstractOrderController {
         bindImages(0.9f);
         this.orderNumberToSign = orderNumber;
         if (model.isDocumentExists(orderNumber)) {
-            btnSign.setText(OPEN_DOCUMENT);
-            btnSign.setOnAction(e ->
-                new OpenFile(orderNumber, cbSendingEmail.isSelected(), txtemail.getText())
-            );
-
+            disableButtonsForImages();
         } else {
-            btnSign.setText("Sign\nOrder");
+            btnSign.setText(SIGN_ORDER);
             btnSign.setOnAction(e -> signOrder());
         }
+    }
+
+    private void disableButtonsForImages() {
+        btnSign.setText(OPEN_DOCUMENT);
+        btnSign.setOnAction(e ->
+            new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
+        );
+        btnSendBack.setDisable(true);
+        btnDeleteImage.setDisable(true);
     }
 }

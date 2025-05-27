@@ -32,7 +32,7 @@ public class BLLManager {
         return hashedPass;
     }
 
-    public User login(String username, String password, Boolean isHashed) {
+    public User login(String username, String password, boolean isHashed) {
         return dalManager.login(username, isHashed ? password : hashPass(username, password));
     }
 
@@ -74,7 +74,7 @@ public class BLLManager {
         User user = dalManager.getUserById(userId);
         new GenerateReport(orderNumber, user, isSendingEmail, email);
         qcDoc.setGeneratedBy(userId);
-        return true; //TODO: Check properly if the document exists in the database
+        return dalManager.isDocumentExists(orderNumber);
     }
 
     public boolean isDocumentExists(String orderNumber) {
