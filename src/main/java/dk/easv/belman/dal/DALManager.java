@@ -2,7 +2,6 @@ package dk.easv.belman.dal;
 
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
-import dk.easv.belman.be.QualityDocument;
 import dk.easv.belman.exceptions.BelmanException;
 import dk.easv.belman.be.User;
 import org.slf4j.Logger;
@@ -209,11 +208,13 @@ public class DALManager {
         return 0;
     }
 
-    public boolean signQualityDocument(QualityDocument qcDoc) {
+    public boolean signQualityDocument(String orderNumber, UUID userId) {
         int noOfTableUpdated = 0;
+        Long productId = getProductIdFromProductNumber(orderNumber);
+
+        //Update photos that they got signed
         String sqlPhotos = "UPDATE dbo.Photos SET is_signed = 1 WHERE product_id = ?";
-        String sqlQualityDocument = "INSERT INTO dbo.QualityCheckDoc (generated_by, product_id, generated_at, qc_doc_path) " +
-                "VALUES (?, ?, CURRENT_TIMESTAMP, ?)";
+
 
         // Merge statement to update or insert into QualityChecks table
         String sqlUpdateQuailityCheck = "MERGE dbo.QualityChecks AS target " +
@@ -231,28 +232,19 @@ public class DALManager {
 
         try (Connection c = connectionManager.getConnection();
              PreparedStatement psPhotos = c.prepareStatement(sqlPhotos);
-             PreparedStatement psQualityDocument = c.prepareStatement(sqlQualityDocument);
              PreparedStatement psUpdateQualityCheck = c.prepareStatement(sqlUpdateQuailityCheck)) {
 
-            psPhotos.setLong(1, qcDoc.getProductId());
+            psPhotos.setLong(1, productId);
             int rowsUpdated = psPhotos.executeUpdate();
             if (rowsUpdated > 0) {
                 noOfTableUpdated++;
             }
 
-            psQualityDocument.setObject(1, qcDoc.getGeneratedBy());
-            psQualityDocument.setLong(2, qcDoc.getProductId());
-            psQualityDocument.setString(3, qcDoc.getQcDocPath());
-            rowsUpdated = psQualityDocument.executeUpdate();
-            if (rowsUpdated > 0) {
-                noOfTableUpdated++;
-            }
-
-            psUpdateQualityCheck.setLong(1, qcDoc.getProductId());
+            psUpdateQualityCheck.setLong(1, productId);
             //Later if we need to add the info, we can add it here
             psUpdateQualityCheck.setString(2, "");
             psUpdateQualityCheck.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-            psUpdateQualityCheck.setObject(4, qcDoc.getGeneratedBy());
+            psUpdateQualityCheck.setObject(4, userId);
             rowsUpdated = psUpdateQualityCheck.executeUpdate();
             if (rowsUpdated > 0) {
                 noOfTableUpdated++;
@@ -261,7 +253,7 @@ public class DALManager {
             throw new BelmanException("Error signing quality document");
         }
 
-        return noOfTableUpdated >= 2;
+        return noOfTableUpdated >= 1;
     }
 
     public boolean checkIfDocumentExists(String orderNumber) {

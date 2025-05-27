@@ -16,7 +16,7 @@ public class LoginModel {
         bllManager = new BLLManager();
     }
 
-    public void login(String username, String password, Boolean isCameraLogin) {
+    public void login(String username, String password, boolean isCameraLogin) {
         errorMessage.set("");
         if (username.isEmpty() || password.isEmpty()) {
             errorMessage.set("Please fill in username and password!");
