@@ -99,6 +99,7 @@ public class QualityController extends AbstractOrderController {
     @FXML
     public void cancel() {
         borderPane.setCenter(rightBox);
+        rebindUserChoiceBox(rightBox);
     }
 
 
@@ -241,7 +242,7 @@ public class QualityController extends AbstractOrderController {
     private void disableButtonsForImages() {
         btnSign.setText(OPEN_DOCUMENT);
         btnSign.setOnAction(e ->
-            new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
+                new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
         );
         btnSendBack.setDisable(true);
         btnDeleteImage.setDisable(true);

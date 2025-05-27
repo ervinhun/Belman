@@ -5,6 +5,7 @@ import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
 import javafx.stage.Stage;
@@ -21,6 +22,13 @@ public abstract class BaseController {
         configureUserChoiceBox();
     }
 
+    protected void rebindUserChoiceBox(Parent root) {
+        ChoiceBox<String> cb = (ChoiceBox<String>) root.lookup("#user");
+        if (cb != null) {
+            this.user = cb;
+            configureUserChoiceBox();
+        }
+    }
 
     protected void loggedOut() {
         try {

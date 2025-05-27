@@ -82,6 +82,7 @@ public class OperatorController extends AbstractOrderController {
     public void cancel() {
         borderPane.setCenter(rightBox);
         resizeWindow(rightBox);
+        rebindUserChoiceBox(rightBox);
     }
 
     @FXML
@@ -89,10 +90,10 @@ public class OperatorController extends AbstractOrderController {
         int validImageCount = 0;
         for (int i = 0; i < imageViews.size(); i++)
         {
-                Image img = imageViews.get(i).getImage();
-                if (img != null && !Objects.equals(img.getUrl(), addPhoto)) {
-                    validImageCount++;
-                }
+            Image img = imageViews.get(i).getImage();
+            if (img != null && !Objects.equals(img.getUrl(), addPhoto)) {
+                validImageCount++;
+            }
         }
         if (validImageCount < 5) {
             logger.warn("At least 5 real images (not placeholders) are required.");

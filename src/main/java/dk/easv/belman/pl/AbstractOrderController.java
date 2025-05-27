@@ -43,7 +43,7 @@ public abstract class AbstractOrderController extends BaseController {
             orderLabel.setText(orderNumber);
             borderPane.setCenter(root);
             resizeWindow(root);
-            configureUserChoiceBox();
+            rebindUserChoiceBox(root);
 
             if(!isOperator)
             {
@@ -123,6 +123,7 @@ public abstract class AbstractOrderController extends BaseController {
     protected void cancel() {
         borderPane.setCenter(rightBox);
         resizeWindow(rightBox);
+        rebindUserChoiceBox(rightBox);
     }
 
     protected abstract List<Photo> getPhotosForOrder(String orderNumber);
