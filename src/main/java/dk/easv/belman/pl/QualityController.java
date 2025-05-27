@@ -210,7 +210,7 @@ public class QualityController extends AbstractOrderController {
         txtemail.setVisible(!txtemail.isVisible());
 
         if (btnSign.getText().equals(OPEN_DOCUMENT)) {
-            btnSign.setOnAction(e ->
+            btnSign.setOnAction(_ ->
                 new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
             );
         }
@@ -232,6 +232,7 @@ public class QualityController extends AbstractOrderController {
 
     @Override
     protected void onDetailLoaded(String orderNumber) {
+        bindImages(0.9f);
         this.orderNumberToSign = orderNumber;
         if (model.isDocumentExists(orderNumber)) {
             btnSign.setText(OPEN_DOCUMENT);

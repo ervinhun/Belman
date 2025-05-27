@@ -52,6 +52,7 @@ public class OperatorController extends AbstractOrderController {
     @FXML private ImageView cameraImage;
     @FXML private Button deleteBtn;
     @FXML private Button doneBtn;
+    @FXML private VBox cameraVbox;
     private HBox selectMethod;
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
@@ -172,6 +173,8 @@ public class OperatorController extends AbstractOrderController {
     @FXML
     private void showCameraImage()
     {
+        cameraImage.fitWidthProperty().bind(cameraVbox.widthProperty().multiply(0.9f));
+        cameraImage.fitHeightProperty().bind(cameraVbox.heightProperty().multiply(0.9f));
         deleteBtn.setVisible(false);
         deleteBtn.setDisable(true);
         doneBtn.setVisible(false);
@@ -285,7 +288,10 @@ public class OperatorController extends AbstractOrderController {
     }
 
     @Override
-    protected void onDetailLoaded(String orderNumber) { openOrder(); }
+    protected void onDetailLoaded(String orderNumber) {
+        openOrder();
+        bindImages(0.9f);
+    }
 
     @Override
     protected void onUserLogout() {

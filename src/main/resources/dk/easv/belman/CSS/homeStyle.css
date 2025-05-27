@@ -29,6 +29,13 @@
     -fx-text-fill: white;
     -fx-cursor: hand;
 }
+#deleteBtn
+{
+    -fx-background-color: #a8273a;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
 #clickable
 {
     -fx-cursor: hand;

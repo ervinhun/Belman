@@ -14,6 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.github.sarxos.webcam.Webcam;
 import com.google.zxing.*;
@@ -36,6 +38,8 @@ public class LoginController {
     @FXML private Button           cameraBtn;
     @FXML private Button           backBtn;
     @FXML private Label            errorLabel;
+    @FXML private StackPane        stackP;
+    @FXML private VBox             loginVBox;
 
     private LoginModel model;
 
@@ -53,6 +57,8 @@ public class LoginController {
                 Platform.runLater(() -> openNextWindow(newUser));
             }
         });
+        cameraView.fitWidthProperty().bind(stackP.widthProperty().multiply(0.8f));
+        cameraView.fitHeightProperty().bind(stackP.heightProperty().multiply(0.8f));
     }
 
     @FXML
@@ -117,8 +123,8 @@ public class LoginController {
         cameraView.setVisible(true);
         backBtn.setVisible(true);
         backBtn.setDisable(false);
-        cameraBtn.setDisable(true);
-        confirm.setDisable(true);
+        loginVBox.setVisible(false);
+        loginVBox.setDisable(true);
 
         webcam = Webcam.getDefault();
         webcam.setViewSize(new Dimension(640, 480));
@@ -175,8 +181,8 @@ public class LoginController {
         cameraView.setDisable(true);
         backBtn.setVisible(false);
         backBtn.setDisable(true);
-        cameraBtn.setDisable(false);
-        confirm.setDisable(false);
+        loginVBox.setVisible(true);
+        loginVBox.setDisable(false);
     }
 
     private void showErrorLabel(String message) {

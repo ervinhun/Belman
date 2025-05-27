@@ -102,6 +102,18 @@ public abstract class AbstractOrderController extends BaseController {
         }
     }
 
+    protected void bindImages(float multiplier)
+    {
+        for (ImageView iv : new ImageView[]{
+                topImage, rightImage, leftImage,
+                frontImage, backImage, additionalImage
+        }) {
+            VBox cellSize = (VBox) iv.getParent();
+            iv.fitWidthProperty().bind(cellSize.widthProperty());
+            iv.fitHeightProperty().bind(cellSize.heightProperty().multiply(multiplier));
+        }
+    }
+
     private void assign(ImageView iv,Photo p, Image img) {
         iv.setImage(img);
         iv.setUserData(p);
