@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox minHeight="-Infinity" minWidth="-Infinity" prefHeight="453.0" prefWidth="600.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="453.0" prefWidth="600.0" stylesheets="@../CSS/homeStyle.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox prefHeight="74.0" prefWidth="600.0">
          <children>
@@ -40,6 +40,9 @@
          <padding>
             <Insets bottom="10.0" left="20.0" />
          </padding>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
       </VBox>
       <GridPane fx:id="gridPane" prefHeight="290.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
          <columnConstraints>
@@ -52,7 +55,7 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+            <VBox alignment="CENTER" minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="100.0">
                <children>
                   <Label text="Left" translateX="-2.0">
                      <font>
@@ -66,7 +69,7 @@
                   </ImageView>
                </children>
             </VBox>
-            <VBox alignment="CENTER" layoutX="10.0" layoutY="3.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
+            <VBox alignment="CENTER" layoutX="10.0" layoutY="3.0" minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1">
                <children>
                   <Label text="Top" translateX="-2.0">
                      <font>
@@ -80,7 +83,7 @@
                   </ImageView>
                </children>
             </VBox>
-            <VBox alignment="CENTER" layoutX="210.0" layoutY="3.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
+            <VBox alignment="CENTER" layoutX="210.0" layoutY="3.0" minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
                <children>
                   <Label text="Right" translateX="-2.0">
                      <font>
@@ -94,7 +97,7 @@
                   </ImageView>
                </children>
             </VBox>
-            <VBox alignment="CENTER" layoutX="410.0" layoutY="3.0" prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
+            <VBox alignment="CENTER" layoutX="410.0" layoutY="3.0" minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
                <children>
                   <Label text="Back" translateX="-2.0">
                      <font>
@@ -108,7 +111,7 @@
                   </ImageView>
                </children>
             </VBox>
-            <VBox alignment="CENTER" layoutX="10.0" layoutY="123.0" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <VBox alignment="CENTER" layoutX="10.0" layoutY="123.0" minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <children>
                   <Label text="Front" translateX="-2.0">
                      <font>
@@ -122,7 +125,7 @@
                   </ImageView>
                </children>
             </VBox>
-            <VBox alignment="CENTER" layoutX="210.0" layoutY="123.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+            <VBox alignment="CENTER" layoutX="210.0" layoutY="123.0" minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                <children>
                   <Label text="Additional" translateX="-2.0">
                      <font>

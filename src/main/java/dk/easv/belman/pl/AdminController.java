@@ -211,6 +211,7 @@ public class AdminController extends AbstractOrderController{
 
     @Override
     protected void onDetailLoaded(String orderNumber) {
+        bindImages(0.6f);
         for (Label lbl : List.of(
                 uploadedByText, uploadedAtText,
                 uploadedByText1, uploadedAtText1,
