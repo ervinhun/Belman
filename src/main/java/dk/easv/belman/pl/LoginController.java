@@ -45,7 +45,7 @@ public class LoginController {
 
     private Webcam webcam;
     private ScheduledExecutorService executor;
-    private Pattern pattern = Pattern.compile("username:\\s*(\\S+).*password:\\s*(\\S+)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private Pattern pattern = Pattern.compile("hash:\\s*(.*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @FXML
     public void initialize() {
@@ -153,9 +153,8 @@ public class LoginController {
                             Matcher matcher = pattern.matcher(result.getText());
 
                             if (matcher.find()) {
-                                String username = matcher.group(1);
-                                String password = matcher.group(2);
-                                model.login(username, password, true);
+                                String hash = matcher.group(1);
+                                model.login("user", hash, true);
                             }
                             else {
                                 showErrorLabel("Invalid QR code format. Please try again.");

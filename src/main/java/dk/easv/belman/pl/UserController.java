@@ -30,6 +30,7 @@ public class UserController {
     private VBox      rightBox;
     private UserModel model;
     private AdminController adminController;
+    private String prevTagId;
 
 
     @FXML
@@ -90,12 +91,14 @@ public class UserController {
         String success = model.successMessageProperty().get();
         if (success != null && !success.isEmpty()) {
             adminController.reloadUsers();
-            cancel();
+            model.clear();
+            goBack();
         }
     }
 
 
     public void setEditingUser(User u) {
+        prevTagId = u.getTagId();
         cbTagId.setSelected(u.getTagId() != null);
         u.setTagId(cbTagId.isSelected() ? "true" : "false");
         txtTagId.setText(u.getTagId());
@@ -107,8 +110,15 @@ public class UserController {
     @FXML
     private void cancel() {
         model.clear();
+        model.cancel(prevTagId);
+        goBack();
+    }
+
+    private void goBack()
+    {
         BorderPane bp = (BorderPane) rootVBox.getParent();
         bp.setCenter(rightBox);
+        txtUsername.setDisable(false);
 
         adminController.resizeWindow(rightBox);
     }

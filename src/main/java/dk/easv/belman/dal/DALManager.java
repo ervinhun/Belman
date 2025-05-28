@@ -433,9 +433,18 @@ public class DALManager {
     }
 
     public User login(String username, String hashedPassword) {
-        final String selectSql =
-                "SELECT id, full_name, username, password, tag_id, role_id, created_at, last_login_time, is_active " +
-                        "FROM Users WHERE username = ? AND password = ?";
+        String selectSql;
+        if(username != null)
+        {
+            selectSql =
+                    "SELECT id, full_name, username, password, tag_id, role_id, created_at, last_login_time, is_active " +
+                            "FROM Users WHERE username = ? AND password = ?";
+        }
+        else
+        {
+            selectSql = "SELECT * FROM Users WHERE tag_id = ?";
+        }
+
         final String updateSql =
                 "UPDATE Users SET last_login_time = CURRENT_TIMESTAMP WHERE id = ?";
 
@@ -445,8 +454,16 @@ public class DALManager {
             UUID id;
             User user;
             try (PreparedStatement psSelect = con.prepareStatement(selectSql)) {
-                psSelect.setString(1, username);
-                psSelect.setString(2, hashedPassword);
+                if(username != null)
+                {
+                    psSelect.setString(1, username);
+                    psSelect.setString(2, hashedPassword);
+                }
+                else
+                {
+                    psSelect.setString(1, hashedPassword);
+                }
+
                 try (ResultSet rs = psSelect.executeQuery()) {
                     if (!rs.next()) {
                         con.rollback();
