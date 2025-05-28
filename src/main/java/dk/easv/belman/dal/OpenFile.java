@@ -30,9 +30,9 @@ public class OpenFile {
     }
 
     private PDDocument openFileAndConvert(String productNumber) {
-        DALManager dalManager = new DALManager();
+        OrderManager orderManager = new OrderManager();
         try {
-            return Loader.loadPDF(dalManager.getPdfFromDb(productNumber));
+            return Loader.loadPDF(orderManager.getPdfFromDb(productNumber));
         } catch (IOException e) {
             throw new BelmanException("Error while opening the pdf from db: " + e);
         }
