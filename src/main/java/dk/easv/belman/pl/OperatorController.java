@@ -48,7 +48,7 @@ public class OperatorController extends AbstractOrderController {
     @FXML private VBox cameraVbox;
     private HBox selectMethod;
 
-
+    private static final int MIN_NUMBER_OF_PHOTOS_TO_SIGN = 5;
     private final String addPhoto = getClass().getResource("/dk/easv/belman/Images/addPhoto.png").toExternalForm();
     private VBox previousVBox = null;
     private ImageView previousImageView = null;
@@ -284,7 +284,7 @@ public class OperatorController extends AbstractOrderController {
             OrderCardController controller = loader.getController();
             controller.setOrder(order);
 
-            boolean isOpenable = order.getPhotos().size() < 5;
+            boolean isOpenable = order.getPhotos().size() < MIN_NUMBER_OF_PHOTOS_TO_SIGN;
             if (isOpenable) {
                 card.setOnMouseClicked(_ -> openOrderDetail("FXML/orderOperator.fxml", order.getOrderNumber(), Boolean.TRUE));
             }

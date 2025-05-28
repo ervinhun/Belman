@@ -286,7 +286,7 @@ public class OrderManager extends DALManagerBase {
                 Long id = rs.getLong( ID);
                 UUID uploadedBy = rs.getObject( UPLOADED_BY, UUID.class);
                 String angle = rs.getString( PHOTOS_ANGLE);
-                LocalDateTime uploadedAt = rs.getTimestamp( USER_CREATED_AT).toLocalDateTime();
+                LocalDateTime uploadedAt = rs.getTimestamp(UPLOADED_AT).toLocalDateTime();
                 boolean isDeleted = rs.getBoolean( IS_DELETED);
                 UUID deletedBy = rs.getObject( DELETED_BY, UUID.class);
                 Timestamp deletedAtTS = rs.getTimestamp( DELETED_AT);

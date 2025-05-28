@@ -152,6 +152,7 @@ public class QualityController extends AbstractOrderController {
             if (selectedImageView.getImage().getUrl() != null && selectedImageView.getImage().getUrl().equals(placeholderUrl)) {
                 Alert alert = new Alert(Alert.AlertType.WARNING, "Selected image is empty. Please select a valid image.");
                 alert.showAndWait();
+                return;
             }
         }
         selectedImageView.setImage(new Image(placeholderUrl));

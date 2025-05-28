@@ -22,6 +22,7 @@ public abstract class DALManagerBase {
     protected static final String DELETED_BY =    "deleted_by";
     protected static final String DELETED_AT =    "deleted_at";
     protected static final String UPLOADED_BY =  "uploaded_by";
+    protected static final String UPLOADED_AT =  "uploaded_at";
 
     public DALManagerBase() throws BelmanException {}
 
