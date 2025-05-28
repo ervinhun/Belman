@@ -8,6 +8,7 @@ import javafx.beans.property.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Properties;
 
 public class UserModel {
@@ -60,7 +61,7 @@ public class UserModel {
 
         if (editingUser != null) {
             editingUser.setFullName(fullName.get());
-            editingUser.setTagId(tagId.get());
+            editingUser.setTagId(Objects.equals(tagId.get(), "true") ? bllManager.hashPass(editingUser.getUsername(), "") : null);
             editingUser.setRoleId(roleId.get());
             editingUser.setPassword(bllManager.hashPass(editingUser.getUsername(), defaultPassword));
 
@@ -70,6 +71,7 @@ public class UserModel {
             } else {
                 errorMessage.set("Update failed.");
             }
+            clear();
             editingUser = null;
             return;
         }
@@ -77,7 +79,7 @@ public class UserModel {
         User u = new User();
         u.setFullName(fullName.get());
         u.setUsername(username.get());
-        u.setTagId(tagId.get());
+        u.setTagId(Objects.equals(tagId.get(), "true") ? bllManager.hashPass(u.getUsername(), "") : null);
         u.setRoleId(roleId.get());
         u.setPassword(hashed);
 
@@ -102,6 +104,15 @@ public class UserModel {
     }
 
     public void clear() {
+        fullName.set("");
+        username.set("");
+        tagId.set("");
+        roleId.set(0);
+    }
+
+    public void cancel(String prevTagId)
+    {
+        if(editingUser != null) editingUser.setTagId(prevTagId);
         fullName.set("");
         username.set("");
         tagId.set("");
