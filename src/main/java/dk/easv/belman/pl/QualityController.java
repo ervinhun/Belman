@@ -144,6 +144,9 @@ public class QualityController extends AbstractOrderController {
             return;
         List<ImageView> views = List.of(topImage, leftImage, rightImage, frontImage, backImage, additionalImage);
         String[] angles = {"Top", "Left", "Right", "Front", "Back", "Additional"};
+        if (!views.contains(selectedImageView)) {
+            return;
+        }
         String angle = angles[views.indexOf(selectedImageView)];
         if (selectedImageView.getImage() != null) {
             if (selectedImageView.getImage().getUrl() != null && selectedImageView.getImage().getUrl().equals(placeholderUrl)) {
