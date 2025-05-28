@@ -275,7 +275,7 @@ public class OrderManager extends DALManagerBase {
     private List<Photo> getPhotos(Long orderId)
     {
         List<Photo> photos = new ArrayList<>();
-        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ? AND Photos.is_deleted = 0";
+        final String selectSql = "SELECT * FROM Photos JOIN Products ON Photos.product_id = Products.id WHERE Photos.product_id = ? AND Photos.is_deleted = 0";
         try(Connection con = connectionManager.getConnection();
             PreparedStatement psSelect = con.prepareStatement(selectSql))
         {
