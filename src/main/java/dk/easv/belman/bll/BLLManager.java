@@ -98,8 +98,8 @@ public class BLLManager {
         return userManager.getUserById(id);
     }
 
-    public void sendBackToOperator(String orderNumber, UUID userId) {
-        orderManager.sendBackToOperator(orderNumber, userId);
+    public void sendBackToOperator(String orderNumber, UUID userId, String angle) {
+        orderManager.sendBackToOperator(orderNumber, userId, angle);
     }
 
     public int getPhotosNumbersforOrder(String orderNumberToSign) {

@@ -5,7 +5,6 @@ import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import dk.easv.belman.exceptions.BelmanException;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -103,8 +102,8 @@ public class QualityModel {
         return bllManager.getPhotosForOrder(orderNumber);
     }
 
-    public void sendBackToOperator(String orderNumber, UUID userId) {
-        bllManager.sendBackToOperator(orderNumber, userId);
+    public void sendBackToOperator(String orderNumber, UUID userId, String angle) {
+        bllManager.sendBackToOperator(orderNumber, userId, angle);
     }
 
     public boolean isOrderReadyForSigning(String orderNumberToSign) {

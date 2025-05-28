@@ -129,19 +129,20 @@ public class OrderManager extends DALManagerBase {
         }
     }
 
-    public void sendBackToOperator(String orderNumber, UUID userId) {
+    public void sendBackToOperator(String orderNumber, UUID userId, String angle) {
         long productId = getProductIdFromProductNumber(orderNumber);
         String sql = """
         UPDATE dbo.Photos
         SET is_deleted   = 1,
             deleted_by   = ?,
             deleted_at   = CURRENT_TIMESTAMP
-        WHERE product_id = ?
+        WHERE product_id = ? AND angle = ? AND is_deleted = 0 AND is_signed = 0
         """;
         try (Connection c = connectionManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setObject(1, userId);
             ps.setLong(  2, productId);
+            ps.setString(3, angle);
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new BelmanException("Error soft-deleting photos " + ex);
