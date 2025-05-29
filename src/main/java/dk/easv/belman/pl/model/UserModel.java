@@ -32,7 +32,6 @@ public class UserModel {
         String hashed;
 
         if (!newPassword) {
-        String defaultPassword;
 
             try (FileInputStream fileInputStream = new FileInputStream(CONFIG_PATH)) {
                 props.load(fileInputStream);
@@ -85,15 +84,8 @@ public class UserModel {
             }
             clear();
             editingUser = null;
-            return;
         }
         else {  //Creating a new user
-            User u = new User();
-            u.setFullName(fullName.get());
-            u.setUsername(username.get());
-            u.setTagId(tagId.get());
-            u.setRoleId(roleId.get());
-            u.setPassword(hashed);
 
         User u = new User();
         u.setFullName(fullName.get());
