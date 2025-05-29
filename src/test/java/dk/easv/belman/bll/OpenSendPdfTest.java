@@ -1,10 +1,12 @@
 package dk.easv.belman.bll;
 
 import dk.easv.belman.exceptions.BelmanException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("db")
 class OpenSendPdfTest {
 
     @Test
