@@ -4,14 +4,11 @@ import dk.easv.belman.pl.model.UserModel;
 import dk.easv.belman.be.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Toggle;
-
-import java.awt.*;
 
 public class UserController {
     @FXML private TextField    txtFullName;
@@ -22,8 +19,6 @@ public class UserController {
     @FXML private RadioButton  chkQualityControl;
     @FXML private RadioButton  chkOperator;
     @FXML private ToggleGroup  tgRole;
-    @FXML private Button       btnSave;
-    @FXML private Button       btnCancel;
     @FXML private VBox         rootVBox;
     @FXML private Label        lblError;
 
@@ -46,14 +41,14 @@ public class UserController {
         chkOperator    .setUserData(3);
         lblError.textProperty().bind(model.errorMessageProperty());
         lblError.visibleProperty().bind(model.errorMessageProperty().isNotEmpty());
-        tgRole.selectedToggleProperty().addListener((obs, oldT, newT) -> {
+        tgRole.selectedToggleProperty().addListener((_, _, newT) -> {
             if (newT != null) {
                 model.roleIdProperty().set((int)newT.getUserData());
             } else {
                 model.roleIdProperty().set(0);
             }
         });
-        model.roleIdProperty().addListener((obs, old, val) -> {
+        model.roleIdProperty().addListener((_, _, val) -> {
             for (Toggle t : tgRole.getToggles()) {
                 if (Integer.valueOf((int)t.getUserData()).equals(val.intValue())) {
                     tgRole.selectToggle(t);
@@ -62,12 +57,7 @@ public class UserController {
             }
         });
 
-        /**model.errorMessageProperty().addListener((obs, o, msg) -> {
-            if (msg != null && !msg.isEmpty()) {
-                new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK).showAndWait();
-            }
-        });*/
-        model.successMessageProperty().addListener((obs, o, msg) -> {
+        model.successMessageProperty().addListener((_, _, msg) -> {
             if (msg != null && !msg.isEmpty()) {
                 new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK).showAndWait();
             }

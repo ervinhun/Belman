@@ -1,8 +1,6 @@
 package dk.easv.belman.pl;
 
-import com.github.sarxos.webcam.Webcam;
 import dk.easv.belman.be.Photo;
-import dk.easv.belman.pl.AbstractOrderController;
 import dk.easv.belman.pl.QualityController;
 import dk.easv.belman.pl.model.PhotoPreviewModel;
 import javafx.fxml.FXML;
@@ -10,10 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
