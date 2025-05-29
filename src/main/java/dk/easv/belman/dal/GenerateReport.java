@@ -35,7 +35,7 @@ import javax.imageio.ImageIO;
 public class GenerateReport {
     private static final Logger logger = LoggerFactory.getLogger(GenerateReport.class);
 
-    private static DALManager dalManager;
+    private static OrderManager orderManager;
 
 
     private final String productNo;
@@ -48,26 +48,25 @@ public class GenerateReport {
     private static final String DATE_FORMAT_PATTERN = "dd/MM/yyyy";
 
 
-    private static DALManager getDalManager() {
-        if (dalManager == null) {
+    private static void getOrderManager() {
+        if (orderManager == null) {
             try {
-                dalManager = new DALManager();
+                orderManager = new OrderManager();
             } catch (BelmanException e) {
                 logger.error("Failed to initialize DALManager: {}", e.getMessage());
             }
         }
-        return dalManager;
     }
     public GenerateReport(String productNumber, User loggedInUser, boolean isSendingEmail, String email) {
         this.productNo = productNumber;
         this.isSendingEmail = isSendingEmail;
         this.email = email;
         float currentYPosition = 0;
-        getDalManager();
+        getOrderManager();
         float margin = 40;
         float availableWidth;
         float minY = 100;
-        List<Photo> photos = dalManager.getPhotosByONum(productNo);
+        List<Photo> photos = orderManager.getPhotosByONum(productNo);
         if (photos.isEmpty()) {
             logger.error("No images found for product number: {}", productNo);
             return;
@@ -235,13 +234,13 @@ public class GenerateReport {
             PDDocument documentToSave = addPageNumber(document);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             documentToSave.save(outputStream);
-            dalManager.savePdfToDb(productNo, outputStream, loggedInUser.getId());
+            orderManager.savePdfToDb(productNo, outputStream, loggedInUser.getId());
             openDocument(productNo);
 
             //Updating the rest of the tables on a different thread
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(() ->
-                dalManager.signQualityDocument(productNo, loggedInUser.getId())
+                    orderManager.signQualityDocument(productNo, loggedInUser.getId())
             );
             executor.shutdown();
 
