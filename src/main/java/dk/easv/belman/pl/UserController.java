@@ -7,20 +7,42 @@ import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Toggle;
 
+
 public class UserController {
-    @FXML private TextField    txtFullName;
-    @FXML private TextField    txtUsername;
-    @FXML private TextField    txtTagId;
-    @FXML private CheckBox     cbTagId;
-    @FXML private RadioButton  chkAdmin;
-    @FXML private RadioButton  chkQualityControl;
-    @FXML private RadioButton  chkOperator;
-    @FXML private ToggleGroup  tgRole;
-    @FXML private VBox         rootVBox;
-    @FXML private Label        lblError;
+    @FXML
+    private TextField txtFullName;
+    @FXML
+    private TextField txtUsername;
+    @FXML
+    private TextField txtTagId;
+    @FXML
+    private CheckBox cbTagId;
+    @FXML
+    private RadioButton chkAdmin;
+    @FXML
+    private RadioButton chkQualityControl;
+    @FXML
+    private RadioButton chkOperator;
+    @FXML
+    private ToggleGroup tgRole;
+    @FXML
+    private Button btnSave;
+    @FXML
+    private Button btnCancel;
+    @FXML
+    private VBox rootVBox;
+    @FXML
+    private Label lblError;
+    @FXML
+    private GridPane gridPassword;
+    @FXML
+    private PasswordField txtNewPass;
+    @FXML
+    private PasswordField txtNewPass2;
 
     private VBox      rightBox;
     private UserModel model;
@@ -31,6 +53,7 @@ public class UserController {
     @FXML
     private void initialize() {
         model = new UserModel();
+        hidePasswordFields(true);
 
         txtFullName.textProperty().bindBidirectional(model.fullNameProperty());
         txtUsername.textProperty().bindBidirectional(model.usernameProperty());
@@ -57,7 +80,7 @@ public class UserController {
             }
         });
 
-        model.successMessageProperty().addListener((_, _, msg) -> {
+        model.successMessageProperty().addListener((obs, o, msg) -> {
             if (msg != null && !msg.isEmpty()) {
                 new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK).showAndWait();
             }
@@ -76,6 +99,16 @@ public class UserController {
     @FXML
     private void btnSaveClick() {
         txtTagId.setText(cbTagId.isSelected() ? "true" : "false");
+        if (!txtNewPass.getText().isEmpty() && !txtNewPass2.getText().isEmpty()) {
+            if (model.checkNewPassword(txtNewPass.getText(), txtNewPass2.getText())) {
+                model.setNewPassword(txtNewPass.getText());
+            }
+            else {
+                return;
+            }
+            txtNewPass.clear();
+            txtNewPass2.clear();
+        }
         model.saveUser();
 
         String success = model.successMessageProperty().get();
@@ -90,6 +123,7 @@ public class UserController {
     public void setEditingUser(User u) {
         prevTagId = u.getTagId();
         cbTagId.setSelected(u.getTagId() != null);
+        hidePasswordFields(false);
         u.setTagId(cbTagId.isSelected() ? "true" : "false");
         txtTagId.setText(u.getTagId());
         model.setEditingUser(u);
@@ -111,5 +145,12 @@ public class UserController {
         txtUsername.setDisable(false);
 
         adminController.resizeWindow(rightBox);
+        hidePasswordFields(true);
+    }
+
+    private void hidePasswordFields(boolean hide) {
+        gridPassword.setVisible(!hide);
+        gridPassword.setManaged(!hide);
+        txtUsername.setDisable(!hide);
     }
 }

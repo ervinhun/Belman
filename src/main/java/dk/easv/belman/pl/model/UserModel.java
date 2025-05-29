@@ -19,6 +19,7 @@ public class UserModel {
     private final StringProperty tagId = new SimpleStringProperty("");
     private final IntegerProperty roleId = new SimpleIntegerProperty(0);
     private User editingUser;
+    private boolean newPassword = false;
 
     private final StringProperty errorMessage = new SimpleStringProperty();
     private final StringProperty successMessage = new SimpleStringProperty();
@@ -27,19 +28,23 @@ public class UserModel {
 
     public void saveUser() {
         Properties props = new Properties();
-        String defaultPassword;
+        String defaultPassword = "";
+        String hashed;
 
-        try (FileInputStream fileInputStream = new FileInputStream(CONFIG_PATH)) {
-            props.load(fileInputStream);
-        } catch (IOException e) {
-            throw new BelmanException("Error loading config properties: " + e.getMessage());
-        }
+        if (!newPassword) {
+
+            try (FileInputStream fileInputStream = new FileInputStream(CONFIG_PATH)) {
+                props.load(fileInputStream);
+            } catch (IOException e) {
+                throw new BelmanException("Error loading config properties: " + e.getMessage());
+            }
 
 
-        try {
-            defaultPassword = ConfigCrypto.decrypt(props.getProperty("user.defaultPassword"));
-        } catch (Exception e) {
-            throw new BelmanException("Error decrypting the default password: " + e.getMessage());
+            try {
+                defaultPassword = ConfigCrypto.decrypt(props.getProperty("user.defaultPassword"));
+            } catch (Exception e) {
+                throw new BelmanException("Error decrypting the default password: " + e.getMessage());
+            }
         }
 
         errorMessage.set("");
@@ -51,19 +56,25 @@ public class UserModel {
             return;
         }
 
-        String hashed;
-        try {
-            hashed = bllManager.hashPass(username.get(), defaultPassword);
-        } catch (Exception e) {
-            errorMessage.set("Error hashing password: " + e.getMessage());
-            return;
+        if (!newPassword && editingUser == null) { // If adding a new user, it will use the default password
+            try {
+                hashed = bllManager.hashPass(username.get(), defaultPassword);
+            } catch (Exception e) {
+                errorMessage.set("Error hashing password: " + e.getMessage());
+                return;
+            }
         }
+        else
+            hashed = editingUser.getPassword();
+
+        if(editingUser != null)
+            hashed = editingUser.getPassword(); // Use existing password if editing
 
         if (editingUser != null) {
             editingUser.setFullName(fullName.get());
             editingUser.setTagId(Objects.equals(tagId.get(), "true") ? bllManager.hashPass(editingUser.getUsername(), "") : null);
             editingUser.setRoleId(roleId.get());
-            editingUser.setPassword(bllManager.hashPass(editingUser.getUsername(), defaultPassword));
+            editingUser.setPassword(hashed);
 
             boolean ok = bllManager.updateUser(editingUser);
             if (ok) {
@@ -73,8 +84,8 @@ public class UserModel {
             }
             clear();
             editingUser = null;
-            return;
         }
+        else {  //Creating a new user
 
         User u = new User();
         u.setFullName(fullName.get());
@@ -83,15 +94,16 @@ public class UserModel {
         u.setRoleId(roleId.get());
         u.setPassword(hashed);
 
-        try {
-            if (bllManager.addUser(u) != null) {
-                successMessage.set("User created with default password: " + defaultPassword);
-                clear();
-            } else {
-                errorMessage.set("User was not created.");
+            try {
+                if (bllManager.addUser(u) != null) {
+                    successMessage.set("User created with default password: " + defaultPassword);
+                    clear();
+                } else {
+                    errorMessage.set("User was not created.");
+                }
+            } catch (Exception ex) {
+                errorMessage.set("Error creating user: " + ex.getMessage());
             }
-        } catch (Exception ex) {
-            errorMessage.set("Error creating user: " + ex.getMessage());
         }
     }
 
@@ -118,6 +130,46 @@ public class UserModel {
         tagId.set("");
         roleId.set(0);
     }
+
+    public boolean checkNewPassword(String newPass, String newPass2) {
+        if (newPass.isEmpty() || newPass2.isEmpty()) {
+            errorMessage.set("To change the password, both fields must be filled.");
+            return false;
+        }
+        if (!newPass.equals(newPass2)) {
+            errorMessage.set("Passwords do not match.");
+            return false;
+        }
+        newPassword = true;
+        return true;
+    }
+
+    public void setNewPassword(String newPass) {
+        if (editingUser != null) {
+            try {
+
+                String hashed = bllManager.hashPass(editingUser.getUsername(), newPass);
+                editingUser.setPassword(hashed);
+                boolean ok = bllManager.updateUser(editingUser);
+                if (ok) {
+                    successMessage.set("Password updated successfully.");
+                } else {
+                    errorMessage.set("Failed to update password.");
+                }
+            } catch (Exception e) {
+                errorMessage.set("Error updating password: " + e.getMessage());
+            }
+        } else {
+            errorMessage.set("No user is being edited.");
+        }
+    }
+
+    public void setOldPassword(String oldPass) {
+        if (editingUser != null) {
+            editingUser.setPassword(oldPass);
+        }
+    }
+
 
     // ─── Properties for binding ───────────────────────────────────────────────
     public StringProperty fullNameProperty() {
