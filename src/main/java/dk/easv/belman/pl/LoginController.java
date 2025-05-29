@@ -35,7 +35,6 @@ public class LoginController {
     @FXML private MFXPasswordField password;
     @FXML private Button           confirm;
     @FXML private ImageView        cameraView;
-    @FXML private Button           cameraBtn;
     @FXML private Button           backBtn;
     @FXML private Label            errorLabel;
     @FXML private StackPane        stackP;
@@ -45,14 +44,14 @@ public class LoginController {
 
     private Webcam webcam;
     private ScheduledExecutorService executor;
-    private Pattern pattern = Pattern.compile("hash:\\s*(.*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private final Pattern pattern = Pattern.compile("hash:\\s*(.*)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     @FXML
     public void initialize() {
         model = new LoginModel();
         errorLabel.textProperty().bind(model.errorMessageProperty());
         errorLabel.visibleProperty().bind(model.errorMessageProperty().isNotEmpty());
-        model.loggedInUserProperty().addListener((obs, oldUser, newUser) -> {
+        model.loggedInUserProperty().addListener((_, _, newUser) -> {
             if (newUser != null) {
                 Platform.runLater(() -> openNextWindow(newUser));
             }

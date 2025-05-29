@@ -9,8 +9,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 public class OrderCardController {
 
@@ -27,20 +27,21 @@ public class OrderCardController {
 
     private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
 
-    private final String placeholderUrl = getClass()
-            .getResource("/dk/easv/belman/Images/belman.png")
+    private final String placeholderUrl = Objects.requireNonNull(getClass()
+                    .getResource("/dk/easv/belman/Images/belman.png"))
             .toExternalForm();
 
     public void setOrder(Order order) {
         List<Photo> photos = order.getPhotos();
         Image img;
         String status;
+        this.order = order;
 
-        if (photos.isEmpty() || photos.get(0).getPhotoFile() == null) {
+        if (photos.isEmpty() || photos.getFirst().getPhotoFile() == null) {
             img = new Image(placeholderUrl);
             status = states[0];
         } else {
-            Photo p = photos.get(0);
+            Photo p = photos.getFirst();
             img = new Image(new ByteArrayInputStream(p.getPhotoFile()));
             status = order.getIsSigned() ? states[2] : states[1];
         }

@@ -10,16 +10,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public class AdminController extends AbstractOrderController{
     @FXML private FlowPane  contentPane;
@@ -30,25 +28,6 @@ public class AdminController extends AbstractOrderController{
     @FXML private ImageView usersImage;
     @FXML private ImageView ordersImage;
     @FXML private TextField search;
-
-    private VBox newUserWindow;
-    private UserController userController;
-
-    private final String placeholderUrl =
-            Objects.requireNonNull(getClass().getResource("/dk/easv/belman/Images/belman.png"))
-                    .toExternalForm();
-
-    private final Image userSel     =
-            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/user.png")));
-    private final Image userDefault =
-            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/userDef.png")));
-    private final Image ordersSel   =
-            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/orders.png")));
-    private final Image ordersDefault =
-            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/ordersDef.png")));
-
-    private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
-    private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     @FXML private Label uploadedByText;
     @FXML private Label uploadedAtText;
@@ -63,15 +42,24 @@ public class AdminController extends AbstractOrderController{
     @FXML private Label uploadedByText5;
     @FXML private Label uploadedAtText5;
 
+    private VBox newUserWindow;
+    private UserController userController;
+
+    private final Image userSel     =
+            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/user.png")));
+    private final Image userDefault =
+            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/userDef.png")));
+    private final Image ordersSel   =
+            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/orders.png")));
+    private final Image ordersDefault =
+            new Image(Objects.requireNonNull(getClass().getResourceAsStream("/dk/easv/belman/Images/ordersDef.png")));
+
     private final DateTimeFormatter dtf =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    private final AdminModel model = new AdminModel();
+    private static final Logger logger = Logger.getLogger(AdminController.class.getName());
 
-    public void reloadUsers() {
-        model.loadUsers();
-        refreshContent();
-    }
+    private final AdminModel model = new AdminModel();
 
     @FXML
     private void initialize() throws IOException {
@@ -82,9 +70,9 @@ public class AdminController extends AbstractOrderController{
 
         currentP.textProperty().bind(model.currentPageProperty());
 
-        model.showingOrdersProperty().addListener((obs, was, isNow) -> updateTabStyles());
+        model.showingOrdersProperty().addListener((_, _, _) -> updateTabStyles());
 
-        search.textProperty().addListener((obs, oldText, newText) -> {
+        search.textProperty().addListener((_, _, newText) -> {
             model.searchQueryProperty().set(newText);
             model.applySearch();
             refreshContent();
@@ -103,6 +91,11 @@ public class AdminController extends AbstractOrderController{
         resizeWindow(newUserWindow);
     }
 
+    public void reloadUsers() {
+        model.loadUsers();
+        refreshContent();
+    }
+
     private void updateTabStyles() {
         boolean showOrders = model.showingOrdersProperty().get();
 
@@ -114,10 +107,10 @@ public class AdminController extends AbstractOrderController{
             newUser.setVisible(false);
             newUser.setDisable(true);
 
-            sideBtnNotSelected.setOnMouseEntered(e -> usersImage.setImage(userSel));
-            sideBtnNotSelected.setOnMouseExited(e -> usersImage.setImage(userDefault));
-            sideBtnSelected.setOnMouseEntered(e -> {});
-            sideBtnSelected.setOnMouseExited(e -> {});
+            sideBtnNotSelected.setOnMouseEntered(_ -> usersImage.setImage(userSel));
+            sideBtnNotSelected.setOnMouseExited(_ -> usersImage.setImage(userDefault));
+            sideBtnSelected.setOnMouseEntered(_ -> {});
+            sideBtnSelected.setOnMouseExited(_ -> {});
 
         } else {
             sideBtnNotSelected.setId("sideBtnSelected");
@@ -127,18 +120,18 @@ public class AdminController extends AbstractOrderController{
             newUser.setVisible(true);
             newUser.setDisable(false);
 
-            sideBtnNotSelected.setOnMouseEntered(e -> {});
-            sideBtnNotSelected.setOnMouseExited(e -> {});
-            sideBtnSelected.setOnMouseEntered(e -> ordersImage.setImage(ordersSel));
-            sideBtnSelected.setOnMouseExited(e -> ordersImage.setImage(ordersDefault));
+            sideBtnNotSelected.setOnMouseEntered(_ -> {});
+            sideBtnNotSelected.setOnMouseExited(_ -> {});
+            sideBtnSelected.setOnMouseEntered(_ -> ordersImage.setImage(ordersSel));
+            sideBtnSelected.setOnMouseExited(_ -> ordersImage.setImage(ordersDefault));
         }
 
         refreshContent();
     }
 
 
-@FXML
-    private void applySearch(KeyEvent event) {
+    @FXML
+    private void applySearch() {
         model.searchQueryProperty().set(search.getText());
         model.applySearch();
         refreshContent();
@@ -149,14 +142,20 @@ public class AdminController extends AbstractOrderController{
 
         if (!model.showingOrdersProperty().get()) {
             for (User user : model.getFilteredUsers()) {
-                HBox card = loadUserCard(user);
-                contentPane.getChildren().add(card);
+                HBox card = createUserCard(user);
+                if(card != null)
+                {
+                    contentPane.getChildren().add(card);
+                }
             }
         }
         else {
             for (Order order : model.getFilteredOrders()) {
                 VBox card = createOrderCard(order);
-                contentPane.getChildren().add(card);
+                if(card != null)
+                {
+                    contentPane.getChildren().add(card);
+                }
             }
         }
     }
@@ -172,12 +171,12 @@ public class AdminController extends AbstractOrderController{
             card.setOnMouseClicked(_ -> openOrderDetail("FXML/orderAdmin.fxml", order.getOrderNumber(), Boolean.FALSE));
             return card;
         } catch (IOException e) {
-            e.printStackTrace();
-            return new VBox(); // fallback
+            logger.warning("Failed to load order card: "+ e);
+            return null;
         }
     }
 
-    private HBox loadUserCard(User u) {
+    private HBox createUserCard(User u) {
         try {
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("FXML/userCard.fxml"));
             HBox card = loader.load();
@@ -188,8 +187,8 @@ public class AdminController extends AbstractOrderController{
 
             return card;
         } catch (IOException e) {
-            logger.error("Failed to load user card", e);
-            return new HBox();
+            logger.warning("Failed to load user card: "+ e);
+            return null;
         }
     }
 

@@ -11,14 +11,12 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,7 +26,7 @@ import java.util.UUID;
 public class OperatorModel {
     private final BLLManager bllManager = new BLLManager();
     private final ObservableList<Order> orders = FXCollections.observableArrayList();
-    private OperatorController operatorController;
+    private final OperatorController operatorController;
 
     private final ObjectProperty<User> loggedInUser = new SimpleObjectProperty<>();
 
@@ -63,7 +61,7 @@ public class OperatorModel {
         UUID userId = operatorController.getUser().getId();
 
         for (int i = 0; i < imageViews.size(); i++) {
-            javafx.scene.image.Image fxImg = imageViews.get(i).getImage();
+            Image fxImg = imageViews.get(i).getImage();
             if (fxImg == null) continue;
 
             // turn FX Image → raw PNG bytes

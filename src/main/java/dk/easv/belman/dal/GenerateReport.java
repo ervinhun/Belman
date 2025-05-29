@@ -115,6 +115,7 @@ public class GenerateReport {
             float productNoFontSize = 16;
             float bodyTextFontSize = 12;
             float headerFontSize = 10;
+
             PDType1Font titleFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
             PDType1Font imageAngle = new PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE);
             PDType1Font dynamicFont = new PDType1Font(Standard14Fonts.FontName.HELVETICA);

@@ -18,8 +18,8 @@ public class AdminModel {
     private final ObservableList<Order> orders = FXCollections.observableArrayList();
     private final ObservableList<User>  users  = FXCollections.observableArrayList();
 
-    private final FilteredList<Order> filteredOrders = new FilteredList<>(orders, o -> true);
-    private final FilteredList<User>  filteredUsers  = new FilteredList<>(users,  u -> true);
+    private final FilteredList<Order> filteredOrders = new FilteredList<>(orders, _ -> true);
+    private final FilteredList<User>  filteredUsers  = new FilteredList<>(users, _ -> true);
 
     private final BooleanProperty showingOrders = new SimpleBooleanProperty(true);
     private final StringProperty  currentPage    = new SimpleStringProperty("Orders");
@@ -52,8 +52,8 @@ public class AdminModel {
     public void applySearch() {
         String q = searchQuery.get().trim().toLowerCase();
         if (q.isEmpty()) {
-            filteredOrders.setPredicate(o -> true);
-            filteredUsers.setPredicate(u -> true);
+            filteredOrders.setPredicate(_ -> true);
+            filteredUsers.setPredicate(_ -> true);
         } else {
             filteredOrders.setPredicate(o ->
                     o.getOrderNumber().toLowerCase().contains(q)

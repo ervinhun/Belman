@@ -27,7 +27,7 @@ public class UserModel {
 
     public void saveUser() {
         Properties props = new Properties();
-        String defaultPassword = "";
+        String defaultPassword;
 
         try (FileInputStream fileInputStream = new FileInputStream(CONFIG_PATH)) {
             props.load(fileInputStream);

@@ -5,7 +5,6 @@ import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import dk.easv.belman.exceptions.BelmanException;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -13,9 +12,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.scene.image.Image;
 
-import java.io.File;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -26,7 +23,7 @@ public class QualityModel {
     private static final int MIN_PHOTOS_FOR_SIGNING = 5;
     private final BLLManager      bllManager   = new BLLManager();
     private final ObservableList<Order> orders    = FXCollections.observableArrayList();
-    private final FilteredList<Order>   filtered   = new FilteredList<>(orders, o -> true);
+    private final FilteredList<Order>   filtered   = new FilteredList<>(orders, _ -> true);
     private final StringProperty        searchQuery = new SimpleStringProperty("");
     private final ObjectProperty<User>  loggedInUser = new SimpleObjectProperty<>();
 
@@ -43,22 +40,13 @@ public class QualityModel {
     public void applySearch() {
         String q = searchQuery.get().trim().toLowerCase();
         if (q.isEmpty()) {
-            filtered.setPredicate(o -> true);
+            filtered.setPredicate(_ -> true);
         } else {
             filtered.setPredicate(o ->
                     o.getOrderNumber().toLowerCase().contains(q)
             );
         }
     }
-
-    public Image getFullImage(File file) {
-        if (file != null && file.exists()) {
-            return new Image(file.toURI().toString());
-        }
-        return null;
-    }
-
-
 
     public void setSearchQuery(String q) {
         searchQuery.set(q);
@@ -84,9 +72,8 @@ public class QualityModel {
     public void signOrder(String orderNumber, boolean isSendingEmail, String email, User whoSignsIt, Consumer<Boolean> onResult) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
-            boolean success = false;
             try {
-                success = bllManager.signOrder(orderNumber, whoSignsIt.getId(), isSendingEmail, email);
+                boolean success = bllManager.signOrder(orderNumber, whoSignsIt.getId(), isSendingEmail, email);
                 onResult.accept(success);
             } catch (Exception e) {
                 throw new BelmanException("Error signing order: " + orderNumber + " - " + e.getMessage());
