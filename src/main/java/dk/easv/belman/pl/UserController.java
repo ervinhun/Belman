@@ -4,7 +4,6 @@ import dk.easv.belman.pl.model.UserModel;
 import dk.easv.belman.be.User;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -45,9 +44,10 @@ public class UserController {
     @FXML
     private PasswordField txtNewPass2;
 
-    private VBox rightBox;
+    private VBox      rightBox;
     private UserModel model;
     private AdminController adminController;
+    private String prevTagId;
 
 
     @FXML
@@ -57,23 +57,23 @@ public class UserController {
 
         txtFullName.textProperty().bindBidirectional(model.fullNameProperty());
         txtUsername.textProperty().bindBidirectional(model.usernameProperty());
-        txtTagId.textProperty().bindBidirectional(model.tagIdProperty());
+        txtTagId   .textProperty().bindBidirectional(model.tagIdProperty());
 
-        chkAdmin.setUserData(1);
+        chkAdmin       .setUserData(1);
         chkQualityControl.setUserData(2);
-        chkOperator.setUserData(3);
+        chkOperator    .setUserData(3);
         lblError.textProperty().bind(model.errorMessageProperty());
         lblError.visibleProperty().bind(model.errorMessageProperty().isNotEmpty());
-        tgRole.selectedToggleProperty().addListener((obs, oldT, newT) -> {
+        tgRole.selectedToggleProperty().addListener((_, _, newT) -> {
             if (newT != null) {
-                model.roleIdProperty().set((int) newT.getUserData());
+                model.roleIdProperty().set((int)newT.getUserData());
             } else {
                 model.roleIdProperty().set(0);
             }
         });
-        model.roleIdProperty().addListener((obs, old, val) -> {
+        model.roleIdProperty().addListener((_, _, val) -> {
             for (Toggle t : tgRole.getToggles()) {
-                if (Integer.valueOf((int) t.getUserData()).equals(val.intValue())) {
+                if (Integer.valueOf((int)t.getUserData()).equals(val.intValue())) {
                     tgRole.selectToggle(t);
                     break;
                 }
@@ -114,12 +114,14 @@ public class UserController {
         String success = model.successMessageProperty().get();
         if (success != null && !success.isEmpty()) {
             adminController.reloadUsers();
-            cancel();
+            model.clear();
+            goBack();
         }
     }
 
 
     public void setEditingUser(User u) {
+        prevTagId = u.getTagId();
         cbTagId.setSelected(u.getTagId() != null);
         hidePasswordFields(false);
         u.setTagId(cbTagId.isSelected() ? "true" : "false");
@@ -132,8 +134,15 @@ public class UserController {
     @FXML
     private void cancel() {
         model.clear();
+        model.cancel(prevTagId);
+        goBack();
+    }
+
+    private void goBack()
+    {
         BorderPane bp = (BorderPane) rootVBox.getParent();
         bp.setCenter(rightBox);
+        txtUsername.setDisable(false);
 
         adminController.resizeWindow(rightBox);
         hidePasswordFields(true);

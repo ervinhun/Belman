@@ -17,6 +17,7 @@ import javafx.scene.layout.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 public class QualityController extends AbstractOrderController {
@@ -30,12 +31,13 @@ public class QualityController extends AbstractOrderController {
 
     private ImageView selectedImageView;
 
-    private final String[] states = {"Images Needed", "Pending", "Signed ✅"};
-    private final String placeholderUrl =
-            getClass().getResource("/dk/easv/belman/Images/belman.png")
-                    .toExternalForm();
+    private final String placeholderUrl =   Objects.requireNonNull(
+                                            getClass().getResource("/dk/easv/belman/Images/belman.png"))
+                                            .toExternalForm();
 
     private QualityModel model;
+    private static final Logger logger = Logger.getLogger(QualityController.class.getName());
+
     private String orderNumberToSign;
     private static final String OPEN_DOCUMENT = "Open\nDocument";
     private static final String SIGN_ORDER = "Sign\nOrder";
@@ -49,7 +51,7 @@ public class QualityController extends AbstractOrderController {
         refreshContent();
         this.loggedInUserQc = getLoggedInUserFromBaseController();
 
-        search.textProperty().addListener((obs, old, txt) -> {
+        search.textProperty().addListener((_, _, txt) -> {
             model.setSearchQuery(txt);
             model.applySearch();
             refreshContent();
@@ -67,7 +69,7 @@ public class QualityController extends AbstractOrderController {
             iv.getStyleClass().removeAll("clickable-image", "image-selected");
             iv.getStyleClass().add("clickable-image");
 
-            iv.setOnMouseClicked(e -> {
+            iv.setOnMouseClicked(_ -> {
                 if (iv.equals(selectedImageView)) {
                     iv.getStyleClass().remove("image-selected");
                     selectedImageView = null;
@@ -91,16 +93,13 @@ public class QualityController extends AbstractOrderController {
     private void refreshContent() {
         ordersPane.getChildren().clear();
         for (Order o : model.getFilteredOrders()) {
-            ordersPane.getChildren().add(createCard(o));
+            VBox orderCard = createOrderCard(o);
+            if(orderCard != null)
+            {
+                ordersPane.getChildren().add(orderCard);
+            }
         }
     }
-
-    @Override
-    @FXML
-    public void cancel() {
-        borderPane.setCenter(rightBox);
-    }
-
 
     @FXML
     private void openImage() {
@@ -140,17 +139,29 @@ public class QualityController extends AbstractOrderController {
 
     @FXML
     private void sendBackToOperator() {
-        model.sendBackToOperator(orderNumberToSign, loggedInUserQc.getId());
-        cancel();
+        if (selectedImageView == null)
+            return;
+        List<ImageView> views = List.of(topImage, leftImage, rightImage, frontImage, backImage, additionalImage);
+        String[] angles = {"Top", "Left", "Right", "Front", "Back", "Additional"};
+        if (!views.contains(selectedImageView)) {
+            return;
+        }
+        String angle = angles[views.indexOf(selectedImageView)];
+        if (selectedImageView.getImage() != null) {
+            if (selectedImageView.getImage().getUrl() != null && selectedImageView.getImage().getUrl().equals(placeholderUrl)) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Selected image is empty. Please select a valid image.");
+                alert.showAndWait();
+                return;
+            }
+        }
+        selectedImageView.setImage(new Image(placeholderUrl));
+        model.sendBackToOperator(orderNumberToSign, loggedInUserQc.getId(), angle);
+        //cancel();
         refreshContent();
     }
 
     @FXML
     private void deleteImage() { /* move logic to model and call from here */ }
-
-    private void setPlaceholder(ImageView iv) {
-        iv.setImage(new Image(placeholderUrl));
-    }
 
     public void returnToOrder()
     {
@@ -160,8 +171,6 @@ public class QualityController extends AbstractOrderController {
 
     @FXML
     private void signOrder() {
-
-        // Check if order number is valid
         if (orderNumberToSign == null || orderNumberToSign.isEmpty()) {
 
             return;
@@ -178,17 +187,25 @@ public class QualityController extends AbstractOrderController {
                     cancel();
                 });
             } else {
-                Platform.runLater(() -> {
-                    Logger logger = Logger.getLogger(QualityController.class.getName());
-                    logger.warning("Failed to sign order: " + orderNumberToSign);
-                });
+                Platform.runLater(() -> logger.warning("Failed to sign order: " + orderNumberToSign));
             }
         });
         //As there are 2 threads running the document generation and the update of other tables
-
     }
 
-    private VBox createCard(Order order) {
+    @FXML
+    private void cbSendingEmailClicked() {
+        txtemail.setVisible(!txtemail.isVisible());
+
+        if (btnSign.getText().equals(OPEN_DOCUMENT)) {
+            disableButtonsForImages();
+        }
+        else {
+            btnSign.setOnAction(_ -> signOrder());
+        }
+    }
+
+    private VBox createOrderCard(Order order) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/dk/easv/belman/FXML/OrderCard.fxml"));
             VBox card = loader.load();
@@ -199,21 +216,25 @@ public class QualityController extends AbstractOrderController {
 
             return card;
         } catch (IOException e) {
-            e.printStackTrace();
-            return new VBox();
+            logger.warning("Failed to create card: " + e);
+            return null;
         }
     }
+
+    private void disableButtonsForImages() {
+        btnSign.setText(OPEN_DOCUMENT);
+        btnSign.setOnAction(_ ->
+                new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
+        );
+        btnSendBack.setDisable(true);
+        btnDeleteImage.setDisable(true);
+    }
+
+    @Override
     @FXML
-    private void cbSendingEmailClicked() {
-        txtemail.setVisible(!txtemail.isVisible());
-
-        if (btnSign.getText().equals(OPEN_DOCUMENT)) {
-            disableButtonsForImages();
-        }
-        else {
-            btnSign.setOnAction(e -> signOrder());
-        }
-
+    public void cancel() {
+        borderPane.setCenter(rightBox);
+        rebindUserChoiceBox(rightBox);
     }
 
     @Override
@@ -234,16 +255,7 @@ public class QualityController extends AbstractOrderController {
             disableButtonsForImages();
         } else {
             btnSign.setText(SIGN_ORDER);
-            btnSign.setOnAction(e -> signOrder());
+            btnSign.setOnAction(_ -> signOrder());
         }
-    }
-
-    private void disableButtonsForImages() {
-        btnSign.setText(OPEN_DOCUMENT);
-        btnSign.setOnAction(e ->
-            new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
-        );
-        btnSendBack.setDisable(true);
-        btnDeleteImage.setDisable(true);
     }
 }

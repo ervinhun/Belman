@@ -8,6 +8,7 @@ import javafx.beans.property.*;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Properties;
 
 public class UserModel {
@@ -31,6 +32,7 @@ public class UserModel {
         String hashed;
 
         if (!newPassword) {
+        String defaultPassword;
 
             try (FileInputStream fileInputStream = new FileInputStream(CONFIG_PATH)) {
                 props.load(fileInputStream);
@@ -71,7 +73,7 @@ public class UserModel {
 
         if (editingUser != null) {
             editingUser.setFullName(fullName.get());
-            editingUser.setTagId(tagId.get());
+            editingUser.setTagId(Objects.equals(tagId.get(), "true") ? bllManager.hashPass(editingUser.getUsername(), "") : null);
             editingUser.setRoleId(roleId.get());
             editingUser.setPassword(hashed);
 
@@ -81,7 +83,9 @@ public class UserModel {
             } else {
                 errorMessage.set("Update failed.");
             }
+            clear();
             editingUser = null;
+            return;
         }
         else {  //Creating a new user
             User u = new User();
@@ -90,6 +94,13 @@ public class UserModel {
             u.setTagId(tagId.get());
             u.setRoleId(roleId.get());
             u.setPassword(hashed);
+
+        User u = new User();
+        u.setFullName(fullName.get());
+        u.setUsername(username.get());
+        u.setTagId(Objects.equals(tagId.get(), "true") ? bllManager.hashPass(u.getUsername(), "") : null);
+        u.setRoleId(roleId.get());
+        u.setPassword(hashed);
 
             try {
                 if (bllManager.addUser(u) != null) {
@@ -113,6 +124,15 @@ public class UserModel {
     }
 
     public void clear() {
+        fullName.set("");
+        username.set("");
+        tagId.set("");
+        roleId.set(0);
+    }
+
+    public void cancel(String prevTagId)
+    {
+        if(editingUser != null) editingUser.setTagId(prevTagId);
         fullName.set("");
         username.set("");
         tagId.set("");
