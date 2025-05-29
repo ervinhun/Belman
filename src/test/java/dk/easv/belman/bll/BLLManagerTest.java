@@ -4,7 +4,6 @@ import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
