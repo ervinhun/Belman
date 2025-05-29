@@ -3,19 +3,22 @@ package dk.easv.belman.bll;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
+@Tag("db")
 class BLLManagerTest {
 
-    private String productNoString = "TEST-001";
-    private String invalidProductNoString = "INVALID-002";
+    private final String productNoString = "TEST-001";
+    private final String invalidProductNoString = "INVALID-002";
     private static User user;
     private BLLManager bllManager;
 
@@ -27,6 +30,8 @@ class BLLManagerTest {
 
     @Test
     void getAllUsers() {
+        assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
+                "Skipping test on GitHub Actions (no DB access)");
         List<User> lUser = bllManager.getAllUsers();
         assertNotNull(lUser, "List of users should not be null");
         assertFalse(lUser.isEmpty(), "List of users should not be empty");
@@ -34,6 +39,8 @@ class BLLManagerTest {
 
     @Test
     void getOrders() {
+        assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
+                "Skipping test on GitHub Actions (no DB access)");
         List<Order> orders = bllManager.getOrders(null);
         assertNotNull(orders, "List of orders should not be null");
         assertFalse(orders.isEmpty(), "List of orders should not be empty");
@@ -41,6 +48,8 @@ class BLLManagerTest {
 
     @Test
     void isDocumentExists() {
+        assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
+                "Skipping test on GitHub Actions (no DB access)");
         boolean exists = bllManager.isDocumentExists(productNoString);
         assertTrue(exists, "Document with product number " + productNoString + " should exist");
 
@@ -50,6 +59,8 @@ class BLLManagerTest {
 
     @Test
     void getUserById() {
+        assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
+                "Skipping test on GitHub Actions (no DB access)");
         UUID validUserId = UUID.fromString("074E23EE-D0AB-4C08-A624-61F6E5A692BC");
         User foundUser = bllManager.getUserById(validUserId);
         User invalidUser = bllManager.getUserById(user.getId());
@@ -61,6 +72,8 @@ class BLLManagerTest {
 
     @Test
     void getPhotosNumbersforOrder() {
+        assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
+                "Skipping test on GitHub Actions (no DB access)");
         int returnNumber = bllManager.getPhotosNumbersforOrder(productNoString);
         int invalidReturnNumber = bllManager.getPhotosNumbersforOrder(invalidProductNoString);
         assertTrue(returnNumber > 0, "Return number for valid product should be greater than 0");
@@ -70,6 +83,8 @@ class BLLManagerTest {
 
     @Test
     void getPhotosForOrder() {
+        assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
+                "Skipping test on GitHub Actions (no DB access)");
         List<Photo> photos = bllManager.getPhotosForOrder(productNoString);
         assertNotNull(photos, "Photos list should not be null");
         assertFalse(photos.isEmpty(), "Photos list for valid order should not be empty");
@@ -81,12 +96,16 @@ class BLLManagerTest {
 
     @Test
     void isDocumentExistsWithInvalidProduct() {
+        assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
+                "Skipping test on GitHub Actions (no DB access)");
         boolean exists = bllManager.isDocumentExists(invalidProductNoString);
         assertFalse(exists, "Document with invalid product number should not exist");
     }
 
     @Test
     void userOperations() {
+        assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
+                "Skipping test on GitHub Actions (no DB access)");
         User addedUser = bllManager.addUser(user);
         assertNotNull(addedUser, "Added user should not be null");
         assertEquals(user.getUsername(), addedUser.getUsername(), "Usernames should match");
@@ -98,9 +117,10 @@ class BLLManagerTest {
         assertEquals(user.getFullName(), bllManager.getUserById(addedUser.getId()).getFullName(), "Updated full name should match");
     }
 
-    @AfterAll
-    static void tearDownAll() {
-        BLLManager bllManager = new BLLManager();
+    @AfterEach
+    void tearDownAll() {
+        assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
+                "Skipping test on GitHub Actions (no DB access)");
         bllManager.deleteUser(user.getId());
     }
 }

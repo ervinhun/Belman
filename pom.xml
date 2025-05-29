@@ -204,6 +204,7 @@
                             <noManPages>true</noManPages>
                             <stripDebug>true</stripDebug>
                             <noHeaderFiles>true</noHeaderFiles>
+                            <excludeModules>db</excludeModules>
                         </configuration>
                     </execution>
                 </executions>
