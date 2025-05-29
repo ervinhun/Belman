@@ -11,13 +11,15 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.Properties;
 
+import static dk.easv.belman.dal.FilePaths.CONFIG_PATH;
+
 public class ConnectionManager {
     private final SQLServerDataSource ds;
 
     public ConnectionManager() throws BelmanException
     {
         Properties props = new Properties();
-        try (FileInputStream in = new FileInputStream("config.properties")) {
+        try (FileInputStream in = new FileInputStream(CONFIG_PATH)) {
             props.load(in);
         } catch (IOException e) {
             throw new BelmanException("I/O exception: " + e);

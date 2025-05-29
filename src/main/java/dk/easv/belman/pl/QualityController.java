@@ -5,7 +5,7 @@ import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.User;
 import dk.easv.belman.exceptions.BelmanException;
 import dk.easv.belman.pl.model.QualityModel;
-import dk.easv.belman.dal.OpenFile;
+import dk.easv.belman.bll.OpenSendPdf;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -43,6 +43,7 @@ public class QualityController extends AbstractOrderController {
     private static final String SIGN_ORDER = "Sign\nOrder";
     private User loggedInUserQc;
     private VBox openedOrder;
+    private static final String IMAGE_SELECTED = "image-selected";
 
     @FXML
     private void initialize() {
@@ -62,21 +63,20 @@ public class QualityController extends AbstractOrderController {
 
     private void setupImageClickHandlers() {
         ImageView[] views = {topImage, leftImage, rightImage, frontImage, backImage, additionalImage};
-
         for (ImageView iv : views) {
             if (iv == null) continue;
 
-            iv.getStyleClass().removeAll("clickable-image", "image-selected");
+            iv.getStyleClass().removeAll("clickable-image", IMAGE_SELECTED);
             iv.getStyleClass().add("clickable-image");
 
             iv.setOnMouseClicked(_ -> {
                 if (iv.equals(selectedImageView)) {
-                    iv.getStyleClass().remove("image-selected");
+                    iv.getStyleClass().remove(IMAGE_SELECTED);
                     selectedImageView = null;
                 } else {
                     clearImageSelectionBorders();
                     selectedImageView = iv;
-                    iv.getStyleClass().add("image-selected");
+                    iv.getStyleClass().add(IMAGE_SELECTED);
                 }
             });
         }
@@ -86,7 +86,7 @@ public class QualityController extends AbstractOrderController {
         ImageView[] views = {topImage, leftImage, rightImage, frontImage, backImage, additionalImage};
         for (ImageView iv : views) {
             if (iv != null)
-                iv.getStyleClass().remove("image-selected");
+                iv.getStyleClass().remove(IMAGE_SELECTED);
         }
     }
 
@@ -147,16 +147,13 @@ public class QualityController extends AbstractOrderController {
             return;
         }
         String angle = angles[views.indexOf(selectedImageView)];
-        if (selectedImageView.getImage() != null) {
             if (selectedImageView.getImage().getUrl() != null && selectedImageView.getImage().getUrl().equals(placeholderUrl)) {
                 Alert alert = new Alert(Alert.AlertType.WARNING, "Selected image is empty. Please select a valid image.");
                 alert.showAndWait();
                 return;
             }
-        }
         selectedImageView.setImage(new Image(placeholderUrl));
         model.sendBackToOperator(orderNumberToSign, loggedInUserQc.getId(), angle);
-        //cancel();
         refreshContent();
     }
 
@@ -224,7 +221,7 @@ public class QualityController extends AbstractOrderController {
     private void disableButtonsForImages() {
         btnSign.setText(OPEN_DOCUMENT);
         btnSign.setOnAction(_ ->
-                new OpenFile(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
+                new OpenSendPdf(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText())
         );
         btnSendBack.setDisable(true);
         btnDeleteImage.setDisable(true);

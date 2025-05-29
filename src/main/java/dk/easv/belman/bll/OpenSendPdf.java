@@ -1,5 +1,6 @@
-package dk.easv.belman.dal;
+package dk.easv.belman.bll;
 
+import dk.easv.belman.dal.OrderManager;
 import dk.easv.belman.exceptions.BelmanException;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -11,10 +12,10 @@ import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-public class OpenFile {
-    private static final Logger logger = LoggerFactory.getLogger(OpenFile.class);
+public class OpenSendPdf {
+    private static final Logger logger = LoggerFactory.getLogger(OpenSendPdf.class);
 
-    public OpenFile(String productNumber, boolean isSendingEmail, String email) {
+    public OpenSendPdf(String productNumber, boolean isSendingEmail, String email) {
         PDDocument document = openFileAndConvert(productNumber);
 
         // Save the document to a file and open it in a window

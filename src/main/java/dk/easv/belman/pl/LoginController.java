@@ -113,62 +113,89 @@ public class LoginController {
 
     @FXML
     private void cameraLogin() {
+        prepareStageCloseHandler();
+        updateUIForCameraLogin();
+        startWebcam();
+        startCameraLoop();
+    }
+
+    private void prepareStageCloseHandler() {
         Stage stage = (Stage) confirm.getScene().getWindow();
         stage.setOnCloseRequest(_ -> {
-            if (webcam != null)  webcam.close();
-            if (executor != null) executor.shutdownNow();
+            closeWebcam();
+            shutdownExecutor();
         });
+    }
 
+    private void updateUIForCameraLogin() {
         cameraView.setVisible(true);
         backBtn.setVisible(true);
         backBtn.setDisable(false);
         loginVBox.setVisible(false);
         loginVBox.setDisable(true);
+    }
 
+    private void startWebcam() {
         webcam = Webcam.getDefault();
         webcam.setViewSize(new Dimension(640, 480));
         webcam.open();
-
-        executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(() -> {
-            try {
-                BufferedImage img = webcam.getImage();
-                if (img != null) {
-                    Platform.runLater(() ->
-                            cameraView.setImage(SwingFXUtils.toFXImage(img, null))
-                    );
-
-                    // try decoding a QR code
-                    LuminanceSource source = new BufferedImageLuminanceSource(img);
-                    BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-
-                    try {
-                        Result result = new MultiFormatReader().decode(bitmap);
-
-                        // QR code found, shut down cam and exec
-                        executor.shutdown();
-                        webcam.close();
-                        Platform.runLater(() -> {
-                            Matcher matcher = pattern.matcher(result.getText());
-
-                            if (matcher.find()) {
-                                String hash = matcher.group(1);
-                                model.login("user", hash, true);
-                            }
-                            else {
-                                showErrorLabel("Invalid QR code format. Please try again.");
-                            }
-                        });
-
-                    } catch (NotFoundException e) {
-                        // no QR code - take next image
-                    }
-                }
-            } catch (Exception e) {
-                throw new BelmanException("Error during camera loop: " + e);
-            }
-        }, 0, 100, TimeUnit.MILLISECONDS);
     }
+
+    private void startCameraLoop() {
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(this::processCameraFrame, 0, 100, TimeUnit.MILLISECONDS);
+    }
+
+    private void processCameraFrame() {
+        try {
+            BufferedImage img = webcam.getImage();
+            if (img == null) return;
+
+            Platform.runLater(() ->
+                    cameraView.setImage(SwingFXUtils.toFXImage(img, null))
+            );
+
+            decodeQRCode(img);
+
+        } catch (Exception e) {
+            throw new BelmanException("Error during camera loop: " + e);
+        }
+    }
+
+    private void decodeQRCode(BufferedImage img) {
+        LuminanceSource source = new BufferedImageLuminanceSource(img);
+        BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+
+        try {
+            Result result = new MultiFormatReader().decode(bitmap);
+            shutdownExecutor();
+            closeWebcam();
+
+            Platform.runLater(() -> handleQRCodeResult(result.getText()));
+
+        } catch (NotFoundException _) {
+            // No QR code found; silently ignore and wait for next frame
+        }
+    }
+
+    private void handleQRCodeResult(String qrText) {
+        Matcher matcher = pattern.matcher(qrText);
+        if (matcher.find()) {
+            String hash = matcher.group(1);
+            model.login("user", hash, true);
+        } else {
+            showErrorLabel("Invalid QR code format. Please try again.");
+        }
+    }
+
+    private void closeWebcam() {
+        if (webcam != null) webcam.close();
+    }
+
+    private void shutdownExecutor() {
+        if (executor != null && !executor.isShutdown()) executor.shutdownNow();
+    }
+
 
     @FXML
     private void back()

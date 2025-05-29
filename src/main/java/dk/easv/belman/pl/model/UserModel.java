@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 
+import static dk.easv.belman.dal.FilePaths.CONFIG_PATH;
+
 public class UserModel {
     private final BLLManager bllManager = new BLLManager();
 
@@ -24,7 +26,6 @@ public class UserModel {
     private final StringProperty errorMessage = new SimpleStringProperty();
     private final StringProperty successMessage = new SimpleStringProperty();
 
-    private static final String CONFIG_PATH = "config.properties";
 
     public void saveUser() {
         Properties props = new Properties();
@@ -163,13 +164,6 @@ public class UserModel {
             errorMessage.set("No user is being edited.");
         }
     }
-
-    public void setOldPassword(String oldPass) {
-        if (editingUser != null) {
-            editingUser.setPassword(oldPass);
-        }
-    }
-
 
     // ─── Properties for binding ───────────────────────────────────────────────
     public StringProperty fullNameProperty() {

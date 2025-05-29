@@ -25,12 +25,10 @@ public class ChooseFile {
     }
 
     private List<File> chosenFile;
-    private static final int THUMBNAIL_SIZE = 150;
     private final Logger logger = LoggerFactory.getLogger(ChooseFile.class);
 
 
-    public ChooseFile(Window window, String productNoString, List<File> chosenFileForTest) {
-        String imagePath = FilePaths.IMAGE_PATH;
+    public ChooseFile(Window window, List<File> chosenFileForTest) {
         FileChooser fileChooser = new FileChooser();
         //Sets the window title
         fileChooser.setTitle("Upload Image Files");
@@ -47,32 +45,7 @@ public class ChooseFile {
             this.chosenFile = chosenFileForTest;
         }
 
-        if (chosenFile != null && productNoString != null) {
-            //Creates the directories for the images
-            File targetDir = new File(imagePath + productNoString);
-            if (!targetDir.exists()) {
-                targetDir.mkdirs();
-            }
-            File thumbnailDir = new File(targetDir.getAbsolutePath() + "/thumbnail");
-            if (!thumbnailDir.exists()) {
-                thumbnailDir.mkdirs();
-            }
-            for (File file : chosenFile) {
-                File targetFile = new File(targetDir, file.getName());
-                File thumbnailFile = new File(thumbnailDir, file.getName());
 
-                try {
-                    // Save original
-                    Files.copy(file.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    // Create thumbnail
-                    createThumbnail(file, thumbnailFile);
-
-                } catch (IOException e) {
-                    logger.error("Failed to create thumbnail for " + file.getName(), e);
-                }
-            }
-
-        }
     }
 
     public List<String> getSelectedFilePath() {
@@ -89,52 +62,6 @@ public class ChooseFile {
         return List.of();
     }
 
-    private void createThumbnail(File sourceFile, File destinationFile) {
-        try {
-            // Load the image
-            javafx.scene.image.Image productImage = new javafx.scene.image.Image(sourceFile.toURI().toString());
-
-            // Create an ImageView to scale the image
-            ImageView thumbnailView = new ImageView(productImage);
-
-            thumbnailView.setFitWidth(THUMBNAIL_SIZE);
-            thumbnailView.setFitHeight(THUMBNAIL_SIZE);
-
-            thumbnailView.setPreserveRatio(true);
-            thumbnailView.setSmooth(true);
-
-            // Snapshot the ImageView to create a resized image
-            WritableImage writableImage = thumbnailView.snapshot(null, null);
-            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(writableImage, null);
-
-            String extension = getFileExtension(sourceFile.getName());
-
-            if (extension.equals("jpg") || extension.equals("jpeg")) {
-                // JPG: needs background (white)
-                BufferedImage rgbImage = new BufferedImage(
-                        bufferedImage.getWidth(),
-                        bufferedImage.getHeight(),
-                        BufferedImage.TYPE_INT_RGB
-                );
-                Graphics2D g = rgbImage.createGraphics();
-                g.setColor(java.awt.Color.WHITE);
-                g.fillRect(0, 0, rgbImage.getWidth(), rgbImage.getHeight());
-                g.drawImage(bufferedImage, 0, 0, null);
-                g.dispose();
-
-                ImageIO.write(rgbImage, "jpg", destinationFile);
-
-            } else if (extension.equals("png") || extension.equals("gif")) {
-                // PNG and GIF can be saved directly
-                ImageIO.write(bufferedImage, extension, destinationFile);
-            } else {
-                // Fallback
-                ImageIO.write(bufferedImage, "png", destinationFile);
-            }
-        } catch (IOException e) {
-            logger.error("Failed to create thumbnail for " + sourceFile.getName(), e);
-        }
-    }
 
 
     static String getFileExtension(String fileName) {
@@ -146,8 +73,5 @@ public class ChooseFile {
         }
     }
 
-    public static int getThumbnailSize() {
-        return THUMBNAIL_SIZE;
-    }
 
 }

@@ -1,8 +1,10 @@
-package dk.easv.belman.dal;
+package dk.easv.belman.bll;
 
 import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.PhotoDataForReport;
 import dk.easv.belman.be.User;
+import dk.easv.belman.dal.OrderManager;
+import dk.easv.belman.dal.QualityCheckJsonReader;
 import dk.easv.belman.exceptions.BelmanException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -24,8 +26,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,7 @@ public class GenerateReport {
             }
         }
     }
+
     public GenerateReport(String productNumber, User loggedInUser, boolean isSendingEmail, String email) {
         this.productNo = productNumber;
         this.isSendingEmail = isSendingEmail;
@@ -75,13 +77,13 @@ public class GenerateReport {
         List<PhotoDataForReport> bufferedImages = photos.stream()
                 .map(p -> {
                     try {
-                                BufferedImage img = ImageIO.read(new ByteArrayInputStream(p.getPhotoFile()));
-                                if (img != null)
-                                    return new PhotoDataForReport(img, p.getAngle());
-                                else {
-                                    logger.error("Image is null for angle: {}", p.getAngle());
-                                    return null;
-                                }
+                        BufferedImage img = ImageIO.read(new ByteArrayInputStream(p.getPhotoFile()));
+                        if (img != null)
+                            return new PhotoDataForReport(img, p.getAngle());
+                        else {
+                            logger.error("Image is null for angle: {}", p.getAngle());
+                            return null;
+                        }
                     } catch (IOException e) {
                         logger.error("Failed to decode image blob for angle {}: {}", p.getAngle(), e.getMessage());
                         return null;
@@ -233,17 +235,12 @@ public class GenerateReport {
             contentStream.close();
             // Save the document
             PDDocument documentToSave = addPageNumber(document);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            documentToSave.save(outputStream);
-            orderManager.savePdfToDb(productNo, outputStream, loggedInUser.getId());
-            openDocument(productNo);
+
+            saveDocument(documentToSave, loggedInUser);
 
             //Updating the rest of the tables on a different thread
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() ->
-                    orderManager.signQualityDocument(productNo, loggedInUser.getId())
-            );
-            executor.shutdown();
+            updateRestOfTables(productNo, loggedInUser);
+
 
         } catch (IOException e) {
             logger.error("I/O error while generating PDF: {}", e.getMessage());
@@ -256,10 +253,38 @@ public class GenerateReport {
 
 
     public void openDocument(String productNumber) {
-        new OpenFile(productNumber, isSendingEmail, email);
+        new OpenSendPdf(productNumber, isSendingEmail, email);
     }
 
+    private void updateRestOfTables(String productNumber, User loggedInUser) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> future = executor.submit(() ->
+                    orderManager.signQualityDocument(productNo, loggedInUser.getId())
+            );
+            future.get(); // optional: waits for task and handles exceptions
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Error updating other tables for product number {}: {}", productNumber, e.getMessage());
+            Thread.currentThread().interrupt(); // Good practice if InterruptedException occurs
+        } finally {
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    executor.shutdownNow(); // Force shutdown if not done
+                }
+            } catch (InterruptedException _) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
 
+    private void saveDocument(PDDocument document, User loggedInUser) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        document.save(outputStream);
+        orderManager.savePdfToDb(productNo, outputStream, loggedInUser.getId());
+        openDocument(productNo);
+    }
 
 
     private PDDocument addPageNumber(PDDocument document) {
