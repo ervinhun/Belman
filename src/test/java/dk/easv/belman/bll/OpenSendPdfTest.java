@@ -1,12 +1,12 @@
 package dk.easv.belman.bll;
 
 import dk.easv.belman.exceptions.BelmanException;
-import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Tag("db")
+@Disabled("Disabled for GHActions due to no DB access")
 class OpenSendPdfTest {
 
     @Test
