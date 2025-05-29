@@ -48,7 +48,7 @@ public class GenerateReport {
     private static final String DATE_FORMAT_PATTERN = "dd/MM/yyyy";
 
 
-    private static void getOrderManager() {
+    private static void initOrderManager() {
         if (orderManager == null) {
             try {
                 orderManager = new OrderManager();
@@ -62,7 +62,7 @@ public class GenerateReport {
         this.isSendingEmail = isSendingEmail;
         this.email = email;
         float currentYPosition = 0;
-        getOrderManager();
+        initOrderManager();
         float margin = 40;
         float availableWidth;
         float minY = 100;

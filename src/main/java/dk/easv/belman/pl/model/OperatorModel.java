@@ -80,4 +80,10 @@ public class OperatorModel {
         bllManager.savePhotosBinary(photos, orderNumber);
     }
 
+    public List<Photo> getPhotosForOrder(String text) {
+        if (text == null || text.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return bllManager.getPhotosForOrder(text);
+    }
 }

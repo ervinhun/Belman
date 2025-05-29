@@ -139,8 +139,24 @@ public class QualityController extends AbstractOrderController {
 
     @FXML
     private void sendBackToOperator() {
-        model.sendBackToOperator(orderNumberToSign, loggedInUserQc.getId());
-        cancel();
+        if (selectedImageView == null)
+            return;
+        List<ImageView> views = List.of(topImage, leftImage, rightImage, frontImage, backImage, additionalImage);
+        String[] angles = {"Top", "Left", "Right", "Front", "Back", "Additional"};
+        if (!views.contains(selectedImageView)) {
+            return;
+        }
+        String angle = angles[views.indexOf(selectedImageView)];
+        if (selectedImageView.getImage() != null) {
+            if (selectedImageView.getImage().getUrl() != null && selectedImageView.getImage().getUrl().equals(placeholderUrl)) {
+                Alert alert = new Alert(Alert.AlertType.WARNING, "Selected image is empty. Please select a valid image.");
+                alert.showAndWait();
+                return;
+            }
+        }
+        selectedImageView.setImage(new Image(placeholderUrl));
+        model.sendBackToOperator(orderNumberToSign, loggedInUserQc.getId(), angle);
+        //cancel();
         refreshContent();
     }
 

@@ -129,19 +129,20 @@ public class OrderManager extends DALManagerBase {
         }
     }
 
-    public void sendBackToOperator(String orderNumber, UUID userId) {
+    public void sendBackToOperator(String orderNumber, UUID userId, String angle) {
         long productId = getProductIdFromProductNumber(orderNumber);
         String sql = """
         UPDATE dbo.Photos
         SET is_deleted   = 1,
             deleted_by   = ?,
             deleted_at   = CURRENT_TIMESTAMP
-        WHERE product_id = ?
+        WHERE product_id = ? AND angle = ? AND is_deleted = 0 AND is_signed = 0
         """;
         try (Connection c = connectionManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setObject(1, userId);
             ps.setLong(  2, productId);
+            ps.setString(3, angle);
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new BelmanException("Error soft-deleting photos " + ex);
@@ -274,7 +275,7 @@ public class OrderManager extends DALManagerBase {
     private List<Photo> getPhotos(Long orderId)
     {
         List<Photo> photos = new ArrayList<>();
-        final String selectSql = "SELECT * FROM Photos, Products WHERE Photos.product_id = ? AND Photos.is_deleted = 0";
+        final String selectSql = "SELECT * FROM Photos JOIN Products ON Photos.product_id = Products.id WHERE Photos.product_id = ? AND Photos.is_deleted = 0";
         try(Connection con = connectionManager.getConnection();
             PreparedStatement psSelect = con.prepareStatement(selectSql))
         {
@@ -285,7 +286,7 @@ public class OrderManager extends DALManagerBase {
                 Long id = rs.getLong( ID);
                 UUID uploadedBy = rs.getObject( UPLOADED_BY, UUID.class);
                 String angle = rs.getString( PHOTOS_ANGLE);
-                LocalDateTime uploadedAt = rs.getTimestamp( USER_CREATED_AT).toLocalDateTime();
+                LocalDateTime uploadedAt = rs.getTimestamp(UPLOADED_AT).toLocalDateTime();
                 boolean isDeleted = rs.getBoolean( IS_DELETED);
                 UUID deletedBy = rs.getObject( DELETED_BY, UUID.class);
                 Timestamp deletedAtTS = rs.getTimestamp( DELETED_AT);

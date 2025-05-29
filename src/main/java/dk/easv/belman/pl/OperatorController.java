@@ -22,8 +22,10 @@ import javafx.stage.Stage;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -39,10 +41,11 @@ public class OperatorController extends AbstractOrderController {
     @FXML private VBox cameraVbox;
     private HBox selectMethod;
 
-
+    private static final int MIN_NUMBER_OF_PHOTOS_TO_SIGN = 5;
     private final String addPhoto = Objects.requireNonNull(
                                     getClass().getResource("/dk/easv/belman/Images/addPhoto.png"))
                                     .toExternalForm();
+
     private VBox previousVBox = null;
     private ImageView previousImageView = null;
     private Webcam webcam;
@@ -223,6 +226,7 @@ public class OperatorController extends AbstractOrderController {
     }
 
     private void openOrder() {
+       List<Photo> photos = model.getPhotosForOrder(orderLabel.getText());
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/selectMethod.fxml"));
             fxmlLoader.setController(this);
@@ -238,8 +242,26 @@ public class OperatorController extends AbstractOrderController {
                     additionalImage
             );
 
+            HashMap<String, ImageView> angleToImageViewMap = new HashMap<>();
+            angleToImageViewMap.put("Front", frontImage);
+            angleToImageViewMap.put("Back", backImage);
+            angleToImageViewMap.put("Left", leftImage);
+            angleToImageViewMap.put("Right", rightImage);
+            angleToImageViewMap.put("Top", topImage);
+            angleToImageViewMap.put("Additional", additionalImage);
+
             for (ImageView imageView : imageViews) {
                 imageView.setOnMouseClicked(_ -> showSelectMethod(imageView));
+            }
+            for (Photo photo : photos) {
+                ImageView imageView = angleToImageViewMap.get(photo.getAngle());
+                if (imageView != null) {
+                    Image img = new Image(new ByteArrayInputStream(photo.getPhotoFile()));
+                    imageView.setImage(img);
+                    imageView.setId(photo.getAngle());
+                    imageView.setUserData(photo);
+                    imageView.setOnMouseClicked(null); // Disable click event for already set images
+                }
             }
         } catch (IOException e) {
             throw new BelmanException("Failed to open order: " + e.getMessage());
@@ -253,7 +275,7 @@ public class OperatorController extends AbstractOrderController {
             OrderCardController controller = loader.getController();
             controller.setOrder(order);
 
-            boolean isOpenable = order.getPhotos().isEmpty();
+            boolean isOpenable = order.getPhotos().size() < MIN_NUMBER_OF_PHOTOS_TO_SIGN;
             if (isOpenable) {
                 card.setOnMouseClicked(_ -> openOrderDetail("FXML/orderOperator.fxml", order.getOrderNumber(), Boolean.TRUE));
             }

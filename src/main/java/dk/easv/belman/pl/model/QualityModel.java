@@ -90,8 +90,8 @@ public class QualityModel {
         return bllManager.getPhotosForOrder(orderNumber);
     }
 
-    public void sendBackToOperator(String orderNumber, UUID userId) {
-        bllManager.sendBackToOperator(orderNumber, userId);
+    public void sendBackToOperator(String orderNumber, UUID userId, String angle) {
+        bllManager.sendBackToOperator(orderNumber, userId, angle);
     }
 
     public boolean isOrderReadyForSigning(String orderNumberToSign) {
