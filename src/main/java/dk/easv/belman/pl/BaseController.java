@@ -52,7 +52,7 @@ public abstract class BaseController {
         user.getSelectionModel().selectFirst();
 
         user.setOnAction(null);
-        user.setOnAction(e -> {
+        user.setOnAction(_ -> {
             if ("Logout".equals(user.getValue())) {
                 loggedOut();
             }

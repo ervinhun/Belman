@@ -15,9 +15,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class AbstractOrderController extends BaseController {
     @FXML protected BorderPane borderPane;
@@ -31,7 +31,7 @@ public abstract class AbstractOrderController extends BaseController {
     @FXML protected ImageView additionalImage;
 
     private final String   placeholderUrl =
-            getClass().getResource("/dk/easv/belman/Images/belman.png")
+            Objects.requireNonNull(getClass().getResource("/dk/easv/belman/Images/belman.png"))
                     .toExternalForm();
 
     protected void openOrderDetail(String fxmlPath, String orderNumber, Boolean isOperator) {

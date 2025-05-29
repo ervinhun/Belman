@@ -11,23 +11,16 @@ import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -36,10 +29,10 @@ import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public class OperatorController extends AbstractOrderController {
     @FXML private FlowPane ordersPane;
-    @FXML private GridPane gridPane;
     @FXML private ImageView cameraImage;
     @FXML private Button deleteBtn;
     @FXML private Button doneBtn;
@@ -47,15 +40,17 @@ public class OperatorController extends AbstractOrderController {
     private HBox selectMethod;
 
 
-    private final String addPhoto = getClass().getResource("/dk/easv/belman/Images/addPhoto.png").toExternalForm();
+    private final String addPhoto = Objects.requireNonNull(
+                                    getClass().getResource("/dk/easv/belman/Images/addPhoto.png"))
+                                    .toExternalForm();
     private VBox previousVBox = null;
     private ImageView previousImageView = null;
     private Webcam webcam;
     private ScheduledExecutorService executor;
     private VBox prevOrderView;
     private List<ImageView> imageViews;
-    private List<String> angles = List.of("Front", "Back", "Left", "Right", "Top", "Additional");
-    private static final Logger logger = LoggerFactory.getLogger(OperatorController.class);
+    private final List<String> angles = List.of("Front", "Back", "Left", "Right", "Top", "Additional");
+    private static final Logger logger = Logger.getLogger(OperatorController.class.getName());
 
 
     private OperatorModel model;
@@ -73,30 +68,24 @@ public class OperatorController extends AbstractOrderController {
     private void refreshOrders() {
         ordersPane.getChildren().clear();
         for (Order o : model.getOrders()) {
-            ordersPane.getChildren().add(createCard(o));
+            if(o != null)
+            {
+                ordersPane.getChildren().add(createOrderCard(o));
+            }
         }
-    }
-
-    @Override
-    @FXML
-    public void cancel() {
-        borderPane.setCenter(rightBox);
-        resizeWindow(rightBox);
-        rebindUserChoiceBox(rightBox);
     }
 
     @FXML
     private void confirmImages() throws IOException {
         int validImageCount = 0;
-        for (int i = 0; i < imageViews.size(); i++)
-        {
-            Image img = imageViews.get(i).getImage();
+        for (ImageView imageView : imageViews) {
+            Image img = imageView.getImage();
             if (img != null && !Objects.equals(img.getUrl(), addPhoto)) {
                 validImageCount++;
             }
         }
         if (validImageCount < 5) {
-            logger.warn("At least 5 real images (not placeholders) are required.");
+            logger.warning("At least 5 real images (not placeholders) are required.");
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText("Insufficient number of Images");
@@ -105,9 +94,9 @@ public class OperatorController extends AbstractOrderController {
             return;
         }
         else {  //If the photo is the placeholder, then it sets it to null
-            for (int i = 0; i < imageViews.size(); i++) {
-                if (Objects.equals(imageViews.get(i).getImage().getUrl(), addPhoto)) {
-                    imageViews.get(i).setImage(null);
+            for (ImageView imageView : imageViews) {
+                if (Objects.equals(imageView.getImage().getUrl(), addPhoto)) {
+                    imageView.setImage(null);
                 }
             }
         }
@@ -253,11 +242,11 @@ public class OperatorController extends AbstractOrderController {
                 imageView.setOnMouseClicked(_ -> showSelectMethod(imageView));
             }
         } catch (IOException e) {
-            logger.error("I/O exception in Operator controller, LN 242: {}", e);
+            throw new BelmanException("Failed to open order: " + e.getMessage());
         }
     }
 
-    private VBox createCard(Order order) {
+    private VBox createOrderCard(Order order) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/dk/easv/belman/FXML/OrderCard.fxml"));
             VBox card = loader.load();
@@ -270,13 +259,13 @@ public class OperatorController extends AbstractOrderController {
             }
             else
             {
-                card.setOnMouseClicked(_ -> logger.warn("Order already sent for signing"));
+                card.setOnMouseClicked(_ -> logger.warning("Order already sent for signing"));
             }
 
             return card;
         } catch (IOException e) {
-            e.printStackTrace();
-            return new VBox();
+            logger.warning("Failed to load order card: "+ e);
+            return null;
         }
     }
 
@@ -288,6 +277,14 @@ public class OperatorController extends AbstractOrderController {
     @Override
     protected List<Photo> getPhotosForOrder(String orderNumber) {
         return List.of();
+    }
+
+    @Override
+    @FXML
+    public void cancel() {
+        borderPane.setCenter(rightBox);
+        resizeWindow(rightBox);
+        rebindUserChoiceBox(rightBox);
     }
 
     @Override
