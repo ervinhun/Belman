@@ -1,6 +1,5 @@
 package dk.easv.belman.dal;
 
-import javafx.scene.image.ImageView;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -10,8 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
-import javafx.application.Platform;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,7 +18,6 @@ class ChooseFileTest {
     static File tempDir; // JUnit creates a temporary folder automatically
 
     private File testImageFile;
-    private File savedThumbnail;
     private ArrayList<File> testFiles;
     private String testFileName;
 

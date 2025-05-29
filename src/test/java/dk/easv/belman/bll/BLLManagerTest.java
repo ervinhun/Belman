@@ -35,6 +35,7 @@ class BLLManagerTest {
     }
 
     @Test
+    @DisplayName("Tests to get all the orders from the database")
     void getOrders() {
         assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
                 "Skipping test on GitHub Actions (no DB access)");
@@ -44,6 +45,7 @@ class BLLManagerTest {
     }
 
     @Test
+    @DisplayName("Tests to get qc document for TEST-001")
     void isDocumentExists() {
         assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
                 "Skipping test on GitHub Actions (no DB access)");
@@ -55,6 +57,7 @@ class BLLManagerTest {
     }
 
     @Test
+    @DisplayName("Tests to get user by ID")
     void getUserById() {
         assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
                 "Skipping test on GitHub Actions (no DB access)");
@@ -68,6 +71,7 @@ class BLLManagerTest {
     }
 
     @Test
+    @DisplayName("Tests to get photos number for order no TEST-001")
     void getPhotosNumbersforOrder() {
         assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
                 "Skipping test on GitHub Actions (no DB access)");
@@ -79,6 +83,7 @@ class BLLManagerTest {
     }
 
     @Test
+    @DisplayName("Tests to get photos for order no TEST-001")
     void getPhotosForOrder() {
         assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
                 "Skipping test on GitHub Actions (no DB access)");
@@ -92,6 +97,7 @@ class BLLManagerTest {
     }
 
     @Test
+    @DisplayName("Tests to check if document exists with invalid product number")
     void isDocumentExistsWithInvalidProduct() {
         assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
                 "Skipping test on GitHub Actions (no DB access)");
@@ -100,6 +106,7 @@ class BLLManagerTest {
     }
 
     @Test
+    @DisplayName("Tests user operations: add, update")
     void userOperations() {
         assumeFalse("true".equals(System.getenv("GITHUB_ACTIONS")),
                 "Skipping test on GitHub Actions (no DB access)");
