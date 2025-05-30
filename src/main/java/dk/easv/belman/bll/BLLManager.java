@@ -5,7 +5,6 @@ import dk.easv.belman.be.Photo;
 import dk.easv.belman.be.QualityDocument;
 import dk.easv.belman.be.User;
 
-import dk.easv.belman.dal.GenerateReport;
 import dk.easv.belman.dal.OrderManager;
 import dk.easv.belman.dal.UserManager;
 import dk.easv.belman.exceptions.BelmanException;

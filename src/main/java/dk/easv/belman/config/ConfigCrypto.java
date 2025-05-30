@@ -11,9 +11,11 @@ import java.util.Base64;
 import java.util.Objects;
 import java.util.Properties;
 
+import static dk.easv.belman.dal.FilePaths.CONFIG_PATH;
+
 public class ConfigCrypto {
     private static final String ALGORITHM = "AES";
-    private static final String CONFIG_FILE = "config.properties";
+    private static final String CONFIG_FILE = CONFIG_PATH;
     private static final String SECRET_KEY_PROPERTY = "encryption.key";
     private static final String SECRET_KEY;
 
@@ -29,12 +31,12 @@ public class ConfigCrypto {
             }
             SECRET_KEY = key;
         } catch (IOException e) {
-            throw new BelmanException("Failed to load encryption key from config.properties" + e);
+            throw new BelmanException("Failed to load encryption key from " + CONFIG_PATH + e);
         }
     }
 
     private ConfigCrypto() {
-        throw new IllegalStateException("Utility class");
+        throw new BelmanException("Utility class");
     }
 
     public static String encrypt(String input) throws Exception {

@@ -24,6 +24,6 @@ public abstract class DALManagerBase {
     protected static final String UPLOADED_BY =  "uploaded_by";
     protected static final String UPLOADED_AT =  "uploaded_at";
 
-    public DALManagerBase() throws BelmanException {}
+    protected DALManagerBase() throws BelmanException {}
 
 }

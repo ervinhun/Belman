@@ -53,6 +53,7 @@ public class OrderManager extends DALManagerBase {
 
         //Update photos that they got signed
         String sqlPhotos = "UPDATE dbo.Photos SET is_signed = 1 WHERE product_id = ?";
+        String sqlProduct = "UPDATE dbo.Products SET is_signed = 1 WHERE id = ?";
 
 
         // Merge statement to update or insert into QualityChecks table
@@ -71,7 +72,8 @@ public class OrderManager extends DALManagerBase {
 
         try (Connection c = connectionManager.getConnection();
              PreparedStatement psPhotos = c.prepareStatement(sqlPhotos);
-             PreparedStatement psUpdateQualityCheck = c.prepareStatement(sqlUpdateQuailityCheck)) {
+             PreparedStatement psUpdateQualityCheck = c.prepareStatement(sqlUpdateQuailityCheck);
+             PreparedStatement psProduct = c.prepareStatement(sqlProduct)) {
 
             psPhotos.setLong(1, productId);
             int rowsUpdated = psPhotos.executeUpdate();
@@ -85,6 +87,8 @@ public class OrderManager extends DALManagerBase {
             psUpdateQualityCheck.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
             psUpdateQualityCheck.setObject(4, userId);
             rowsUpdated = psUpdateQualityCheck.executeUpdate();
+            psProduct.setLong(1, productId);
+            rowsUpdated += psProduct.executeUpdate();
             if (rowsUpdated > 0) {
                 noOfTableUpdated++;
             }

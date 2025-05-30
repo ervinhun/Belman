@@ -1,6 +1,5 @@
 package dk.easv.belman.dal;
 
-import javafx.scene.image.ImageView;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -9,8 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.concurrent.CountDownLatch;
-import javafx.application.Platform;
+import java.util.Objects;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,7 +18,6 @@ class ChooseFileTest {
     static File tempDir; // JUnit creates a temporary folder automatically
 
     private File testImageFile;
-    private File savedThumbnail;
     private ArrayList<File> testFiles;
     private String testFileName;
 
@@ -31,53 +28,14 @@ class ChooseFileTest {
         testFileName = "test_image";
         testFiles = new ArrayList<>();
         testImageFile = new File(tempDir, testFileName + ".jpg");
-        Files.copy(getClass().getResourceAsStream("/" + testFileName + ".jpg"), testImageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("/" + testFileName + "2.jpg")), testImageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         testFiles.add(testImageFile);
         testImageFile = new File(tempDir, testFileName + ".png");
-        Files.copy(getClass().getResourceAsStream("/" + testFileName + ".png"), testImageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("/" + testFileName + ".png")), testImageFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         testFiles.add(testImageFile);
     }
-    @Disabled
-    @Test
-    void testCreateThumbnail() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-        int THUMBNAIL_SIZE = ChooseFile.getThumbnailSize();
-        Platform.runLater(() -> {
-            try {
-                // JavaFX operations
-                ImageView thumbnail = new ImageView();
-                thumbnail.setFitWidth(THUMBNAIL_SIZE);
-                thumbnail.setFitHeight(THUMBNAIL_SIZE);
-                thumbnail.setPreserveRatio(true);
-                double fitSize = thumbnail.getFitHeight() == THUMBNAIL_SIZE ? thumbnail.getFitHeight() : thumbnail.getFitWidth();
-                assertEquals(THUMBNAIL_SIZE, fitSize);
-            } finally {
-                latch.countDown(); // Very important: release test thread
-            }
-        });
-        latch.await();
-    }
-    @Disabled
-    @Test
-    void testChooseFile() {
-        CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(() -> {
-            try {
-                ChooseFile chooseFile = new ChooseFile(null, "testProductNo", testFiles);
-                assertNotNull(chooseFile.getSelectedFilePath());
-                assertEquals(testFiles.size(), chooseFile.getChosenFile().size());
-            } finally {
-                latch.countDown(); // Very important: release test thread
-            }
-        });
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
 
-    @Disabled
+
     @Test
     void getFileExtension() {
         String fileName = testFileName + ".jpg";
@@ -88,6 +46,20 @@ class ChooseFileTest {
         String actualExtension2 = ChooseFile.getFileExtension(fileName2);
         assertEquals(expectedExtension, actualExtension);
         assertEquals(expectedExtension2, actualExtension2);
+
+        // Test with a file without an extension
+        String fileNameWithoutExtension = "test_image";
+        String actualExtensionWithout = ChooseFile.getFileExtension(fileNameWithoutExtension);
+        assertEquals("", actualExtensionWithout, "Expected empty string for file without extension");
+    }
+
+    @Test
+    void testChooseFile() {
+        ChooseFile chooseFile = new ChooseFile(null, testFiles);
+        assertNotNull(chooseFile.getChosenFile());
+        assertEquals(2, chooseFile.getChosenFile().size());
+        assertTrue(chooseFile.getChosenFile().stream().anyMatch(file -> file.getName().equals(testFileName + ".jpg")));
+        assertTrue(chooseFile.getChosenFile().stream().anyMatch(file -> file.getName().equals(testFileName + ".png")));
     }
 
     @AfterEach
