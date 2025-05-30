@@ -227,7 +227,7 @@ public class AdminController extends AbstractOrderController{
             String angle = p.getAngle().toUpperCase();
             UUID id  = p.getUploadedBy();
             User user = model.getUserById(id);
-            String fullName = user.getFullName();
+            String fullName = user == null ? "Unknown" : user.getFullName();
             String when  = dtf.format(p.getUploadedAt());
 
             switch (angle) {

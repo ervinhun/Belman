@@ -149,7 +149,7 @@ public class UserManager extends DALManagerBase
     }
 
     public User getUserById(UUID userId) {
-        String sql = "SELECT * FROM Users WHERE id = ? AND is_active = 1";
+        String sql = "SELECT * FROM Users WHERE id = ?";
         try (Connection c = connectionManager.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
