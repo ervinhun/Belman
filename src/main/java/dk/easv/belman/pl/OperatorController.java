@@ -43,8 +43,8 @@ public class OperatorController extends AbstractOrderController {
 
     private static final int MIN_NUMBER_OF_PHOTOS_TO_SIGN = 5;
     private final String addPhoto = Objects.requireNonNull(
-                                    getClass().getResource("/dk/easv/belman/Images/addPhoto.png"))
-                                    .toExternalForm();
+                    getClass().getResource("/dk/easv/belman/Images/addPhoto.png"))
+            .toExternalForm();
 
     private VBox previousVBox = null;
     private ImageView previousImageView = null;
@@ -106,6 +106,7 @@ public class OperatorController extends AbstractOrderController {
         model.savePhotos(imageViews, angles, orderLabel.getText());
         borderPane.setCenter(rightBox);
         resizeWindow(rightBox);
+        rebindUserChoiceBox(rightBox);
     }
 
     private void showSelectMethod(ImageView clickedImage) {
@@ -226,7 +227,7 @@ public class OperatorController extends AbstractOrderController {
     }
 
     private void openOrder() {
-       List<Photo> photos = model.getPhotosForOrder(orderLabel.getText());
+        List<Photo> photos = model.getPhotosForOrder(orderLabel.getText());
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("FXML/selectMethod.fxml"));
             fxmlLoader.setController(this);
