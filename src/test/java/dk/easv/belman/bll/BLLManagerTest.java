@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 @Disabled("Disabled for GHActions due to no DB access")
 class BLLManagerTest {
