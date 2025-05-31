@@ -2,6 +2,7 @@ package dk.easv.belman.pl.model;
 
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
+import dk.easv.belman.be.QualityDocument;
 import dk.easv.belman.be.User;
 import dk.easv.belman.bll.BLLManager;
 import javafx.beans.property.*;
@@ -92,5 +93,9 @@ public class AdminModel {
 
     public User getUserById(UUID id) {
         return bllManager.getUserById(id);
+    }
+
+    public QualityDocument getQualityDocumentForAdmin(String orderNumber) {
+        return bllManager.getQualityDocumentForAdmin(orderNumber);
     }
 }

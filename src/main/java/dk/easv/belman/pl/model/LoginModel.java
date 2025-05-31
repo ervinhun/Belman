@@ -9,8 +9,8 @@ import javafx.beans.property.SimpleStringProperty;
 
 public class LoginModel {
     private final BLLManager bllManager;
-    private final ObjectProperty<User>  loggedInUser = new SimpleObjectProperty<>();
-    private final StringProperty        errorMessage  = new SimpleStringProperty();
+    private final ObjectProperty<User> loggedInUser = new SimpleObjectProperty<>();
+    private final StringProperty errorMessage = new SimpleStringProperty();
 
     public LoginModel() {
         bllManager = new BLLManager();
@@ -26,6 +26,8 @@ public class LoginModel {
         User found = bllManager.login(username, password, isCameraLogin);
         if (found == null) {
             errorMessage.set("Invalid username or password!");
+        } else if (!found.isActive()) {
+            errorMessage.set("User is inactive. Please contact support.");
         } else {
             loggedInUser.set(found);
         }

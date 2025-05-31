@@ -9,6 +9,7 @@ public class QualityDocument {
     private long productId;
     private LocalDateTime generatedAt;
     private String qcDocPath;
+    private String generatedByName;
 
     public QualityDocument(long id, UUID generatedBy, long productId, LocalDateTime generatedAt, String qcDocPath) {
         this.id = id;
@@ -16,6 +17,12 @@ public class QualityDocument {
         this.productId = productId;
         this.generatedAt = generatedAt;
         this.qcDocPath = qcDocPath;
+    }
+    public QualityDocument(long id, String generatedByName, long productId, LocalDateTime generatedAt) {
+        this.id = id;
+        this.generatedByName = generatedByName;
+        this.productId = productId;
+        this.generatedAt = generatedAt;
     }
     public QualityDocument(UUID generatedBy, long productId) {
         this.generatedBy = generatedBy;
@@ -60,5 +67,12 @@ public class QualityDocument {
 
     public void setQcDocPath(String qcDocPath) {
         this.qcDocPath = qcDocPath;
+    }
+
+    public void setGeneratedByName(String generatedByName) {
+        this.generatedByName = generatedByName;
+    }
+    public String getGeneratedByName() {
+        return generatedByName;
     }
 }
