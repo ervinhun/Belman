@@ -2,6 +2,7 @@ package dk.easv.belman.dal;
 
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
+import dk.easv.belman.be.QualityDocument;
 import dk.easv.belman.exceptions.BelmanException;
 
 import java.io.ByteArrayOutputStream;
@@ -235,14 +236,14 @@ public class OrderManager extends DALManagerBase {
 
         if(username == null)
         {
-            selectSql = "SELECT * FROM Products;";
+            selectSql = "SELECT * FROM Products WHERE is_deleted = 0;";
         }
         else
         {
             selectSql = "SELECT Products.*  " +
                         "FROM Products  " +
                         "JOIN Users ON Products.operator_id = Users.id  " +
-                        "WHERE Users.username = ?;";
+                        "WHERE Users.username = ? AND is_deleted = 0;";
         }
 
         try (Connection con = connectionManager.getConnection();
@@ -309,5 +310,30 @@ public class OrderManager extends DALManagerBase {
         {
             throw new BelmanException("Error fetching photos: " + e.getMessage());
         }
+    }
+
+    public QualityDocument getOrderByOrderNumberForAdmin(String orderNumber) {
+        Long productId = getProductIdFromProductNumber(orderNumber);
+        String sql = "SELECT d.id, u.full_name, d.generated_at " +
+                "FROM QualityCheckDoc d " +
+                "JOIN Users u ON d.generated_by = u.id " +
+                "WHERE d.product_id = ?";
+
+        try (Connection c = connectionManager.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Long id = rs.getLong("id");
+                LocalDateTime createdAt = rs.getTimestamp("generated_at").toLocalDateTime();
+                String fullName = rs.getString("full_name");
+
+                return new QualityDocument(id, fullName, productId, createdAt);
+            }
+        } catch (SQLException e) {
+            logger.error("Error fetching order by number: {}", e.getMessage());
+        }
+        return null;
     }
 }

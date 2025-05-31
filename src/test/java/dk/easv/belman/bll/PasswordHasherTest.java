@@ -3,9 +3,6 @@ package dk.easv.belman.bll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class PasswordHasherTest {

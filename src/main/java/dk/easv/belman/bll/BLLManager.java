@@ -104,4 +104,8 @@ public class BLLManager {
     public int getPhotosNumbersforOrder(String orderNumberToSign) {
         return orderManager.getPhotosNumbersforOrder(orderNumberToSign);
     }
+
+    public QualityDocument getQualityDocumentForAdmin(String orderNumber) {
+        return orderManager.getOrderByOrderNumberForAdmin(orderNumber);
+    }
 }

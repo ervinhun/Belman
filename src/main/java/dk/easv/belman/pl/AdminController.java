@@ -3,6 +3,7 @@ package dk.easv.belman.pl;
 import dk.easv.belman.Main;
 import dk.easv.belman.be.Order;
 import dk.easv.belman.be.Photo;
+import dk.easv.belman.be.QualityDocument;
 import dk.easv.belman.be.User;
 import dk.easv.belman.pl.model.AdminModel;
 import javafx.fxml.FXML;
@@ -41,6 +42,8 @@ public class AdminController extends AbstractOrderController{
     @FXML private Label uploadedAtText4;
     @FXML private Label uploadedByText5;
     @FXML private Label uploadedAtText5;
+    @FXML private Label signedByText;
+    @FXML private Label signedAtText;
 
     private VBox newUserWindow;
     private UserController userController;
@@ -260,6 +263,14 @@ public class AdminController extends AbstractOrderController{
                     uploadedAtText.setText("");
                 }
             }
+        }
+        QualityDocument pDoc = model.getQualityDocumentForAdmin(orderNumber);
+        if (pDoc != null && pDoc.getGeneratedAt() != null) {
+            signedAtText.setText(signedAtText.getText() + " " + dtf.format(pDoc.getGeneratedAt()));
+            signedByText.setText(signedByText.getText() + " " + pDoc.getGeneratedByName());
+        } else {
+            signedAtText.setText(signedAtText.getText() + " Not signed");
+            signedByText.setText(signedByText.getText() + " Not signed");
         }
     }
 }
