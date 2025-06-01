@@ -15,9 +15,6 @@ import javafx.collections.transformation.FilteredList;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class QualityModel {
     private static final int MIN_PHOTOS_FOR_SIGNING = 5;
