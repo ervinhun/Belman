@@ -46,7 +46,6 @@ public class QualityController extends AbstractOrderController {
     private User loggedInUserQc;
     private VBox openedOrder;
     private static final String IMAGE_SELECTED = "image-selected";
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @FXML
     private void initialize() {
@@ -180,18 +179,28 @@ public class QualityController extends AbstractOrderController {
             alert.showAndWait();
             return;
         }
-        executor.submit(() -> {
-            boolean success = model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc);
-            Platform.runLater(() -> {
-                if (success) {
-                    disableButtonsForImages();
-                    cancel();
-                    refreshContent();
-                } else {
-                    logger.warning("Failed to sign order: " + orderNumberToSign);
-                }
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            executor.submit(() -> {
+                boolean success = model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc);
+                Platform.runLater(() -> {
+                    if (success) {
+                        disableButtonsForImages();
+                        cancel();
+                        refreshContent();
+                    } else {
+                        logger.warning("Failed to sign order: " + orderNumberToSign);
+                    }
+                });
             });
-        });
+        }
+        catch (BelmanException e) {
+            logger.warning("Error signing order: " + e.getMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to sign order: " + e.getMessage());
+            alert.showAndWait();
+        } finally {
+            executor.shutdown();
+        }
     }
 
     @FXML
@@ -236,7 +245,6 @@ public class QualityController extends AbstractOrderController {
     public void cancel() {
         borderPane.setCenter(rightBox);
         rebindUserChoiceBox(rightBox);
-        shutdown();
     }
 
     @Override
@@ -259,9 +267,5 @@ public class QualityController extends AbstractOrderController {
             btnSign.setText(SIGN_ORDER);
             btnSign.setOnAction(_ -> signOrder());
         }
-    }
-
-    public void shutdown() {
-        executor.shutdownNow();
     }
 }
