@@ -18,6 +18,8 @@ import javafx.scene.layout.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 public class QualityController extends AbstractOrderController {
@@ -177,17 +179,19 @@ public class QualityController extends AbstractOrderController {
             alert.showAndWait();
             return;
         }
-        model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc, success -> {
-            if (success) {
-                Platform.runLater(() -> {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            boolean success = model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc);
+            Platform.runLater(() -> {
+                if (success) {
                     disableButtonsForImages();
                     cancel();
-                });
-            } else {
-                Platform.runLater(() -> logger.warning("Failed to sign order: " + orderNumberToSign));
-            }
+                } else {
+                    logger.warning("Failed to sign order: " + orderNumberToSign);
+                }
+            });
+            executor.shutdown();
         });
-        //As there are 2 threads running the document generation and the update of other tables
     }
 
     @FXML

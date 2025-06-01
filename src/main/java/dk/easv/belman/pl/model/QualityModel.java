@@ -69,17 +69,12 @@ public class QualityModel {
         return loggedInUser;
     }
 
-    public void signOrder(String orderNumber, boolean isSendingEmail, String email, User whoSignsIt, Consumer<Boolean> onResult) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            try {
-                boolean success = bllManager.signOrder(orderNumber, whoSignsIt.getId(), isSendingEmail, email);
-                onResult.accept(success);
-            } catch (Exception e) {
-                throw new BelmanException("Error signing order: " + orderNumber + " - " + e.getMessage());
-            }
-        });
-        executor.shutdownNow();
+    public boolean signOrder(String orderNumber, boolean isSendingEmail, String email, User whoSignsIt) {
+        try {
+            return bllManager.signOrder(orderNumber, whoSignsIt.getId(), isSendingEmail, email);
+        } catch (Exception e) {
+            throw new BelmanException("Error in Model while signing order" + e);
+        }
     }
 
     public boolean isDocumentExists(String orderNumber) {
