@@ -186,6 +186,7 @@ public class QualityController extends AbstractOrderController {
                 if (success) {
                     disableButtonsForImages();
                     cancel();
+                    refreshContent();
                 } else {
                     logger.warning("Failed to sign order: " + orderNumberToSign);
                 }
