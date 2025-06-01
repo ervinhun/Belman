@@ -18,6 +18,8 @@ import javafx.scene.layout.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 public class QualityController extends AbstractOrderController {
@@ -177,17 +179,28 @@ public class QualityController extends AbstractOrderController {
             alert.showAndWait();
             return;
         }
-        model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc, success -> {
-            if (success) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            executor.submit(() -> {
+                boolean success = model.signOrder(orderNumberToSign, cbSendingEmail.isSelected(), txtemail.getText(), loggedInUserQc);
                 Platform.runLater(() -> {
-                    disableButtonsForImages();
-                    cancel();
+                    if (success) {
+                        disableButtonsForImages();
+                        cancel();
+                        refreshContent();
+                    } else {
+                        logger.warning("Failed to sign order: " + orderNumberToSign);
+                    }
                 });
-            } else {
-                Platform.runLater(() -> logger.warning("Failed to sign order: " + orderNumberToSign));
-            }
-        });
-        //As there are 2 threads running the document generation and the update of other tables
+            });
+        }
+        catch (BelmanException e) {
+            logger.warning("Error signing order: " + e.getMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to sign order: " + e.getMessage());
+            alert.showAndWait();
+        } finally {
+            executor.shutdown();
+        }
     }
 
     @FXML

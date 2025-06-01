@@ -15,9 +15,6 @@ import javafx.collections.transformation.FilteredList;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class QualityModel {
     private static final int MIN_PHOTOS_FOR_SIGNING = 5;
@@ -69,17 +66,12 @@ public class QualityModel {
         return loggedInUser;
     }
 
-    public void signOrder(String orderNumber, boolean isSendingEmail, String email, User whoSignsIt, Consumer<Boolean> onResult) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            try {
-                boolean success = bllManager.signOrder(orderNumber, whoSignsIt.getId(), isSendingEmail, email);
-                onResult.accept(success);
-            } catch (Exception e) {
-                throw new BelmanException("Error signing order: " + orderNumber + " - " + e.getMessage());
-            }
-        });
-        executor.shutdownNow();
+    public boolean signOrder(String orderNumber, boolean isSendingEmail, String email, User whoSignsIt) {
+        try {
+            return bllManager.signOrder(orderNumber, whoSignsIt.getId(), isSendingEmail, email);
+        } catch (Exception e) {
+            throw new BelmanException("Error in Model while signing order" + e);
+        }
     }
 
     public boolean isDocumentExists(String orderNumber) {
